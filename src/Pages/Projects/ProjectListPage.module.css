@@ -1,0 +1,326 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 2rem;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background: rgba(98, 124, 143, 0.12);
+  border: 1px solid rgba(138, 180, 219, 0.14);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+}
+
+.create_btn {
+  background-color: rgba(66, 123, 134, 0.2);
+  color: #2aa1ee;
+}
+
+.eyebrow {
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
+  color: #8bb4d9;
+  font-size: 0.72rem;
+  margin: 0 0 0.3rem;
+}
+
+/* ── Summary ── */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.summaryCard {
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(98, 124, 143, 0.15), rgba(98, 124, 143, 0.08));
+  border: 1px solid rgba(138, 180, 219, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  box-shadow: 0 12px 25px rgba(5, 10, 16, 0.08);
+}
+
+.summaryCard span {
+  color: var(--muted, #a7bfd8);
+  font-size: 0.78rem;
+}
+
+.summaryCard strong {
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+}
+
+/* ── Project Cards ── */
+.projectsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+.projectCard {
+  background: linear-gradient(180deg, rgba(18, 31, 41, 0.05), rgba(18, 31, 41, 0.15));
+  border: 1px solid rgba(138, 180, 219, 0.14);
+  border-radius: 1rem;
+  padding: 1.1rem 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  box-shadow: 0 12px 24px rgba(5, 10, 16, 0.08);
+  transition: border-color 0.2s;
+}
+
+.projectCard:hover {
+  border-color: rgba(138, 180, 219, 0.28);
+}
+
+.cardTopRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.projectCard h3 {
+  font-size: 1.05rem;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.meta {
+  color: var(--muted, #b6d0ea);
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.description {
+  color: var(--text, #d5e4f4);
+  margin: 0;
+  min-height: 3rem;
+  line-height: 1.5;
+  font-size: 0.88rem;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text, #dfeefc);
+  font-size: 0.84rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid rgba(138, 180, 219, 0.08);
+}
+
+/* ── Custom Status Dropdown ── */
+.statusDropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* The pill trigger button */
+.statusBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.65rem 0.28rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(100, 116, 139, 0.15);
+  color: inherit;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s;
+  user-select: none;
+}
+
+.statusBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.statusBtn:not(:disabled):hover {
+  filter: brightness(1.12);
+}
+
+/* ── Theme-aware status colour tokens ── */
+
+/* Dark theme (default) */
+:global(.dark) .statusBtn.active,
+.statusBtn.active {
+  --s-bg:     rgba(34, 197, 94, 0.22);
+  --s-border: #22c55e;
+  --s-color:  #86efac;
+  --s-glow:   rgba(34, 197, 94, 0.28);
+}
+:global(.dark) .statusBtn.done,
+.statusBtn.done {
+  --s-bg:     rgba(59, 130, 246, 0.22);
+  --s-border: #3b82f6;
+  --s-color:  #93c5fd;
+  --s-glow:   rgba(59, 130, 246, 0.28);
+}
+:global(.dark) .statusBtn.in_progress,
+.statusBtn.in_progress {
+  --s-bg:     rgba(245, 158, 11, 0.22);
+  --s-border: #f59e0b;
+  --s-color:  #fcd34d;
+  --s-glow:   rgba(245, 158, 11, 0.28);
+}
+:global(.dark) .statusBtn.inactive,
+.statusBtn.inactive {
+  --s-bg:     rgba(100, 116, 139, 0.25);
+  --s-border: #64748b;
+  --s-color:  #cbd5e1;
+  --s-glow:   transparent;
+}
+
+/* Light theme overrides — deeper saturation for visibility on white */
+:global(.light) .statusBtn.active {
+  --s-bg:     rgba(21, 128, 61, 0.12);
+  --s-border: #16a34a;
+  --s-color:  #15803d;
+  --s-glow:   rgba(21, 128, 61, 0.18);
+}
+:global(.light) .statusBtn.done {
+  --s-bg:     rgba(29, 78, 216, 0.1);
+  --s-border: #1d4ed8;
+  --s-color:  #1d4ed8;
+  --s-glow:   rgba(29, 78, 216, 0.18);
+}
+:global(.light) .statusBtn.in_progress {
+  --s-bg:     rgba(180, 83, 9, 0.1);
+  --s-border: #b45309;
+  --s-color:  #b45309;
+  --s-glow:   rgba(180, 83, 9, 0.18);
+}
+:global(.light) .statusBtn.inactive {
+  --s-bg:     rgba(71, 85, 105, 0.1);
+  --s-border: #475569;
+  --s-color:  #475569;
+  --s-glow:   transparent;
+}
+
+/* Apply the tokens */
+.statusBtn.active,
+.statusBtn.done,
+.statusBtn.in_progress,
+.statusBtn.inactive {
+  background:   var(--s-bg);
+  border-color: var(--s-border);
+  color:        inherit;
+  box-shadow:   0 0 10px var(--s-glow);
+}
+
+
+/* Animated chevron */
+.chevron {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Floating menu */
+.statusMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 100;
+  min-width: 148px;
+  background: var(--bg-elevated, #1a2535);
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.18));
+  border-radius: 10px;
+  padding: 0.35rem;
+  margin: 0;
+  list-style: none;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  animation: menuIn 0.15s ease;
+}
+
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* Menu items */
+.statusOption {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--muted, #a7bfd8);
+  transition: background 0.13s, color 0.13s;
+}
+
+.statusOption:hover {
+  background: var(--surface-highlight, rgba(138, 180, 219, 0.1));
+  color: var(--text, #e2eef9);
+}
+
+.statusOption.statusOptionActive {
+  background: var(--surface-highlight, rgba(138, 180, 219, 0.08));
+  color: var(--text, #e2eef9);
+  font-weight: 600;
+}
+
+.checkIcon {
+  margin-left: auto;
+  font-size: 0.65rem;
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+/* ── States ── */
+.emptyState,
+.loading {
+  padding: 2rem;
+  text-align: center;
+  border: 1px dashed rgba(141, 175, 181, 0.4);
+  border-radius: 1rem;
+  background: rgba(98, 124, 143, 0.08);
+}
+
+.secondaryButton {
+  margin-top: auto;
+}
+
+/* ── Responsive ── */
+@media (max-width: 520px) {
+  .headerRow {
+    padding: 0.9rem;
+  }
+
+  .projectsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .infoRow {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+}
+
+.pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1rem 0 0.5rem; flex-wrap: wrap; }
+.pageBtn { background: var(--panel, rgba(98,124,143,0.12)); border: 1px solid var(--border, rgba(138,180,219,0.2)); color: var(--text); border-radius: 0.5rem; padding: 0.45rem 1.1rem; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; }
+.pageBtn:hover:not(:disabled) { background: var(--accent, #2aa1ee); color: #fff; border-color: transparent; }
+.pageBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+.pageInfo { font-size: 0.85rem; color: var(--muted); }

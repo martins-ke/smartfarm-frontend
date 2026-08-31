@@ -1,0 +1,92 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    overflow-y: auto; /* allow the whole layout to scroll so sticky header works */
+    transition: background 0.25s ease, color 0.25s ease;
+    --topbar-height: 56px; /* approximate header height used for spacing if needed */
+    --backdrop-filter: blur(1rem);
+    /* z-index layer system used across components (children inherit these vars) */
+    --z-menu: 1200; /* menu should be above back button */
+    --z-topbar: 1000;
+    --z-usercard: 1100;
+    --z-backbutton: 600;
+    --z-overlay: 900;
+    --z-message: 1500;
+    --z-modal: 1400;
+}
+.container.dark{
+    --bg: #2a3237;
+    --bg-elevated: #32393e;
+    --panel: rgba(16, 26, 36, 0.9);
+    --panel-soft: rgba(22, 42, 57, 0.8);
+    --text: #edf6ff;
+    --muted: #a9bfd8;
+    --border: rgba(138, 180, 219, 0.2);
+    --accent: #2aa1ee;
+    --accent-strong: #57b5ff;
+    --surface-highlight: rgba(43, 102, 174, 0.22);
+    --green-text: #4ade80;
+    --green-bg: rgba(34, 197, 94, 0.18);
+    --green-border: rgba(34, 197, 94, 0.35);
+    --green-solid: #22c55e;
+    background: linear-gradient(180deg, #07141d 0%, #0c1b27 100%);
+    color: var(--text);
+}
+.container.light{
+    --bg: #f3f8fc;
+    --bg-elevated: #ffffff;
+    --panel: rgba(255, 255, 255, 0.88);
+    --backdrop-filter: blur(1rem);
+    --panel-soft: rgba(240, 246, 250, 0.85);
+    --text: #102330;
+    --muted: #49657a;
+    --border: rgba(76, 116, 141, 0.2);
+    --accent: #1f7fc5;
+    --accent-strong: #2f8fe0;
+    --surface-highlight: rgba(54, 115, 162, 0.12);
+    --green-text: #15803d;
+    --green-bg: rgba(22, 163, 74, 0.14);
+    --green-border: rgba(22, 163, 74, 0.35);
+    --green-solid: #16a34a;
+    background: linear-gradient(180deg, #edf6ff 0%, #f5fbff 100%);
+    color: var(--text);
+}
+.center{
+    width: 100%;
+    margin: 0;
+    padding: calc(var(--topbar-height, 56px) + 0.75rem) 1rem 1rem; /* ensure content starts below fixed topbar */
+    flex: 1;
+    /* center no longer scrolls independently; the main container handles scrolling */
+    overflow: auto;
+    position: relative; /* allow absolutely positioned children like the back button */
+}
+
+.backButtonFixed{
+    color: var(--text);
+    padding: 0.45rem 0.8rem;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    border: none;
+    background: inherit;
+    backdrop-filter: blur(1rem);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 18px rgba(2,6,12,0.18);
+}
+
+.backButtonFixed:hover{
+    background: var(--panel-soft);
+    transform: translateY(-1px);
+}
+
+
+
+@media (max-width: 640px){
+    .backButton{
+        top: 0.6rem;
+        left: 0.6rem;
+        font-size: 0.9rem;
+    }
+}

@@ -1,0 +1,437 @@
+.page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--panel, rgba(98, 124, 143, 0.12));
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.14));
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+  color: var(--muted, #8bb4d9);
+  font-size: 0.75rem;
+  margin: 0 0 0.25rem;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  background: var(--accent, #2aa1ee);
+  color: #fff;
+  border: none;
+  border-radius: 0.6rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryBtn {
+  background: rgba(138, 180, 219, 0.12);
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
+  color: var(--text);
+  border-radius: 0.6rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  background: rgba(138, 180, 219, 0.2);
+}
+
+/* ── Quota Cards ── */
+.quotaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.quotaCard {
+  background: var(--panel, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.15));
+  border-radius: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: 0 8px 18px rgba(4, 8, 14, 0.08);
+}
+
+.quotaCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.quotaValue {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.quotaProgress {
+  height: 6px;
+  background: rgba(138, 180, 219, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* ── Pending Approvals Banner ── */
+.pendingBox {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(217, 119, 6, 0.08));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 0.85rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pendingHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.pendingList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pendingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pendingActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.approveBtn {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rejectBtn {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Users Table & Cards ── */
+.tableCard {
+  background: var(--panel, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.15));
+  border-radius: 0.85rem;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(4, 8, 14, 0.08);
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tableWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.table th {
+  background: rgba(138, 180, 219, 0.08);
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.15));
+}
+
+.table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.08));
+  vertical-align: middle;
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent, #2aa1ee), #16a34a);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.roleAdmin {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.roleManager {
+  background: rgba(42, 161, 238, 0.15);
+  color: #2aa1ee;
+  border: 1px solid rgba(42, 161, 238, 0.3);
+}
+
+.roleSupervisor {
+  background: var(--green-bg, rgba(22, 163, 74, 0.15));
+  color: var(--green-text, #15803d);
+  border: 1px solid var(--green-border, rgba(22, 163, 74, 0.35));
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusActive {
+  background: var(--green-bg, rgba(34, 197, 94, 0.15));
+  color: var(--green-text, #15803d);
+  border: 1px solid var(--green-border, rgba(34, 197, 94, 0.35));
+}
+
+.statusPending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.statusDisabled {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.catPill {
+  display: inline-block;
+  background: rgba(138, 180, 219, 0.15);
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  margin-right: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.actionBtnGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.iconBtn {
+  background: transparent;
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
+  color: var(--text);
+  border-radius: 0.45rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+
+.iconBtn:hover {
+  background: var(--accent, #2aa1ee);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ── Modal Overlay ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1400;
+}
+
+.modalContent {
+  background: #14212e;
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.25));
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 480px;
+  padding: 1.5rem;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  color: var(--text, #edf6ff);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.formGroup label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.input,
+.select {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.3));
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text, #edf6ff);
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--accent, #2aa1ee);
+}
+
+.checkboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 0.6rem;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}

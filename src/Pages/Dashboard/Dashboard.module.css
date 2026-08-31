@@ -1,0 +1,657 @@
+.container {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 1rem 0.75rem 2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: var(--panel, rgba(15, 31, 43, 0.62));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.eyebrow {
+  margin: 0 0 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12rem;
+  font-size: 0.72rem;
+  color: #7ecbff;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2vw, 2.2rem);
+  color: var(--text, #edf6ff);
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(42,161,238,0.85), rgba(95,118,255,0.75));
+  color: white;
+  border: none;
+  border-radius: 0.8rem;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.metricCard {
+  background: var(--panel, rgba(15, 31, 43, 0.62));
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.metricHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.75rem;
+}
+
+.metricIconWrap {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(42, 161, 238, 0.12);
+  color: #7ecbff;
+}
+
+.metricLabel {
+  font-size: 0.82rem;
+  color: var(--muted, #a9bfd8);
+}
+
+.metricValue {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.7vw, 1.85rem);
+  font-weight: 800;
+  color: #e8811a;
+}
+
+.metricCard small {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--muted, #a9bfd8);
+  line-height: 1.5;
+}
+
+.categorySection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.categoryCard {
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(88, 149, 199, 0.4);
+  box-shadow: 0 12px 30px rgba(116, 115, 115, 0.29);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.cropAccent {
+  background: linear-gradient(180deg, rgba(239, 91, 195, 0.1), rgba(107, 232, 222, 0.1));
+}
+
+.livestockAccent {
+  background: linear-gradient(180deg, rgba(178, 122, 33, 0.075), rgba(87, 99, 109, 0.1));
+}
+
+.poultryAccent {
+  background: linear-gradient(180deg, rgba(114, 95, 167, 0.075), rgba(31, 231, 228, 0.1));
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.categoryIconWrap {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.08);
+}
+
+.categoryIcon {
+  font-size: 1.15rem;
+}
+
+.categoryName {
+  margin: 0 0 0.2rem;
+  color: var(--muted, #a9bfd8);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+}
+
+.categoryCard h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.categoryDetail {
+  margin: 0;
+  color: var(--text, #edf6ff);
+  line-height: 1.6;
+}
+
+.categoryFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  color: #1a7ae8;
+  font-weight: 600;
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.arrow {
+  font-size: 1.15rem;
+}
+
+.summaryButton {
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.loading {
+  text-align: center;
+  color: var(--muted, #a9bfd8);
+  padding: 0.5rem 0;
+}
+
+.lowerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: var(--panel, rgba(15, 31, 43, 0.62));
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.panelHeader h3 {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+}
+
+.summaryList,
+.activityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.summaryList li,
+.activityList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.7rem;
+}
+
+.donutWrap {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* tooltip */
+.tooltip {
+  position: absolute;
+  background: rgba(10, 20, 30, 0.95);
+  color: #d9eefc;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.45rem;
+  font-size: 0.75rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* metric actions */
+.metricCard {
+  background: var(--panel, rgba(15, 31, 43, 0.62));
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metricActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.metricActionBtn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted, #a9bfd8);
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.55rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.metricActionBtn.primary {
+  background: linear-gradient(135deg, rgba(42,161,238,0.12), rgba(95,118,255,0.08));
+  color: #bfe7ff;
+  border-color: rgba(124,200,255,0.18);
+}
+
+.metricCard:hover {
+  transform: translateY(-4px);
+  transition: transform 180ms ease;
+}
+
+/* progress bar */
+.progressBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.45rem;
+}
+
+.progressTrack {
+  flex: 1 1 auto;
+  height: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #7ecbff, #8fe1bf);
+  width: 0%;
+  transition: width 300ms ease;
+}
+
+.progressLabel {
+  min-width: 42px;
+  text-align: right;
+  font-weight: 700;
+  color: var(--text, #edf6ff);
+}
+
+.donutCenter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  color: var(--text, #edf6ff);
+}
+
+.donutValue {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.donutLabel {
+  font-size: 0.75rem;
+  color: var(--muted, #a9bfd8);
+}
+
+.donutLegend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.donutLegend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted, #a9bfd8);
+}
+
+.donutLegend .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.donutLegend .label {
+  font-size: 0.85rem;
+}
+
+.donutLegend .val {
+}
+
+.summaryButton {
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.loading {
+  text-align: center;
+  color: var(--muted, #a9bfd8);
+  padding: 0.5rem 0;
+}
+
+.lowerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.panel {
+  background: var(--panel, rgba(15, 31, 43, 0.62));
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.panelHeader h3 {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+}
+
+.summaryList,
+.activityList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.summaryList li,
+.activityList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.7rem;
+}
+
+.donutWrap {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* tooltip */
+.tooltip {
+  position: absolute;
+  background: rgba(10, 20, 30, 0.95);
+  color: #d9eefc;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.45rem;
+  font-size: 0.75rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* metric actions */
+.metricCard {
+  background: var(--panel, rgba(15, 31, 43, 0.62));
+  border-radius: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metricActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.metricActionBtn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted, #a9bfd8);
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.55rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.metricActionBtn.primary {
+  background: linear-gradient(135deg, rgba(42,161,238,0.12), rgba(95,118,255,0.08));
+  color: #bfe7ff;
+  border-color: rgba(124,200,255,0.18);
+}
+
+.metricCard:hover {
+  transform: translateY(-4px);
+  transition: transform 180ms ease;
+}
+
+/* progress bar */
+.progressBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.45rem;
+}
+
+.progressTrack {
+  flex: 1 1 auto;
+  height: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #7ecbff, #8fe1bf);
+  width: 0%;
+  transition: width 300ms ease;
+}
+
+.progressLabel {
+  min-width: 42px;
+  text-align: right;
+  font-weight: 700;
+  color: var(--text, #edf6ff);
+}
+
+.donutCenter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  color: var(--text, #edf6ff);
+}
+
+.donutValue {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.donutLabel {
+  font-size: 0.75rem;
+  color: var(--muted, #a9bfd8);
+}
+
+.donutLegend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.donutLegend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted, #a9bfd8);
+}
+
+.donutLegend .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.donutLegend .label {
+  font-size: 0.85rem;
+}
+
+.donutLegend .val {
+  margin-left: auto;
+  color: var(--text, #edf6ff);
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .donutWrap {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1.5rem;
+  }
+  .donutLegend {
+    align-items: center;
+    width: 100%;
+  }
+  .donutLegend li {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Prevent horizontal scroll entirely */
+  body, html {
+    overflow-x: hidden;
+  }
+
+  /* Force cards to fit perfectly with 0.5rem padding */
+  .metricCard,
+  .categoryCard,
+  .panel {
+    padding: 0.5rem !important;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .header {
+    padding: 0.8rem !important;
+    box-sizing: border-box;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .primaryBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  /* Reduce font sizes on mobile so text doesn't stretch containers */
+  .header h1 {
+    font-size: 1.25rem !important;
+  }
+  .metricValue {
+    font-size: 1.2rem !important;
+  }
+  .categoryCard h2 {
+    font-size: 1.1rem !important;
+  }
+  .panelHeader h3 {
+    font-size: 0.95rem !important;
+  }
+
+  /* Allow list items in farm summary to wrap their contents */
+  .summaryList li,
+  .activityList li {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  /* Reduce grid gaps and force 1 column to prevent overflowing the parent container */
+  .overviewGrid,
+  .categorySection,
+  .lowerGrid {
+    gap: 0.5rem;
+    grid-template-columns: 1fr;
+  }
+}
