@@ -340,23 +340,35 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
   z-index: 1400;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modalContent {
-  background: #14212e;
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.25));
-  border-radius: 1rem;
+  background: var(--panel, #ffffff);
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
+  border-radius: 1.1rem;
   width: 100%;
   max-width: 480px;
   padding: 1.5rem;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
-  color: var(--text, #edf6ff);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+  color: var(--text, #0f172a);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modalHeader {
@@ -364,50 +376,74 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.15));
 }
 
 .modalHeader h3 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text, inherit);
 }
 
 .closeBtn {
   background: transparent;
   border: none;
-  color: var(--muted);
+  color: var(--muted, #64748b);
   font-size: 1.1rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border-radius: 0.4rem;
+  transition: all 0.15s ease;
+}
+
+.closeBtn:hover {
+  color: var(--text, #0f172a);
+  background: var(--surface-highlight, rgba(0, 0, 0, 0.06));
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  margin-bottom: 1rem;
+  gap: 0.4rem;
+  margin-bottom: 1.1rem;
 }
 
 .formGroup label {
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--muted, #64748b);
 }
 
 .input,
 .select {
   width: 100%;
   padding: 0.65rem 0.85rem;
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.3));
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.25));
   border-radius: 0.6rem;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text, #edf6ff);
-  font-size: 0.9rem;
+  background: var(--surface-highlight, rgba(138, 180, 219, 0.08)) !important;
+  color: var(--text, #0f172a) !important;
+  font-size: 0.92rem;
   box-sizing: border-box;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.input::placeholder {
+  color: var(--muted, #94a3b8);
+  opacity: 0.8;
 }
 
 .input:focus,
 .select:focus {
   outline: none;
   border-color: var(--accent, #2aa1ee);
+  background: var(--panel, #ffffff) !important;
+  box-shadow: 0 0 0 3px rgba(42, 161, 238, 0.18);
 }
 
 .checkboxList {
@@ -417,7 +453,8 @@
   max-height: 200px;
   overflow-y: auto;
   padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--surface-highlight, rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.15));
   border-radius: 0.6rem;
 }
 
@@ -427,11 +464,14 @@
   gap: 0.6rem;
   font-size: 0.88rem;
   cursor: pointer;
+  color: var(--text);
 }
 
 .modalActions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.65rem;
-  margin-top: 1.25rem;
+  gap: 0.75rem;
+  margin-top: 1.4rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border, rgba(138, 180, 219, 0.12));
 }
