@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './TopBar.module.css'
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaBars, FaCog, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf, FaBoxes, FaUsersCog, FaUsers } from 'react-icons/fa';
+import { FaBars, FaCog, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf, FaBoxes, FaUsersCog, FaUsers, FaUserEdit } from 'react-icons/fa';
 
 import { notify } from '../../utils/notify';
 import useAuth from '../../useAuth';
+import EditProfileModal from '../EditProfileModal/EditProfileModal';
 
 export function TopBar({darkTheme, setDarkTheme}){
     const[hideMenu, setHideMenu] = useState(true);
     const [showUserCard, setShowUserCard] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -53,7 +55,8 @@ export function TopBar({darkTheme, setDarkTheme}){
     };
 
     const onSettings = () => {
-        notify('Settings clicked', 'info');
+        setShowUserCard(false);
+        setShowEditModal(true);
     };
 
     const onLogout = () => {
@@ -133,13 +136,15 @@ export function TopBar({darkTheme, setDarkTheme}){
                        <div className={styles.userCardBody}>
                            <div className={styles.userEmail}>{currentUser?.email || ''}</div>
                            <div className={styles.userActions}>
-                               <button onClick={onSettings}><FaCog /> Settings</button>
+                               <button onClick={onSettings}><FaUserEdit /> Edit Profile & Credentials</button>
                                <button onClick={onLogout}><FaSignOutAlt /> Logout</button>
                            </div>
                        </div>
                    </div>
                )}
            </aside>
+
+           {showEditModal && <EditProfileModal onClose={() => setShowEditModal(false)} />}
         </div>
     )
 }

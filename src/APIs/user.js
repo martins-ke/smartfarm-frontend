@@ -97,6 +97,15 @@ export const assignSupervisorToProject = (projectId, supervisorId) =>
     body: JSON.stringify({ supervisorId }),
   });
 
+/**
+ * PUT /users/:id/profile
+ */
+export const updateUserProfile = (id, data) =>
+  apiClient(`/users/${id}/profile`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
 export default {
   checkBootstrapStatus,
   signup,
@@ -108,5 +117,6 @@ export default {
   assignProjectsToSupervisor,
   getSupervisorProjects,
   deleteUser,
+  updateUserProfile,
   assignSupervisorToProject,
 };
