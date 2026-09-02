@@ -124,24 +124,33 @@ export function TopBar({darkTheme, setDarkTheme}){
 
            <aside className={styles.user} ref={userRef} onClick={(e)=>{ e.stopPropagation(); setShowUserCard((s)=> !s); }}>
                <div className={styles.userInitial}><FaUserAlt /></div>
-               {showUserCard && (
-                   <div className={styles.userCard} onClick={(e)=> e.stopPropagation()}>
-                       <div className={styles.userCardHeader}>
-                           <div className={styles.avatar}><FaUserAlt /></div>
-                           <div>
-                               <div className={styles.userName}>{currentUser?.username || 'Guest'}</div>
-                               <div className={styles.userRole}>{currentUser?.role || 'No role'}</div>
-                           </div>
-                       </div>
-                       <div className={styles.userCardBody}>
-                           <div className={styles.userEmail}>{currentUser?.email || ''}</div>
-                           <div className={styles.userActions}>
-                               <button onClick={onSettings}><FaUserEdit /> Edit Profile & Credentials</button>
-                               <button onClick={onLogout}><FaSignOutAlt /> Logout</button>
-                           </div>
-                       </div>
-                   </div>
-               )}
+                {showUserCard && (
+                    <div className={styles.userCard} onClick={(e)=> e.stopPropagation()}>
+                        <div className={styles.userCardTop}>
+                            <div className={styles.avatarWrap}>
+                                <div className={styles.avatar}><FaUserAlt /></div>
+                                <span className={styles.onlineBadge} />
+                            </div>
+                            <div className={styles.userInfoBlock}>
+                                <div className={styles.userName}>{currentUser?.username || 'Guest'}</div>
+                                <span className={styles.userRoleBadge}>{currentUser?.role || 'User'}</span>
+                            </div>
+                        </div>
+
+                        <div className={styles.cardDivider} />
+
+                        <div className={styles.userCardActions}>
+                            <button className={styles.actionBtn} onClick={onSettings}>
+                                <FaUserEdit className={styles.btnIcon} />
+                                <span>Edit Profile</span>
+                            </button>
+                            <button className={`${styles.actionBtn} ${styles.logoutBtn}`} onClick={onLogout}>
+                                <FaSignOutAlt className={styles.btnIcon} />
+                                <span>Log Out</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
            </aside>
 
            {showEditModal && <EditProfileModal onClose={() => setShowEditModal(false)} />}

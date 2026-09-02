@@ -56,91 +56,150 @@
     align-items: center;
     justify-content: center;
 }
-.userCard{
+.userCard {
     position: absolute;
     right: 0;
-    top: calc(var(--topbar-height, 56px) + 0.35rem);
-    width: 260px;
-    border-radius: 0.85rem;
-    background: var(--panel, rgba(16, 26, 36, 0.95));
-    border: 1px solid var(--border, rgba(138, 180, 219, 0.25));
-    padding: 1rem;
-    box-shadow: 0 16px 36px rgba(4,8,14,0.4);
-    backdrop-filter: var(--backdrop-filter, blur(14px));
-    -webkit-backdrop-filter: var(--backdrop-filter, blur(14px));
-    background-clip: padding-box;
+    top: calc(var(--topbar-height, 56px) + 0.4rem);
+    width: 224px;
+    border-radius: 1rem;
+    background: var(--panel, #ffffff);
+    border: 1px solid var(--border, rgba(138, 180, 219, 0.22));
+    padding: 1.15rem 0.9rem 0.85rem;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--border, rgba(138, 180, 219, 0.1));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     z-index: var(--z-usercard, 1100);
     color: var(--text, inherit);
+    animation: userCardDrop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.userCardHeader{
+
+@keyframes userCardDrop {
+    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.userCardTop {
     display: flex;
-    gap: 0.75rem;
+    flex-direction: column;
     align-items: center;
-    border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.15));
-    padding-bottom: 0.75rem;
-    color: inherit;
+    text-align: center;
+    gap: 0.5rem;
 }
-.avatar{
-    width: 44px;
-    height: 44px;
+
+.avatarWrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface-highlight, rgba(42, 161, 238, 0.18));
+    background: var(--surface-highlight, rgba(42, 161, 238, 0.12));
     color: var(--accent, #2aa1ee);
-    font-size: 1.15rem;
-    flex-shrink: 0;
+    font-size: 1.25rem;
+    border: 2px solid var(--border, rgba(138, 180, 219, 0.3));
+    box-shadow: 0 4px 12px rgba(42, 161, 238, 0.15);
+    transition: transform 0.2s ease;
 }
-.userName{
-    font-weight: 700;
-    color: var(--text, inherit);
-    font-size: 0.95rem;
-    word-break: break-word;
+
+.onlineBadge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background: #10b981;
+    border: 2px solid var(--panel, #ffffff);
+    border-radius: 50%;
 }
-.userRole{
-    font-size: 0.78rem;
-    color: var(--accent, #2aa1ee);
-    font-weight: 600;
-    text-transform: uppercase;
-}
-.userCardBody{
-    padding-top: 0.75rem;
+
+.userInfoBlock {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    color: inherit;
-}
-.userEmail{
-    font-size: 0.82rem;
-    color: var(--muted, inherit);
-    opacity: 0.85;
-    word-break: break-all;
-}
-.userActions{
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
-}
-.userActions button{
-    flex: 1;
-    background: var(--surface-highlight, rgba(43, 102, 174, 0.25));
-    border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
-    padding: 0.45rem 0.6rem;
-    border-radius: 0.5rem;
-    color: var(--text, inherit);
-    font-size: 0.82rem;
-    font-weight: 600;
-    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    transition: all 0.15s ease;
+    gap: 0.25rem;
+    width: 100%;
 }
-.userActions button:hover{
-    background: var(--accent, #2aa1ee);
-    color: #ffffff;
-    border-color: transparent;
+
+.userName {
+    font-weight: 700;
+    color: var(--text, inherit);
+    font-size: 0.88rem;
+    word-break: break-word;
+    letter-spacing: -0.01em;
+}
+
+.userRoleBadge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--accent, #2aa1ee);
+    background: rgba(42, 161, 238, 0.1);
+    border: 1px solid rgba(42, 161, 238, 0.22);
+    padding: 0.12rem 0.55rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.cardDivider {
+    height: 1px;
+    width: 100%;
+    margin: 0.85rem 0 0.55rem;
+    background: linear-gradient(90deg, transparent, var(--border, rgba(138, 180, 219, 0.35)), transparent);
+    opacity: 0.85;
+}
+
+.userCardActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.55rem;
+    background: transparent;
+    border: none;
+    color: var(--text, inherit);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    text-align: left;
+}
+
+.btnIcon {
+    font-size: 0.85rem;
+    color: var(--muted, #64748b);
+    transition: color 0.15s ease;
+}
+
+.actionBtn:hover {
+    background: var(--surface-highlight, rgba(0, 0, 0, 0.05));
+    color: var(--accent, #2aa1ee);
+}
+
+.actionBtn:hover .btnIcon {
+    color: var(--accent, #2aa1ee);
+}
+
+.logoutBtn:hover {
+    background: rgba(239, 68, 68, 0.08) !important;
+    color: #ef4444 !important;
+}
+
+.logoutBtn:hover .btnIcon {
+    color: #ef4444 !important;
 }
 .left{
     display: flex;
