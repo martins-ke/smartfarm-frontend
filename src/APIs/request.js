@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_SMARTFARM_BACKEND_URL || import.meta.env.VITE_SMARTFARM_API_URL || import.meta.env.VITE_API_URL || "/api";
+const API_BASE_URL = import.meta.env.SMARTFARMV1_BC_URL || import.meta.env.VITE_SMARTFARMV1_BC_URL || import.meta.env.VITE_SMARTFARM_BACKEND_URL || import.meta.env.VITE_API_URL || "/api";
 
 export const apiClient = async (endpoint, options = {}) => {
     let authHeaders = {};
