@@ -20,6 +20,7 @@
     --bg: #2a3237;
     --bg-elevated: #32393e;
     --panel: rgba(16, 26, 36, 0.9);
+    --panel-solid: #14212e;
     --panel-soft: rgba(22, 42, 57, 0.8);
     --text: #edf6ff;
     --muted: #a9bfd8;
@@ -38,6 +39,7 @@
     --bg: #f3f8fc;
     --bg-elevated: #ffffff;
     --panel: rgba(255, 255, 255, 0.88);
+    --panel-solid: #ffffff;
     --backdrop-filter: blur(1rem);
     --panel-soft: rgba(240, 246, 250, 0.85);
     --text: #102330;
@@ -56,37 +58,48 @@
 .center{
     width: 100%;
     margin: 0;
-    padding: calc(var(--topbar-height, 56px) + 0.75rem) 1rem 1rem; /* ensure content starts below fixed topbar */
+    padding: calc(var(--topbar-height, 56px) + 1.8rem) 1.25rem 1.25rem; /* ensure content starts below fixed topbar and back button */
     flex: 1;
-    /* center no longer scrolls independently; the main container handles scrolling */
     overflow: auto;
-    position: relative; /* allow absolutely positioned children like the back button */
+    position: relative;
 }
 
 .backButtonFixed{
+    position: fixed;
+    top: calc(var(--topbar-height, 56px) + 8px);
+    left: 14px;
+    z-index: 500;
     color: var(--text);
-    padding: 0.45rem 0.8rem;
-    font-size: 0.75rem;
-    border-radius: 8px;
-    border: none;
-    background: inherit;
-    backdrop-filter: blur(1rem);
+    padding: 0.32rem 0.75rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 999px;
+    border: 1px solid var(--border, rgba(138, 180, 219, 0.28));
+    background: var(--panel-solid, #ffffff);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 18px rgba(2,6,12,0.18);
+    transition: all 0.18s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    font-family: inherit;
 }
 
 .backButtonFixed:hover{
-    background: var(--panel-soft);
-    transform: translateY(-1px);
+    background: var(--surface-highlight, rgba(42, 161, 238, 0.12));
+    border-color: var(--accent, #2aa1ee);
+    color: var(--accent, #2aa1ee);
+    transform: translateX(-2px);
 }
 
-
-
 @media (max-width: 640px){
-    .backButton{
-        top: 0.6rem;
-        left: 0.6rem;
-        font-size: 0.9rem;
+    .center{
+        padding: calc(var(--topbar-height, 56px) + 1.6rem) 0.75rem 1rem;
+    }
+    .backButtonFixed{
+        padding: 0.24rem 0.55rem;
+        font-size: 0.7rem;
     }
 }

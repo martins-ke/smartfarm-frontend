@@ -132,10 +132,6 @@ export function DashboardPage() {
           <p className={styles.eyebrow}>Farm overview</p>
           <h1>Smart farm dashboard</h1>
         </div>
-        <button type="button" className={styles.primaryBtn} onClick={() => navigate('/categories')}>
-          <FaCalendarAlt />
-          View schedule
-        </button>
       </header>
 
       <section className={styles.overviewGrid}>
@@ -154,29 +150,7 @@ export function DashboardPage() {
         ))}
       </section>
 
-      <section className={styles.categorySection}>
-        {categoryData.map((category) => (
-          <article key={category.slug} className={`${styles.categoryCard} ${category.accent}`}>
-            <div className={styles.categoryHeader}>
-              <div className={styles.categoryIconWrap}>{category.icon}</div>
-              <div>
-                <p className={styles.categoryName}>{category.name}</p>
-                <h2>{category.projectCount ? `Ksh. ${category.totalBudget.toLocaleString()}` : 'No project data'}</h2>
-              </div>
-            </div>
-            <p className={styles.categoryDetail}>{category.detail}</p>
-            <button
-              type="button"
-              className={styles.categoryFooter}
-              onClick={() => navigate(`/categories/${category.id}/${category.slug}`)}
-            >
-              <span>{category.projectCount > 0 ? 'Open category' : 'Create first project'}</span>
-              <span className={styles.arrow}>→</span>
-            </button>
-          </article>
-        ))}
-      </section>
-
+      {/* 2. Charts & Summary Panels (Second) */}
       <section className={styles.lowerGrid}>
         <article className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -202,7 +176,7 @@ export function DashboardPage() {
           <ul className={styles.summaryList}>
             {categoryData.map((category) => (
               <li key={category.slug}>
-                <button type="button" className={styles.summaryButton} onClick={() => navigate(`/categories/${category.slug}`)}>
+                <button type="button" className={styles.summaryButton} onClick={() => navigate(`/categories/${category.id}/${category.slug}`)}>
                   <span>{category.name}</span>
                 </button>
                 <strong>{category.projectCount ? `Ksh. ${category.totalBudget.toLocaleString()}` : 'No data'}</strong>
@@ -210,8 +184,31 @@ export function DashboardPage() {
             ))}
           </ul>
         </article>
+      </section>
 
-          </section>
+      {/* 3. Category Cards (Last) */}
+      <section className={styles.categorySection}>
+        {categoryData.map((category) => (
+          <article key={category.slug} className={`${styles.categoryCard} ${category.accent}`}>
+            <div className={styles.categoryHeader}>
+              <div className={styles.categoryIconWrap}>{category.icon}</div>
+              <div>
+                <p className={styles.categoryName}>{category.name}</p>
+                <h2>{category.projectCount ? `Ksh. ${category.totalBudget.toLocaleString()}` : 'No project data'}</h2>
+              </div>
+            </div>
+            <p className={styles.categoryDetail}>{category.detail}</p>
+            <button
+              type="button"
+              className={styles.categoryFooter}
+              onClick={() => navigate(`/categories/${category.id}/${category.slug}`)}
+            >
+              <span>{category.projectCount > 0 ? 'Open category' : 'Create first project'}</span>
+              <span className={styles.arrow}>→</span>
+            </button>
+          </article>
+        ))}
+      </section>
 
       {loading && <div className={styles.loading}>Loading dashboard data...</div>}
     </div>

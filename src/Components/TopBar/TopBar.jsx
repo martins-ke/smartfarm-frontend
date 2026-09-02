@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './TopBar.module.css'
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaBars, FaCog, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf, FaBoxes, FaUsersCog, FaUsers, FaUserEdit } from 'react-icons/fa';
+import { FaBars, FaCog, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf, FaBoxes, FaUsersCog, FaUsers, FaUserEdit, FaChevronDown } from 'react-icons/fa';
 
 import { notify } from '../../utils/notify';
 import useAuth from '../../useAuth';
 import EditProfileModal from '../EditProfileModal/EditProfileModal';
 
-export function TopBar({darkTheme, setDarkTheme}){
-    const[hideMenu, setHideMenu] = useState(true);
+export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, setHideMenu: externalSetHideMenu}){
+    const [localHideMenu, setLocalHideMenu] = useState(true);
+    const hideMenu = externalHideMenu !== undefined ? externalHideMenu : localHideMenu;
+    const setHideMenu = externalSetHideMenu || setLocalHideMenu;
+
     const [showUserCard, setShowUserCard] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
 
@@ -122,8 +125,23 @@ export function TopBar({darkTheme, setDarkTheme}){
                </aside>
            </div>
 
-           <aside className={styles.user} ref={userRef} onClick={(e)=>{ e.stopPropagation(); setShowUserCard((s)=> !s); }}>
-               <div className={styles.userInitial}><FaUserAlt /></div>
+           <div 
+               className={`${styles.userTriggerBtn} ${showUserCard ? styles.userTriggerActive : ''}`} 
+               ref={userRef} 
+               onClick={(e)=>{ e.stopPropagation(); setShowUserCard((s)=> !s); }}
+               role="button"
+               tabIndex={0}
+               aria-label="User Profile Menu"
+           >
+               <div className={styles.userAvatarMini}>
+                   <FaUserAlt className={styles.avatarMiniIcon} />
+                   <span className={styles.miniOnlineDot} />
+               </div>
+               <div className={styles.userTriggerInfo}>
+                   <span className={styles.userTriggerName}>{currentUser?.username || 'Account'}</span>
+                   <span className={styles.userTriggerRole}>{currentUser?.role || 'Guest'}</span>
+               </div>
+               <FaChevronDown className={`${styles.userTriggerChevron} ${showUserCard ? styles.chevronRotated : ''}`} />
                 {showUserCard && (
                     <div className={styles.userCard} onClick={(e)=> e.stopPropagation()}>
                         <div className={styles.userCardTop}>
@@ -151,7 +169,7 @@ export function TopBar({darkTheme, setDarkTheme}){
                         </div>
                     </div>
                 )}
-           </aside>
+           </div>
 
            {showEditModal && <EditProfileModal onClose={() => setShowEditModal(false)} />}
         </div>
