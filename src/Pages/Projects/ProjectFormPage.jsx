@@ -32,6 +32,12 @@ export function ProjectFormPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (form.startDate && form.endDate && new Date(form.startDate) > new Date(form.endDate)) {
+      import('../../utils/notify').then(({ notify }) => notify('Start date cannot be greater than end date!', 'error'));
+      return;
+    }
+
     setIsSubmitting(true); 
 
     try {
@@ -77,12 +83,12 @@ export function ProjectFormPage() {
 
           <label>
             <span>Start date</span>
-            <input type="date" name="startDate" value={form.startDate} onChange={handleChange} required />
+            <input type="date" name="startDate" value={form.startDate} max={form.endDate || undefined} onChange={handleChange} required />
           </label>
 
           <label>
             <span>End date</span>
-            <input type="date" name="endDate" value={form.endDate} onChange={handleChange} required />
+            <input type="date" name="endDate" value={form.endDate} min={form.startDate || undefined} onChange={handleChange} required />
           </label>
 
           <label>
