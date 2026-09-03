@@ -1,0 +1,59 @@
+/* ── Spinner Wrapper ── */
+.wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+}
+
+.fullPage {
+    display: flex;
+    width: 100%;
+    min-height: 260px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Ring Track ── */
+.ring {
+    position: relative;
+    border-radius: 50%;
+    background: transparent;
+}
+
+/* Sizes */
+.sm  { width: 14px;  height: 14px; }
+.md  { width: 24px;  height: 24px; }
+.lg  { width: 36px;  height: 36px; }
+
+/* ── Spinning Arc ── */
+.arc {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    /* Outer "track" – faded border all round */
+    box-shadow: 0 0 0 2px var(--border, rgba(138, 180, 219, 0.25));
+    /* Accent arc on top */
+    border-top-color: var(--accent, #2aa1ee);
+    border-right-color: var(--accent, #2aa1ee);
+    animation: spin 0.75s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.sm  .arc { border-width: 2px; }
+.md  .arc { border-width: 3px; }
+.lg  .arc { border-width: 4px; }
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Optional label ── */
+.label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted, #64748b);
+    margin: 0;
+    letter-spacing: 0.01em;
+}

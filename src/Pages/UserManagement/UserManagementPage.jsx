@@ -28,6 +28,7 @@ import {
   FaEye
 } from 'react-icons/fa';
 import UserDetailsModal from './UserDetailsModal';
+import { Spinner } from '../../Components/Spinner/Spinner';
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
@@ -125,6 +126,10 @@ export default function UserManagementPage() {
 
   return (
     <div className={styles.page}>
+      {loading ? (
+        <Spinner fullPage label="Loading staff data..." />
+      ) : (
+        <>
       {/* Header */}
       <div className={styles.headerRow}>
         <div>
@@ -430,6 +435,8 @@ export default function UserManagementPage() {
           onClose={() => setViewUserId(null)}
           onUserUpdated={loadData}
         />
+      )}
+        </>
       )}
     </div>
   );

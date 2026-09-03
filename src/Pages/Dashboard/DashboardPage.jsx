@@ -9,6 +9,7 @@ import { GiChicken } from 'react-icons/gi';
 import FaCow from '../../Icons/FaCow';
 import { requestProjectsSummary } from '../../APIs/dashboard';
 import DonutChart from './DonutChart';
+import { Spinner } from '../../Components/Spinner/Spinner';
 const categoryMeta = [
   { id:'C001', slug: 'crops', name: 'Crops', icon: <FaLeaf className={styles.categoryIcon} />, accent: styles.cropAccent },
   { id:'L002', slug: 'livestock', name: 'Livestock', icon: <FaCow className={styles.categoryIcon} />, accent: styles.livestockAccent },
@@ -127,15 +128,19 @@ export function DashboardPage() {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>Farm overview</p>
-          <h1>Smart farm dashboard</h1>
-        </div>
-      </header>
+      {loading ? (
+        <Spinner fullPage label="Loading farm data..." />
+      ) : (
+        <>
+          <header className={styles.header}>
+            <div>
+              <p className={styles.eyebrow}>Farm overview</p>
+              <h1>Smart farm dashboard</h1>
+            </div>
+          </header>
 
-      <section className={styles.overviewGrid}>
-        {overviewCards.map((card) => (
+          <section className={styles.overviewGrid}>
+            {overviewCards.map((card) => (
           <article key={card.label} className={styles.metricCard}>
             <div className={styles.metricHeader}>
               <span className={styles.metricIconWrap}>{card.icon}</span>
@@ -209,8 +214,8 @@ export function DashboardPage() {
           </article>
         ))}
       </section>
-
-      {loading && <div className={styles.loading}>Loading dashboard data...</div>}
+        </>
+      )}
     </div>
   );
 }

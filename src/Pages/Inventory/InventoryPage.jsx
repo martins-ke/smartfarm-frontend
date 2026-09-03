@@ -3,6 +3,7 @@ import styles from './InventoryPage.module.css';
 import { getInventoryItems, addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../APIs/inventory';
 import { FaPlus, FaBoxOpen, FaExclamationTriangle, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import { notify } from '../../utils/notify';
+import { Spinner } from '../../Components/Spinner/Spinner';
 
 function InventoryModal({ item, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -186,7 +187,7 @@ export function InventoryPage() {
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Loading inventory...</div>
+        <Spinner fullPage label="Loading inventory..." />
       ) : filteredItems.length === 0 ? (
         <div className={styles.loading}>No items found in this category.</div>
       ) : (

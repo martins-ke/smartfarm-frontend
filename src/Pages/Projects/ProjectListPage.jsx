@@ -4,6 +4,7 @@ import styles from './ProjectListPage.module.css';
 import { getProjectsByCategory, updateProjectStatus } from '../../APIs/project';
 import useAuth from '../../useAuth';
 import { FaFolderOpen, FaMoneyBillWave, FaPlus, FaArrowRight, FaChevronDown, FaCheck, FaUserShield } from 'react-icons/fa';
+import { Spinner } from '../../Components/Spinner/Spinner';
 
 const STATUS_OPTIONS = [
   { value: 'active',      label: 'Active',      color: '#22c55e' },
@@ -184,7 +185,7 @@ export function ProjectListPage() {
       </div>
 
       {loading ? (
-        <div className={styles.loading}>Loading projects...</div>
+        <Spinner fullPage label="Loading projects..." />
       ) : projects.length === 0 ? (
         <div className={styles.emptyState}>
           <p>{isSupervisor ? 'No assigned projects found for you in this category.' : 'No projects found for this category.'}</p>
