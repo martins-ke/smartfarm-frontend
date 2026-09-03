@@ -110,10 +110,15 @@ export default function UserManagementPage() {
   };
 
   const handleDelete = async (userId, username) => {
-    if (!window.confirm(`Are you sure you want to remove user "${username}"?`)) return;
+    if (userId === currentUser?.id) {
+      notify('You cannot delete your own active account!', 'error');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to permanently remove user "${username}"?`)) return;
     try {
       await deleteUser(userId);
-      notify(`User ${username} removed`, 'success');
+      notify(`User "${username}" was successfully removed ✅`, 'success');
       loadData();
     } catch (err) {
       notify(err.message || 'Failed to remove user', 'error');
