@@ -22,9 +22,9 @@ const ForgotPasswordPage = () => {
     try {
       const res = await forgotPassword({ email });
       if (res.success) {
-        setSuccess(res.message || 'If the email exists, a reset link has been sent.');
+        setSuccess(res.message || 'Password reset link has been sent to your email. Please check your inbox.');
       } else {
-        setError(res.message || 'Failed to send reset link.');
+        setError(res.message || 'No account found with this email address.');
       }
     } catch (err) {
       setError(err.message || 'Network error. Please try again.');
