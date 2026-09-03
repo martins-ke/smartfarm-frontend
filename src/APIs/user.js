@@ -8,10 +8,10 @@ export const checkBootstrapStatus = () => apiClient('/users/check-bootstrap', { 
 /**
  * POST /users/signup
  */
-export const signup = ({ username, password, cpassword, role }) =>
+export const signup = ({ username, email, password, cpassword, role }) =>
   apiClient('/users/signup', {
     method: 'POST',
-    body: JSON.stringify({ username, password, cpassword, role }),
+    body: JSON.stringify({ username, email, password, cpassword, role }),
   });
 
 /**
@@ -21,6 +21,24 @@ export const loginUser = ({ username, password }) =>
   apiClient('/users/login', {
     method: 'POST',
     body: JSON.stringify({ username, password }),
+  });
+
+/**
+ * POST /users/forgot-password
+ */
+export const forgotPassword = ({ email }) =>
+  apiClient('/users/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+
+/**
+ * POST /users/reset-password
+ */
+export const resetPassword = ({ token, newPassword }) =>
+  apiClient('/users/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, newPassword }),
   });
 
 /**
@@ -43,10 +61,10 @@ export const getUserById = (id) =>
 /**
  * POST /users/create
  */
-export const createStaff = ({ username, password, role, createdById }) =>
+export const createStaff = ({ username, email, password, role, createdById }) =>
   apiClient('/users/create', {
     method: 'POST',
-    body: JSON.stringify({ username, password, role, createdById }),
+    body: JSON.stringify({ username, email, password, role, createdById }),
   });
 
 /**
@@ -56,6 +74,15 @@ export const updateUserStatus = (id, status) =>
   apiClient(`/users/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
+  });
+
+/**
+ * PATCH /users/:id/admin-reset-password
+ */
+export const adminResetPassword = (id, newPassword) =>
+  apiClient(`/users/${id}/admin-reset-password`, {
+    method: 'PATCH',
+    body: JSON.stringify({ newPassword }),
   });
 
 /**
@@ -110,6 +137,8 @@ export default {
   checkBootstrapStatus,
   signup,
   loginUser,
+  forgotPassword,
+  resetPassword,
   fetchUsers,
   createStaff,
   updateUserStatus,
@@ -119,4 +148,5 @@ export default {
   deleteUser,
   updateUserProfile,
   assignSupervisorToProject,
+  adminResetPassword,
 };

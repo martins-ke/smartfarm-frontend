@@ -6,7 +6,8 @@ import {
   createStaff, 
   updateUserStatus, 
   deleteUser,
-  checkBootstrapStatus 
+  checkBootstrapStatus,
+  adminResetPassword
 } from '../../APIs/user';
 import { getCategories } from '../../APIs/category';
 import useAuth from '../../useAuth';
@@ -45,7 +46,10 @@ export default function UserManagementPage() {
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [targetRoleToCreate, setTargetRoleToCreate] = useState(isAdmin ? 'MANAGER' : 'SUPERVISOR');
-  const [createForm, setCreateForm] = useState({ username: '', password: '', role: 'MANAGER' });
+  const [createForm, setCreateForm] = useState({ username: '', email: '', password: '', role: 'MANAGER' });
+
+  const [resetModalUser, setResetModalUser] = useState(null);
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
 
   const loadData = async () => {
     setLoading(true);
@@ -81,13 +85,14 @@ export default function UserManagementPage() {
     try {
       await createStaff({
         username: createForm.username,
+        email: createForm.email,
         password: createForm.password,
         role: targetRoleToCreate,
         createdById: currentUser?.id
       });
       notify(`${targetRoleToCreate} created successfully`, 'success');
       setShowCreateModal(false);
-      setCreateForm({ username: '', password: '', role: 'MANAGER' });
+      setCreateForm({ username: '', email: '', password: '', role: 'MANAGER' });
       loadData();
     } catch (err) {
       notify(err.message || 'Failed to create user', 'error');
@@ -112,6 +117,22 @@ export default function UserManagementPage() {
       loadData();
     } catch (err) {
       notify(err.message || 'Failed to remove user', 'error');
+    }
+  };
+
+  const handleAdminResetPassword = async (e) => {
+    e.preventDefault();
+    if (!resetPasswordValue || resetPasswordValue.length < 6) {
+      notify('Password must be at least 6 characters', 'error');
+      return;
+    }
+    try {
+      await adminResetPassword(resetModalUser.id, resetPasswordValue);
+      notify(`Password for ${resetModalUser.username} has been reset.`, 'success');
+      setResetModalUser(null);
+      setResetPasswordValue('');
+    } catch (err) {
+      notify(err.message || 'Failed to reset password', 'error');
     }
   };
 
@@ -343,6 +364,14 @@ export default function UserManagementPage() {
 
                           {!isUserAdmin && (
                             <>
+                              <button 
+                                className={styles.iconBtn}
+                                onClick={() => setResetModalUser(u)}
+                                style={{ color: '#eab308' }} // warning yellow/orange
+                              >
+                                <FaUserShield /> Reset Password
+                              </button>
+
                               {u.status === 'ACTIVE' ? (
                                 <button 
                                   className={styles.iconBtn}
@@ -403,6 +432,16 @@ export default function UserManagementPage() {
                 />
               </div>
               <div className={styles.formGroup}>
+                <label>Email (Optional)</label>
+                <input
+                  type="email"
+                  className={styles.input}
+                  placeholder="e.g. staff@smartfarm.com"
+                  value={createForm.email}
+                  onChange={e => setCreateForm(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+              <div className={styles.formGroup}>
                 <label>Temporary Password</label>
                 <input
                   type="password"
@@ -435,6 +474,43 @@ export default function UserManagementPage() {
           onClose={() => setViewUserId(null)}
           onUserUpdated={loadData}
         />
+      )}
+
+      {/* Admin Reset Password Modal */}
+      {resetModalUser && (
+        <div className={styles.modalOverlay} onClick={() => setResetModalUser(null)}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>Reset Password for {resetModalUser.username}</h3>
+              <button className={styles.closeBtn} onClick={() => setResetModalUser(null)}>
+                <FaTimes />
+              </button>
+            </div>
+            <form onSubmit={handleAdminResetPassword}>
+              <div className={styles.formGroup}>
+                <label>New Temporary Password</label>
+                <input
+                  type="password"
+                  className={styles.input}
+                  placeholder="Min 6 characters"
+                  value={resetPasswordValue}
+                  onChange={e => setResetPasswordValue(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+
+              <div className={styles.modalActions}>
+                <button type="button" className={styles.secondaryBtn} onClick={() => setResetModalUser(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className={styles.primaryBtn} style={{ background: '#eab308' }}>
+                  Confirm Reset
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
         </>
       )}

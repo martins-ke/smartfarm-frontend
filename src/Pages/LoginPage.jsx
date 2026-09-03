@@ -60,15 +60,15 @@ const LoginPage = () => {
 
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
 
-          {/* Username */}
+          {/* Username or Email */}
           <div className={styles.fieldGroup}>
-            <label className={styles.label} htmlFor="username">Username</label>
+            <label className={styles.label} htmlFor="username">Username or Email</label>
             <input
               id="username"
               name="username"
               className={styles.input}
               type="text"
-              placeholder="Enter your username"
+              placeholder="Enter username or email"
               value={form.username}
               onChange={handleChange}
               required
@@ -99,6 +99,16 @@ const LoginPage = () => {
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              <button
+                type="button"
+                className={styles.switchLink}
+                style={{ fontSize: '0.85rem' }}
+                onClick={() => navigate('/forgot-password')}
+              >
+                Forgot Password?
               </button>
             </div>
           </div>

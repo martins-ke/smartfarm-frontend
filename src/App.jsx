@@ -9,6 +9,8 @@ import { ProjectFormPage } from './Pages/Projects/ProjectFormPage'
 import { ProjectDashboardPage } from './Pages/Projects/ProjectDashboardPage'
 import LoginPage from './Pages/LoginPage'
 import SignupPage from './Pages/SignupPage'
+import ForgotPasswordPage from './Pages/ForgotPasswordPage'
+import ResetPasswordPage from './Pages/ResetPasswordPage'
 import ForbiddenPage from './Pages/ForbiddenPage'
 import UserManagementPage from './Pages/UserManagement/UserManagementPage'
 import AssignCategoriesPage from './Pages/UserManagement/AssignCategoriesPage'
@@ -24,6 +26,8 @@ export function App() {
       <Routes>
         <Route path='/login' element={<LoginPage />} />
         <Route path='/signup' element={<SignupPage />} />
+        <Route path='/forgot-password' element={<ForgotPasswordPage />} />
+        <Route path='/reset-password' element={<ResetPasswordPage />} />
         <Route path='/forbidden' element={<ForbiddenPage />} />
 
         <Route element={<ProtectedRoute />}>

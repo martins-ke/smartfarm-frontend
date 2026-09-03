@@ -269,12 +269,26 @@ export function ProjectDashboardPage() {
 
   const renderRecordDate = (entry) => entry.added_on || entry.date || 'N/A';
 
+  if (loading) {
+    return <Spinner fullPage label="Loading project dashboard..." />;
+  }
+
+  if (!project) {
+    return (
+      <div className={styles.page} style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+        <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '1.5rem' }}>Project not found or access denied.</p>
+        <button 
+          onClick={() => navigate('/')} 
+          style={{ padding: '0.6rem 1.2rem', borderRadius: '0.45rem', backgroundColor: '#10b981', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
-      {loading ? (
-        <Spinner fullPage label="Loading project..." />
-      ) : (
-      <>
       <div className={styles.headerRow}>
         <div>
           <p className={styles.eyebrow}>{categoryLabel}</p>
@@ -587,8 +601,6 @@ export function ProjectDashboardPage() {
           ))}
         </aside>
       </div>
-      </>
-      )}
     </div>
   );
 }

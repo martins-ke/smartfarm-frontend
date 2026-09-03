@@ -9,7 +9,7 @@ const SignupPage = () => {
   const navigate = useNavigate();
   const login = useAuth(state => state.login);
 
-  const [form, setForm] = useState({ username: '', password: '', confirmPassword: '', role: 'MANAGER' });
+  const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '', role: 'MANAGER' });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
@@ -70,6 +70,7 @@ const SignupPage = () => {
     try {
       const res = await signup({
         username: form.username,
+        email: form.email,
         password: form.password,
         cpassword: form.confirmPassword,
         role: isBootstrap ? 'ADMIN' : form.role,
@@ -168,6 +169,21 @@ const SignupPage = () => {
                 onChange={handleChange}
                 required
                 autoComplete="username"
+              />
+            </div>
+
+            {/* Email */}
+            <div className={styles.fieldGroup}>
+              <label className={styles.label} htmlFor="email">Email (Optional for password resets)</label>
+              <input
+                id="email"
+                name="email"
+                className={styles.input}
+                type="email"
+                placeholder="Enter email address"
+                value={form.email}
+                onChange={handleChange}
+                autoComplete="email"
               />
             </div>
 
