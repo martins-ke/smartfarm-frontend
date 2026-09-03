@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Category.module.css'
 import { getCategories } from '../../APIs/category';
+import { Spinner } from '../../Components/Spinner/Spinner';
 
 const icons = {crops:'🌾', livestock: '🐄', poultry: '🐔'}; 
 
 export function Category(){
     const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(()=>{
@@ -17,6 +19,8 @@ export function Category(){
                     setCategories(data);
                 }catch(err){
                     setCategories([]);
+                } finally {
+                    setLoading(false);
                 }
             }
         loadCategories();
@@ -30,7 +34,9 @@ export function Category(){
             </div>
 
             <main className={styles.content}>
-                {categories && categories.length > 0 ? (
+                {loading ? (
+                    <Spinner fullPage label="Loading categories..." />
+                ) : categories && categories.length > 0 ? (
                     <div className={styles.cards}>
                         {categories.map((c) => (
                             <div key={c.id} className={styles.card} onClick={() =>{ navigate(`/categories/${c.id}/${c.name.toLowerCase()}`); }} role="button" tabIndex={0}>

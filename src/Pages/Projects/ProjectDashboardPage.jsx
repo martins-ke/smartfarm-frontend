@@ -27,6 +27,7 @@ import { recordActivity } from '../../APIs/activity';
 import { getInventoryItems, useInventoryItem } from '../../APIs/inventory';
 import { notify, alertModal } from '../../utils/notify';
 import { FaBoxes } from 'react-icons/fa';
+import { Spinner } from '../../Components/Spinner/Spinner';
 
 const recordTabs = ['expenses', 'activities', 'sales', 'harvest'];
 
@@ -270,6 +271,10 @@ export function ProjectDashboardPage() {
 
   return (
     <div className={styles.page}>
+      {loading ? (
+        <Spinner fullPage label="Loading project..." />
+      ) : (
+      <>
       <div className={styles.headerRow}>
         <div>
           <p className={styles.eyebrow}>{categoryLabel}</p>
@@ -582,6 +587,8 @@ export function ProjectDashboardPage() {
           ))}
         </aside>
       </div>
+      </>
+      )}
     </div>
   );
 }

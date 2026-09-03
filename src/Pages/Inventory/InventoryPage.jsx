@@ -189,7 +189,7 @@ export function InventoryPage() {
       {loading ? (
         <Spinner fullPage label="Loading inventory..." />
       ) : filteredItems.length === 0 ? (
-        <div className={styles.loading}>No items found in this category.</div>
+        <div className={styles.loading}>No items found in inventory.</div>
       ) : (
         <div className={styles.inventoryGrid}>
           {filteredItems.map(item => (
