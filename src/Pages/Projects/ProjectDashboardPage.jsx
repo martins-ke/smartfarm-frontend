@@ -64,6 +64,17 @@ export function ProjectDashboardPage() {
   const isSupervisor = userRole === 'SUPERVISOR';
   const userPrivileges = currentUser?.privileges || [];
 
+  const [project, setProject] = useState(null);
+  const [activeTab, setActiveTab] = useState('expenses');
+  const [showRecordForm, setShowRecordForm] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [openCustomerForm, setOpenCustomerForm] = useState(false);
+  const [customerData, setCustomerData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  const [openCustomerList, setOpenCustomerList] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const canEditProject = isAdmin || (isManager && userPrivileges.includes('CAN_MANAGE_BUDGETS'));
   const canUseSupplies = isAdmin || isManager || (isSupervisor && userPrivileges.includes('CAN_USE_INVENTORY'));
   const canModifyRecord = !isSupervisor;
@@ -78,17 +89,6 @@ export function ProjectDashboardPage() {
     }
     return false;
   }, [isAdmin, isManager, isSupervisor, activeTab, userPrivileges]);
-
-  const [project, setProject] = useState(null);
-  const [activeTab, setActiveTab] = useState('expenses');
-  const [showRecordForm, setShowRecordForm] = useState(false);
-  const [form, setForm] = useState(initialForm);
-  const [openCustomerForm, setOpenCustomerForm] = useState(false);
-  const [customerData, setCustomerData] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [customers, setCustomers] = useState([]);
-  const [openCustomerList, setOpenCustomerList] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   // Inventory usage
   const [useSuppliesModalOpen, setUseSuppliesModalOpen] = useState(false);
