@@ -141,11 +141,13 @@
     right: 0;
     top: calc(100% + 0.35rem);
     width: 224px;
-    border-radius: 1rem;
-    background: var(--panel-solid, #ffffff) !important;
-    border: 1px solid var(--border, rgba(138, 180, 219, 0.28));
+    border-radius: 1.15rem;
+    background: var(--modal-bg) !important;
+    border: 1px solid var(--modal-border);
     padding: 1.15rem 0.9rem 0.85rem;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.32), 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--modal-shadow);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     z-index: var(--z-usercard, 1100);
     color: var(--text, inherit);
     animation: userCardDrop 0.2s cubic-bezier(0.16, 1, 0.3, 1);

@@ -14,21 +14,39 @@
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
-  background: rgba(98, 124, 143, 0.12);
-  border: 1px solid rgba(138, 180, 219, 0.14);
+  background: var(--header-card-bg);
+  border: 1px solid var(--header-card-border);
   border-radius: 1rem;
-  padding: 1rem 1.1rem;
+  padding: 1.1rem 1.3rem;
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--header-card-shadow);
 }
 
 .create_btn {
-  background-color: rgba(66, 123, 134, 0.2);
-  color: #2aa1ee;
+  background: linear-gradient(135deg, rgba(42,161,238,0.9), rgba(31,127,197,0.85));
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 14px rgba(42, 161, 238, 0.3);
+  transition: all 0.2s ease;
+}
+
+.create_btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(42, 161, 238, 0.45);
 }
 
 .eyebrow {
   letter-spacing: 0.08rem;
   text-transform: uppercase;
-  color: #8bb4d9;
+  color: var(--muted, #8bb4d9);
   font-size: 0.72rem;
   margin: 0 0 0.3rem;
 }
@@ -41,23 +59,33 @@
 }
 
 .summaryCard {
-  padding: 1rem 1.1rem;
+  padding: 1.1rem 1.2rem;
   border-radius: 1rem;
-  background: linear-gradient(180deg, rgba(98, 124, 143, 0.15), rgba(98, 124, 143, 0.08));
-  border: 1px solid rgba(138, 180, 219, 0.14);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
-  box-shadow: 0 12px 25px rgba(5, 10, 16, 0.08);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease;
+}
+
+.summaryCard:hover {
+  transform: translateY(-2px);
 }
 
 .summaryCard span {
   color: var(--muted, #a7bfd8);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .summaryCard strong {
-  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text, #edf6ff);
 }
 
 /* ── Project Cards ── */
@@ -68,19 +96,23 @@
 }
 
 .projectCard {
-  background: linear-gradient(180deg, rgba(18, 31, 41, 0.05), rgba(18, 31, 41, 0.15));
-  border: 1px solid rgba(138, 180, 219, 0.14);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1rem;
-  padding: 1.1rem 1.1rem 1rem;
+  padding: 1.25rem 1.25rem 1.1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  box-shadow: 0 12px 24px rgba(5, 10, 16, 0.08);
-  transition: border-color 0.2s;
+  gap: 0.85rem;
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
+  transition: all 0.2s ease;
 }
 
 .projectCard:hover {
-  border-color: rgba(138, 180, 219, 0.28);
+  transform: translateY(-3px);
+  border-color: var(--card-border-hover);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .cardTopRow {

@@ -42,12 +42,13 @@ export const resetPassword = ({ token, newPassword }) =>
   });
 
 /**
- * GET /users?role=...&createdById=...
+ * GET /users?role=...&createdById=...&managerId=...
  */
-export const fetchUsers = (role, createdById) => {
+export const fetchUsers = (role, createdById, managerId) => {
   const params = new URLSearchParams();
   if (role) params.append('role', role);
   if (createdById) params.append('createdById', createdById);
+  if (managerId) params.append('managerId', managerId);
   const query = params.toString() ? `?${params.toString()}` : '';
   return apiClient(`/users${query}`, { method: 'GET' });
 };
@@ -125,6 +126,15 @@ export const assignSupervisorToProject = (projectId, supervisorId) =>
   });
 
 /**
+ * PATCH /users/:id/privileges
+ */
+export const updateUserPrivileges = (id, { privileges, maxProjectCapacity }) =>
+  apiClient(`/users/${id}/privileges`, {
+    method: 'PATCH',
+    body: JSON.stringify({ privileges, maxProjectCapacity }),
+  });
+
+/**
  * PUT /users/:id/profile
  */
 export const updateUserProfile = (id, data) =>
@@ -142,6 +152,7 @@ export default {
   fetchUsers,
   createStaff,
   updateUserStatus,
+  updateUserPrivileges,
   assignCategoriesToUser,
   assignProjectsToSupervisor,
   getSupervisorProjects,

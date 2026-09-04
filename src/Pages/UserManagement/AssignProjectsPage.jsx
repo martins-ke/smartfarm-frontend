@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './AssignProjectsPage.module.css';
-import { fetchUsers, assignProjectsToSupervisor } from '../../APIs/user';
+import { getUserById, getSupervisorProjects, assignProjectsToSupervisor } from '../../APIs/user';
 import { getAllProjects } from '../../APIs/project';
 import { getCategories } from '../../APIs/category';
 import { notify } from '../../utils/notify';
@@ -34,16 +34,17 @@ export default function AssignProjectsPage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [usersRes, projectsRes, catsRes] = await Promise.all([
-          fetchUsers(),
+        const [userRes, projectsRes, catsRes, supProjectsRes] = await Promise.all([
+          getUserById(userId),
           getAllProjects(),
-          getCategories().catch(() => ({ body: [] }))
+          getCategories().catch(() => ({ body: [] })),
+          getSupervisorProjects(userId).catch(() => ({ body: [] }))
         ]);
 
-        const allUsers = usersRes?.body || [];
-        const targetUser = allUsers.find(u => String(u.id) === String(userId));
+        const targetUser = userRes?.body;
         const allProjects = projectsRes?.body || [];
         const allCategories = catsRes?.body || [];
+        const supProjects = supProjectsRes?.body || [];
 
         if (!targetUser) {
           notify('Supervisor not found', 'error');
@@ -56,12 +57,13 @@ export default function AssignProjectsPage() {
         setCategories(allCategories);
 
         // Pre-select projects currently assigned to this supervisor
-        const existingAssignedIds = allProjects
-          .filter(p => p.supervisor && String(p.supervisor.id) === String(userId))
-          .map(p => p.id);
+        const existingAssignedIds = supProjects.length > 0 
+          ? supProjects.map(p => p.id)
+          : allProjects.filter(p => p.supervisor && String(p.supervisor.id) === String(userId)).map(p => p.id);
+
         setSelectedProjectIds(existingAssignedIds);
       } catch (err) {
-        notify('Failed to load project assignment data', 'error');
+        notify(err.message || 'Failed to load project assignment data', 'error');
       } finally {
         setLoading(false);
       }
@@ -121,6 +123,9 @@ export default function AssignProjectsPage() {
     );
   }
 
+  const maxCapacity = Number(supervisor?.maxProjectCapacity) > 0 ? Number(supervisor.maxProjectCapacity) : 4;
+  const isOverCapacity = selectedProjectIds.length > maxCapacity;
+
   return (
     <div className={styles.page}>
       {/* Top Back Navigation */}
@@ -146,11 +151,32 @@ export default function AssignProjectsPage() {
             <div className={styles.userName}>{supervisor?.username}</div>
             <div className={styles.userRole}>
               <FaUserTie style={{ marginRight: '0.3rem' }} />
-              {supervisor?.role}
+              {supervisor?.role} • Max Capacity: {maxCapacity}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Capacity Alert Banner */}
+      {isOverCapacity && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.15)',
+          border: '1.5px solid rgba(239, 68, 68, 0.4)',
+          borderRadius: '0.75rem',
+          padding: '0.85rem 1.25rem',
+          color: '#f87171',
+          fontSize: '0.9rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.6rem',
+          margin: '0.5rem 0'
+        }}>
+          <FaExclamationCircle style={{ fontSize: '1.2rem', flexShrink: 0 }} />
+          <span>
+            <strong>Capacity Limit Exceeded:</strong> {supervisor?.username} has a max capacity of {maxCapacity} projects. You have currently selected {selectedProjectIds.length} projects.
+          </span>
+        </div>
+      )}
 
       {/* Filter and Quick Selection Toolbar */}
       <div className={styles.controlsBar}>
@@ -186,9 +212,9 @@ export default function AssignProjectsPage() {
           <button type="button" className={styles.smallBtn} onClick={handleClearAllFiltered}>
             Clear Filtered
           </button>
-          <div className={styles.selectionCountBadge}>
+          <div className={styles.selectionCountBadge} style={{ color: isOverCapacity ? '#ef4444' : 'inherit' }}>
             <FaFolder style={{ marginRight: '0.4rem' }} />
-            {selectedProjectIds.length} of {projects.length} Assigned
+            {selectedProjectIds.length} / {maxCapacity} Max Capacity ({projects.length} Total)
           </div>
         </div>
       </div>
@@ -277,9 +303,9 @@ export default function AssignProjectsPage() {
             type="button" 
             className={styles.saveBtn} 
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isOverCapacity}
           >
-            <FaCheck /> {isSaving ? 'Saving...' : 'Save Project Assignments'}
+            <FaCheck /> {isSaving ? 'Saving...' : isOverCapacity ? 'Capacity Exceeded' : 'Save Project Assignments'}
           </button>
         </div>
       </div>

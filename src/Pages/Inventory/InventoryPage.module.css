@@ -14,11 +14,13 @@
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
-  background: var(--panel, rgba(98, 124, 143, 0.12));
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.14));
+  background: var(--header-card-bg);
+  border: 1px solid var(--header-card-border);
   border-radius: 1rem;
-  padding: 1rem 1.1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  padding: 1.1rem 1.3rem;
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--header-card-shadow);
 }
 
 .eyebrow {
@@ -35,20 +37,23 @@
 }
 
 .create_btn {
-  background-color: var(--accent, #2aa1ee);
+  background: linear-gradient(135deg, rgba(42,161,238,0.9), rgba(31,127,197,0.85));
   color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.6rem;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  box-shadow: 0 4px 14px rgba(42, 161, 238, 0.3);
+  transition: all 0.2s ease;
 }
 
 .create_btn:hover {
-  background-color: var(--accent-strong, #1f7fc5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(42, 161, 238, 0.45);
 }
 
 /* ── Filter Bar ── */
@@ -65,7 +70,7 @@
 }
 
 .filterBtn {
-  background: var(--panel, rgba(98, 124, 143, 0.08));
+  background: rgba(138, 180, 219, 0.06);
   border: 1px solid var(--border, rgba(138, 180, 219, 0.14));
   color: var(--muted, #8bb4d9);
   padding: 0.45rem 1rem;
@@ -75,10 +80,12 @@
   font-size: 0.85rem;
   white-space: nowrap;
   transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 
 .filterBtn:hover {
-  background: var(--surface-highlight, rgba(42, 161, 238, 0.08));
+  background: rgba(42, 161, 238, 0.12);
+  border-color: rgba(42, 161, 238, 0.3);
   color: var(--text, #edf6ff);
 }
 
@@ -86,6 +93,7 @@
   background: var(--accent, #2aa1ee);
   border-color: var(--accent, #2aa1ee);
   color: #fff;
+  box-shadow: 0 2px 10px rgba(42, 161, 238, 0.35);
 }
 
 /* ── Inventory Grid ── */
@@ -96,22 +104,25 @@
 }
 
 .inventoryCard {
-  background: var(--bg-elevated, #fff);
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.14));
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1rem;
-  padding: 1.2rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s, box-shadow 0.2s;
+  gap: 0.85rem;
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   position: relative;
   overflow: hidden;
 }
 
 .inventoryCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+  border-color: var(--card-border-hover);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .cardTopRow {
@@ -211,25 +222,28 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(4, 12, 20, 0.78);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: var(--z-modal, 1400);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .modalContent {
-  background: var(--bg, #fff);
-  border-radius: 1rem;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: 1.1rem;
   width: 100%;
   max-width: 500px;
   padding: 1.5rem;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  box-shadow: var(--modal-shadow);
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
   box-sizing: border-box;
+  color: var(--text, #edf6ff);
 }
 
 .modalHeader {

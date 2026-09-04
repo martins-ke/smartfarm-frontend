@@ -29,23 +29,33 @@
 }
 
 .summaryCard {
-  background: var(--panel, rgba(255,255,255,0.04));
-  border-radius: 0.85rem;
-  padding: 0.75rem 1rem;
+  background: var(--card-bg);
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.1rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 8px 18px rgba(4,8,14,0.10);
+  border: 1px solid var(--card-border);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease;
+}
+
+.summaryCard:hover {
+  transform: translateY(-2px);
 }
 
 .summaryCard span {
   color: var(--muted, #a7bfd8);
   font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .summaryCard strong {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text, #edf6ff);
 }
 
 .contentGrid {
@@ -56,11 +66,13 @@
 
 .recordPanel,
 .recentPanel {
-  background: var(--panel, rgba(255,255,255,0.04));
-  border-radius: 0.85rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 8px 20px rgba(4,8,14,0.08);
+  background: var(--panel-bg);
+  border-radius: 0.95rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--panel-border);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--panel-shadow);
 }
 .recentPanel{
   max-height: 100vh;
@@ -533,7 +545,7 @@
   padding: 0.75rem 0.95rem;
   border: 1px solid var(--border, rgba(138, 180, 219, 0.3));
   border-radius: 0.65rem;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family-base);
   font-size: 0.95rem;
   background: rgba(16, 26, 38, 0.4);
   color: var(--text, #dfeefc);

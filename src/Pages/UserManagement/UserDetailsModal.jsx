@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserDetailsModal.module.css';
-import { getUserById, getSupervisorProjects, updateUserStatus, deleteUser } from '../../APIs/user';
+import { getUserById, getSupervisorProjects, updateUserStatus, deleteUser, updateUserPrivileges } from '../../APIs/user';
 import { notify } from '../../utils/notify';
 import { 
   FaTimes, 
@@ -16,7 +16,10 @@ import {
   FaExternalLinkAlt,
   FaIdBadge,
   FaCheck,
-  FaShieldAlt
+  FaShieldAlt,
+  FaToggleOn,
+  FaToggleOff,
+  FaSave
 } from 'react-icons/fa';
 
 export default function UserDetailsModal({ userId, currentAdminUser, onClose, onUserUpdated }) {
@@ -25,8 +28,12 @@ export default function UserDetailsModal({ userId, currentAdminUser, onClose, on
   const [supervisedProjects, setSupervisedProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [privileges, setPrivileges] = useState([]);
+  const [maxCapacity, setMaxCapacity] = useState(4);
+  const [privilegeSaving, setPrivilegeSaving] = useState(false);
 
   const isAdmin = currentAdminUser?.role?.toUpperCase() === 'ADMIN';
+  const isCurrentManager = currentAdminUser?.role?.toUpperCase() === 'MANAGER';
 
   const loadUserDetails = async () => {
     setLoading(true);
@@ -34,6 +41,8 @@ export default function UserDetailsModal({ userId, currentAdminUser, onClose, on
       const res = await getUserById(userId);
       const userData = res?.body;
       setUser(userData);
+      setPrivileges(userData?.privileges || []);
+      setMaxCapacity(userData?.maxProjectCapacity || 4);
 
       if (userData?.role?.toUpperCase() === 'SUPERVISOR') {
         const projRes = await getSupervisorProjects(userId).catch(() => ({ body: [] }));
@@ -44,6 +53,29 @@ export default function UserDetailsModal({ userId, currentAdminUser, onClose, on
       onClose();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTogglePrivilege = (privKey) => {
+    setPrivileges((prev) => 
+      prev.includes(privKey) ? prev.filter(k => k !== privKey) : [...prev, privKey]
+    );
+  };
+
+  const handleSavePrivileges = async () => {
+    setPrivilegeSaving(true);
+    try {
+      await updateUserPrivileges(userId, {
+        privileges: privileges,
+        maxProjectCapacity: Number(maxCapacity) || 4
+      });
+      notify('Privileges and capacity saved successfully ✅', 'success');
+      loadUserDetails();
+      if (onUserUpdated) onUserUpdated();
+    } catch (err) {
+      notify(err.message || 'Failed to save privileges', 'error');
+    } finally {
+      setPrivilegeSaving(false);
     }
   };
 
@@ -208,43 +240,112 @@ export default function UserDetailsModal({ userId, currentAdminUser, onClose, on
                 </div>
               )}
 
-              {/* Supervisor Assigned Projects */}
-              {isUserSupervisor && (
+              {/* Granular Privilege Delegation Section (PBAC) */}
+              {(isUserManager && isAdmin) && (
                 <div className={styles.sectionBlock}>
                   <div className={styles.sectionTitle}>
                     <span>
-                      <FaFolder style={{ marginRight: '0.4rem', color: '#22c55e' }} />
-                      Assigned Field Projects ({supervisedProjects.length})
+                      <FaShieldAlt style={{ marginRight: '0.4rem', color: '#2aa1ee' }} />
+                      Manager Privileges & Authority
                     </span>
                     <button 
                       className={styles.actionBtn}
-                      style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
-                      onClick={() => {
-                        onClose();
-                        navigate(`/users/${user.id}/projects`);
-                      }}
+                      style={{ background: '#0284c7', color: '#fff', padding: '0.3rem 0.75rem', fontSize: '0.8rem' }}
+                      onClick={handleSavePrivileges}
+                      disabled={privilegeSaving}
                     >
-                      <FaExternalLinkAlt /> Delegate Projects
+                      <FaSave /> {privilegeSaving ? 'Saving...' : 'Save Privileges'}
                     </button>
                   </div>
-
-                  {supervisedProjects.length === 0 ? (
-                    <p className={styles.emptyNote}>No projects currently supervised by this staff member.</p>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                      {supervisedProjects.map((p) => (
-                        <div key={p.id} className={styles.projectListItem}>
-                          <div>
-                            <div className={styles.projectListName}>{p.name}</div>
-                            <div className={styles.projectListMeta}>{p.category?.name || 'Category'} • {p.season}</div>
+                  <div className={styles.privilegeList}>
+                    {[
+                      { key: 'CAN_CREATE_CATEGORIES', label: 'Create Farm Categories / Sectors', desc: 'Allow manager to create and configure new categories.' },
+                      { key: 'CAN_CREATE_SUPERVISORS', label: 'Create & Provision Supervisors', desc: 'Allow manager to hire and register dedicated field supervisors.' },
+                      { key: 'CAN_VIEW_FINANCIALS', label: 'View Sector Financials & Cash Flow', desc: 'Allow manager to view revenue and expense analytics for their sectors.' },
+                      { key: 'CAN_MANAGE_BUDGETS', label: 'Manage & Edit Project Budgets', desc: 'Allow manager to modify budget allocations on projects.' },
+                      { key: 'CAN_DELETE_INVENTORY', label: 'Delete Inventory Items', desc: 'Allow manager to permanently remove items from the inventory catalog.' },
+                    ].map((item) => {
+                      const isGranted = privileges.includes(item.key);
+                      return (
+                        <div key={item.key} className={styles.privilegeItem} onClick={() => handleTogglePrivilege(item.key)}>
+                          <div className={styles.privilegeInfo}>
+                            <span className={styles.privilegeLabel}>{item.label}</span>
+                            <span className={styles.privilegeDesc}>{item.desc}</span>
                           </div>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#22c55e', textTransform: 'capitalize' }}>
-                            {p.status || 'Active'}
+                          <span className={isGranted ? styles.toggleOn : styles.toggleOff}>
+                            {isGranted ? <FaToggleOn size={24} /> : <FaToggleOff size={24} />}
                           </span>
                         </div>
-                      ))}
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {(isUserSupervisor && (isAdmin || isCurrentManager)) && (
+                <div className={styles.sectionBlock}>
+                  <div className={styles.sectionTitle}>
+                    <span>
+                      <FaShieldAlt style={{ marginRight: '0.4rem', color: '#10b981' }} />
+                      Supervisor Privileges & Capacity
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button 
+                        className={styles.actionBtn}
+                        style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
+                        onClick={() => {
+                          onClose();
+                          navigate(`/users/${user.id}/projects`);
+                        }}
+                      >
+                        <FaExternalLinkAlt /> Assign Projects
+                      </button>
+                      <button 
+                        className={styles.actionBtn}
+                        style={{ background: '#10b981', color: '#fff', padding: '0.3rem 0.75rem', fontSize: '0.8rem' }}
+                        onClick={handleSavePrivileges}
+                        disabled={privilegeSaving}
+                      >
+                        <FaSave /> {privilegeSaving ? 'Saving...' : 'Save Privileges'}
+                      </button>
                     </div>
-                  )}
+                  </div>
+
+                  <div className={styles.capacityRow}>
+                    <label>Max Project Capacity:</label>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="10" 
+                      value={maxCapacity} 
+                      onChange={(e) => setMaxCapacity(e.target.value)}
+                      className={styles.capacityInput}
+                    />
+                    <span className={styles.capacityNote}>(Current: {supervisedProjects.length} / {maxCapacity} projects)</span>
+                  </div>
+
+                  <div className={styles.privilegeList}>
+                    {[
+                      { key: 'CAN_RECORD_HARVEST', label: 'Record Harvest Yields', desc: 'Allow supervisor to submit harvest volumes and production logs.' },
+                      { key: 'CAN_LOG_ACTIVITIES', label: 'Log Daily Field Activities', desc: 'Allow logging weeding, spraying, irrigation, and feeding tasks.' },
+                      { key: 'CAN_USE_INVENTORY', label: 'Deduct Stock from Inventory', desc: 'Allow deducting fertilizer, feed, and seed quantities for assigned projects.' },
+                      { key: 'CAN_RECORD_EXPENSES', label: 'Record Petty Field Expenses', desc: 'Allow logging cash expenses incurred in the field.' },
+                      { key: 'CAN_RECORD_SALES', label: 'Record Farm-Gate Sales', desc: 'Allow recording direct sales from project harvest stock.' },
+                    ].map((item) => {
+                      const isGranted = privileges.includes(item.key);
+                      return (
+                        <div key={item.key} className={styles.privilegeItem} onClick={() => handleTogglePrivilege(item.key)}>
+                          <div className={styles.privilegeInfo}>
+                            <span className={styles.privilegeLabel}>{item.label}</span>
+                            <span className={styles.privilegeDesc}>{item.desc}</span>
+                          </div>
+                          <span className={isGranted ? styles.toggleOn : styles.toggleOff}>
+                            {isGranted ? <FaToggleOn size={24} /> : <FaToggleOff size={24} />}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </>

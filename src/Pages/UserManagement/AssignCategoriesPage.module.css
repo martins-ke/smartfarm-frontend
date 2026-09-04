@@ -31,8 +31,8 @@
 }
 
 .headerCard {
-  background: var(--panel, rgba(98, 124, 143, 0.12));
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.18));
+  background: var(--header-card-bg);
+  border: 1px solid var(--header-card-border);
   border-radius: 1rem;
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -40,7 +40,9 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  box-shadow: 0 8px 24px rgba(4, 8, 14, 0.08);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--header-card-shadow);
 }
 
 .eyebrow {
@@ -68,10 +70,11 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--surface-highlight, rgba(138, 180, 219, 0.06));
   border: 1px solid var(--border, rgba(138, 180, 219, 0.15));
   border-radius: 0.85rem;
-  padding: 0.6rem 1rem;
+  padding: 0.65rem 1.1rem;
+  backdrop-filter: blur(8px);
 }
 
 .userAvatar {
@@ -115,10 +118,13 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
-  background: var(--panel, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.12));
-  border-radius: 0.85rem;
-  padding: 0.75rem 1.1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.95rem;
+  padding: 0.85rem 1.2rem;
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
 }
 
 .controlButtons {
@@ -166,31 +172,33 @@
 }
 
 .categoryCard {
-  background: var(--panel, rgba(255, 255, 255, 0.04));
-  border: 2px solid var(--border, rgba(138, 180, 219, 0.15));
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
   border-radius: 1rem;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 6px 16px rgba(4, 8, 14, 0.06);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
   -webkit-tap-highlight-color: transparent;
 }
 
 .categoryCard:hover {
-  border-color: var(--accent, #2aa1ee);
+  border-color: var(--card-border-hover);
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(4, 8, 14, 0.12);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .categoryCardSelected {
-  background: linear-gradient(135deg, rgba(42, 161, 238, 0.12), rgba(34, 197, 94, 0.08));
+  background: linear-gradient(145deg, rgba(20, 42, 60, 0.85) 0%, rgba(12, 24, 38, 0.95) 100%);
   border-color: #2aa1ee;
-  box-shadow: 0 0 0 1px #2aa1ee, 0 10px 24px rgba(42, 161, 238, 0.18);
+  box-shadow: 0 0 0 1px #2aa1ee, 0 12px 32px rgba(42, 161, 238, 0.25);
 }
 
 .cardTop {
@@ -277,7 +285,9 @@
 .stickyBottomBar {
   position: sticky;
   bottom: 1rem;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(145deg, rgba(18, 26, 34, 0.92) 0%, rgba(10, 15, 20, 0.96) 100%);
   border: 1px solid var(--border, rgba(138, 180, 219, 0.25));
   border-radius: 1rem;
   padding: 1rem 1.5rem;
@@ -285,7 +295,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
   z-index: 100;
 }
 
@@ -304,11 +314,11 @@
 }
 
 .saveBtn {
-  background: linear-gradient(135deg, rgba(22, 163, 74, 0.12), rgba(42, 161, 238, 0.12));
-  color: inherit;
-  border: none;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.6rem;
-  padding: 0.6rem 1.4rem;
+  padding: 0.65rem 1.5rem;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
@@ -317,12 +327,12 @@
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(42, 161, 238, 0.3);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
 }
 
 .saveBtn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(42, 161, 238, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
 }
 
 .saveBtn:disabled {

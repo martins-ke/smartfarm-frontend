@@ -43,21 +43,27 @@
 }
 
 .card{
-  /* use theme-aware panel color for card background so dark/light themes look correct */
-  background: var(--panel, #fff);
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: flex-start;
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
   color: var(--text, #102330);
 }
 
-.card:hover{ transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.card:hover{ 
+  transform: translateY(-4px); 
+  border-color: var(--card-border-hover);
+  box-shadow: var(--card-shadow-hover); 
+}
 
 .cardIcon{
   font-size: 2rem;

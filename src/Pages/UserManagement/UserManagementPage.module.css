@@ -14,10 +14,13 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  background: var(--panel, rgba(98, 124, 143, 0.12));
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.14));
+  background: var(--header-card-bg);
+  border: 1px solid var(--header-card-border);
   border-radius: 1rem;
-  padding: 1rem 1.25rem;
+  padding: 1.1rem 1.3rem;
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--header-card-shadow);
 }
 
 .eyebrow {
@@ -36,23 +39,25 @@
 }
 
 .primaryBtn {
-  background: var(--accent, #2aa1ee);
+  background: linear-gradient(135deg, rgba(42,161,238,0.9), rgba(31,127,197,0.85));
   color: #fff;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 0.6rem;
   padding: 0.55rem 1rem;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  box-shadow: 0 4px 14px rgba(42, 161, 238, 0.3);
   transition: all 0.2s ease;
 }
 
 .primaryBtn:hover:not(:disabled) {
-  opacity: 0.9;
+  opacity: 0.95;
   transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(42, 161, 238, 0.42);
 }
 
 .primaryBtn:disabled {
@@ -61,7 +66,7 @@
 }
 
 .secondaryBtn {
-  background: rgba(138, 180, 219, 0.12);
+  background: rgba(138, 180, 219, 0.08);
   border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
   color: var(--text);
   border-radius: 0.6rem;
@@ -73,10 +78,11 @@
   align-items: center;
   gap: 0.45rem;
   transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 
 .secondaryBtn:hover {
-  background: rgba(138, 180, 219, 0.2);
+  background: rgba(138, 180, 219, 0.18);
 }
 
 /* ── Quota Cards ── */
@@ -87,14 +93,21 @@
 }
 
 .quotaCard {
-  background: var(--panel, rgba(255, 255, 255, 0.04));
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.15));
-  border-radius: 0.85rem;
-  padding: 0.85rem 1.1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.95rem;
+  padding: 1rem 1.2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  box-shadow: 0 8px 18px rgba(4, 8, 14, 0.08);
+  gap: 0.45rem;
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease;
+}
+
+.quotaCard:hover {
+  transform: translateY(-2px);
 }
 
 .quotaCardHeader {
@@ -191,11 +204,13 @@
 
 /* ── Users Table & Cards ── */
 .tableCard {
-  background: var(--panel, rgba(255, 255, 255, 0.04));
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.15));
-  border-radius: 0.85rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.95rem;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(4, 8, 14, 0.08);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
 }
 
 .tableWrapper {
@@ -339,8 +354,9 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(5px);
+  background: var(--modal-overlay-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,14 +371,14 @@
 }
 
 .modalContent {
-  background: var(--panel, #ffffff);
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
   border-radius: 1.1rem;
   width: 100%;
   max-width: 480px;
   padding: 1.5rem;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
-  color: var(--text, #0f172a);
+  box-shadow: var(--modal-shadow);
+  color: var(--text, #edf6ff);
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

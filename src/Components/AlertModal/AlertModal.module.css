@@ -1,8 +1,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(4, 12, 20, 0.7);
-  backdrop-filter: blur(8px);
+  background: var(--modal-overlay-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   z-index: 9999; /* Highest priority */
   display: flex;
   align-items: center;
@@ -21,13 +22,15 @@
 }
 
 .card {
-  background: var(--bg-elevated, #fff);
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.14));
-  border-radius: 1rem;
-  padding: 2rem 1.5rem 1.5rem;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: 1.25rem;
+  padding: 2rem 1.75rem 1.5rem;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--modal-shadow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -4,6 +4,7 @@ import { getInventoryItems, addInventoryItem, updateInventoryItem, deleteInvento
 import { FaPlus, FaBoxOpen, FaExclamationTriangle, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import { notify } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { useAuth } from '../../useAuth';
 
 function InventoryModal({ item, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -105,6 +106,13 @@ function InventoryModal({ item, onClose, onSave }) {
 }
 
 export function InventoryPage() {
+  const currentUser = useAuth((state) => state.user);
+  const userRole = currentUser?.role?.toUpperCase();
+  const userPrivileges = currentUser?.privileges || currentUser?.permissions || [];
+  const isAdmin = userRole === 'ADMIN';
+  const isManager = userRole === 'MANAGER';
+  const canDelete = isAdmin || (isManager && userPrivileges.includes('CAN_DELETE_INVENTORY'));
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -142,13 +150,17 @@ export function InventoryPage() {
   };
 
   const handleDelete = async (id) => {
+    if (!canDelete) {
+      notify('You do not have permission to delete inventory items.', 'error');
+      return;
+    }
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     try {
       await deleteInventoryItem(id);
       notify('Item deleted', 'success');
       loadItems(page);
     } catch (err) {
-      notify('Failed to delete item', 'error');
+      notify(err.message || 'Failed to delete item', 'error');
     }
   };
 
@@ -226,9 +238,11 @@ export function InventoryPage() {
                 <button className={styles.iconBtn} onClick={() => handleEdit(item)}>
                   <FaEdit /> Edit / Restock
                 </button>
-                <button className={styles.iconBtn} style={{ color: '#ef4444' }} onClick={() => handleDelete(item.id)}>
-                  <FaTrash /> Delete
-                </button>
+                {canDelete && (
+                  <button className={styles.iconBtn} style={{ color: '#ef4444' }} onClick={() => handleDelete(item.id)}>
+                    <FaTrash /> Delete
+                  </button>
+                )}
               </div>
             </div>
           ))}

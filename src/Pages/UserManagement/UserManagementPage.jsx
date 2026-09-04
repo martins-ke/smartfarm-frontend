@@ -219,10 +219,26 @@ export default function UserManagementPage() {
           </div>
         )}
 
+        {isManager && (
+          <div className={styles.quotaCard}>
+            <div className={styles.quotaCardHeader}>
+              <span>🏷️ Assigned Sectors</span>
+              <span className={styles.roleManager}>Portfolio</span>
+            </div>
+            <div className={styles.quotaValue}>{(currentUser?.assignedCategories || []).length} Sectors</div>
+            <div className={styles.quotaProgress}>
+              <div 
+                className={styles.progressBar} 
+                style={{ width: `${Math.min(100, ((currentUser?.assignedCategories || []).length / 3) * 100)}%`, background: '#38bdf8' }} 
+              />
+            </div>
+          </div>
+        )}
+
         <div className={styles.quotaCard}>
           <div className={styles.quotaCardHeader}>
             <span>👷 Field Supervisors</span>
-            <span className={styles.roleSupervisor}>Max 10</span>
+            <span className={styles.roleSupervisor}>{isManager ? 'Your Team' : 'Max 10'}</span>
           </div>
           <div className={styles.quotaValue}>{supervisorCount} / 10</div>
           <div className={styles.quotaProgress}>

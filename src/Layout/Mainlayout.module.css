@@ -17,11 +17,49 @@
     --z-modal: 1400;
 }
 .container.dark{
-    --bg: #2a3237;
-    --bg-elevated: #32393e;
-    --panel: rgba(16, 26, 36, 0.9);
-    --panel-solid: #14212e;
-    --panel-soft: rgba(22, 42, 57, 0.8);
+    --bg: #141a21;
+    --bg-elevated: #1a232c;
+    --panel: rgba(18, 25, 32, 0.82);
+    --panel-solid: #141c24;
+    --panel-soft: rgba(22, 32, 42, 0.75);
+
+    /* Pro Dark Theme Card & Panel Design Tokens */
+    --card-bg: linear-gradient(145deg, rgba(20, 28, 36, 0.78) 0%, rgba(12, 17, 22, 0.88) 100%);
+    --card-bg-solid: #141c24;
+    --card-border: rgba(138, 180, 219, 0.14);
+    --card-border-hover: rgba(42, 161, 238, 0.4);
+    --card-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --card-shadow-hover: 0 16px 36px rgba(0, 0, 0, 0.35), 0 0 16px rgba(42, 161, 238, 0.14);
+    --card-blur: blur(14px);
+
+    --header-card-bg: linear-gradient(145deg, rgba(20, 28, 36, 0.78) 0%, rgba(12, 17, 22, 0.88) 100%);
+    --header-card-border: rgba(138, 180, 219, 0.14);
+    --header-card-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    --panel-bg: linear-gradient(145deg, rgba(20, 28, 36, 0.78) 0%, rgba(12, 17, 22, 0.88) 100%);
+    --panel-border: rgba(138, 180, 219, 0.14);
+    --panel-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    --modal-bg: #141c24;
+    --modal-border: rgba(138, 180, 219, 0.2);
+    --modal-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --modal-overlay-bg: rgba(4, 12, 20, 0.78);
+
+    --crop-card-bg: linear-gradient(145deg, rgba(18, 36, 28, 0.8) 0%, rgba(11, 20, 16, 0.9) 100%);
+    --crop-border: rgba(34, 197, 94, 0.25);
+    --crop-border-hover: rgba(34, 197, 94, 0.45);
+    --crop-shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 16px rgba(34, 197, 94, 0.15);
+
+    --livestock-card-bg: linear-gradient(145deg, rgba(38, 30, 18, 0.8) 0%, rgba(20, 16, 10, 0.9) 100%);
+    --livestock-border: rgba(245, 158, 11, 0.25);
+    --livestock-border-hover: rgba(245, 158, 11, 0.45);
+    --livestock-shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 16px rgba(245, 158, 11, 0.15);
+
+    --poultry-card-bg: linear-gradient(145deg, rgba(20, 32, 46, 0.8) 0%, rgba(10, 18, 28, 0.9) 100%);
+    --poultry-border: rgba(42, 161, 238, 0.25);
+    --poultry-border-hover: rgba(42, 161, 238, 0.45);
+    --poultry-shadow-hover: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 16px rgba(42, 161, 238, 0.15);
+
     --text: #edf6ff;
     --muted: #a9bfd8;
     --border: rgba(138, 180, 219, 0.2);
@@ -32,7 +70,7 @@
     --green-bg: rgba(34, 197, 94, 0.18);
     --green-border: rgba(34, 197, 94, 0.35);
     --green-solid: #22c55e;
-    background: linear-gradient(180deg, #07141d 0%, #0c1b27 100%);
+    background: linear-gradient(180deg, #0c0f11 0%, #0b1015 100%);
     color: var(--text);
 }
 .container.light{
@@ -40,8 +78,46 @@
     --bg-elevated: #ffffff;
     --panel: rgba(255, 255, 255, 0.88);
     --panel-solid: #ffffff;
-    --backdrop-filter: blur(1rem);
     --panel-soft: rgba(240, 246, 250, 0.85);
+
+    /* Light Theme Card & Panel Design Tokens */
+    --card-bg: #ffffff;
+    --card-bg-solid: #ffffff;
+    --card-border: rgba(76, 116, 141, 0.18);
+    --card-border-hover: rgba(31, 127, 197, 0.45);
+    --card-shadow: 0 4px 14px rgba(16, 35, 48, 0.06);
+    --card-shadow-hover: 0 8px 22px rgba(16, 35, 48, 0.12);
+    --card-blur: none;
+
+    --header-card-bg: #ffffff;
+    --header-card-border: rgba(76, 116, 141, 0.18);
+    --header-card-shadow: 0 4px 14px rgba(16, 35, 48, 0.06);
+
+    --panel-bg: #ffffff;
+    --panel-border: rgba(76, 116, 141, 0.18);
+    --panel-shadow: 0 4px 14px rgba(16, 35, 48, 0.06);
+
+    --modal-bg: #ffffff;
+    --modal-border: rgba(76, 116, 141, 0.2);
+    --modal-shadow: 0 20px 48px rgba(16, 35, 48, 0.18);
+    --modal-overlay-bg: rgba(15, 23, 42, 0.45);
+
+    --crop-card-bg: linear-gradient(145deg, rgba(240, 253, 244, 0.95) 0%, rgba(220, 252, 231, 0.75) 100%);
+    --crop-border: rgba(34, 197, 94, 0.28);
+    --crop-border-hover: rgba(34, 197, 94, 0.5);
+    --crop-shadow-hover: 0 10px 24px rgba(34, 197, 94, 0.16);
+
+    --livestock-card-bg: linear-gradient(145deg, rgba(254, 252, 232, 0.95) 0%, rgba(254, 243, 199, 0.75) 100%);
+    --livestock-border: rgba(245, 158, 11, 0.28);
+    --livestock-border-hover: rgba(245, 158, 11, 0.5);
+    --livestock-shadow-hover: 0 10px 24px rgba(245, 158, 11, 0.16);
+
+    --poultry-card-bg: linear-gradient(145deg, rgba(239, 246, 255, 0.95) 0%, rgba(219, 234, 254, 0.75) 100%);
+    --poultry-border: rgba(42, 161, 238, 0.28);
+    --poultry-border-hover: rgba(42, 161, 238, 0.5);
+    --poultry-shadow-hover: 0 10px 24px rgba(42, 161, 238, 0.16);
+
+    --backdrop-filter: blur(1rem);
     --text: #102330;
     --muted: #49657a;
     --border: rgba(76, 116, 141, 0.2);

@@ -13,13 +13,16 @@
 .form{
   width: 100%;
   max-width: 640px;
-  background: var(--panel, #fff);
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  background: var(--card-bg);
+  padding: 1.75rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
   color: var(--text, #102330);
 }
 
