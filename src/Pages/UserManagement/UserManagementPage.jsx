@@ -203,19 +203,21 @@ export default function UserManagementPage() {
           </div>
         )}
 
-        <div className={styles.quotaCard}>
-          <div className={styles.quotaCardHeader}>
-            <span>👔 Farm Managers</span>
-            <span className={styles.roleManager}>Max 2</span>
+        {isAdmin && (
+          <div className={styles.quotaCard}>
+            <div className={styles.quotaCardHeader}>
+              <span>👔 Farm Managers</span>
+              <span className={styles.roleManager}>Max 2</span>
+            </div>
+            <div className={styles.quotaValue}>{managerCount} / 2</div>
+            <div className={styles.quotaProgress}>
+              <div 
+                className={styles.progressBar} 
+                style={{ width: `${(managerCount / 2) * 100}%`, background: '#2aa1ee' }} 
+              />
+            </div>
           </div>
-          <div className={styles.quotaValue}>{managerCount} / 2</div>
-          <div className={styles.quotaProgress}>
-            <div 
-              className={styles.progressBar} 
-              style={{ width: `${(managerCount / 2) * 100}%`, background: '#2aa1ee' }} 
-            />
-          </div>
-        </div>
+        )}
 
         <div className={styles.quotaCard}>
           <div className={styles.quotaCardHeader}>
