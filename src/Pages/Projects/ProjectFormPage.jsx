@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './ProjectFormPage.module.css';
 import { createProject } from '../../APIs/project';
+import { notify } from '../../utils/notify';
 import { FaFolderPlus, FaSave, FaTimes } from 'react-icons/fa';
 
 const initialState = {
@@ -34,7 +35,7 @@ export function ProjectFormPage() {
     event.preventDefault();
 
     if (form.startDate && form.endDate && new Date(form.startDate) > new Date(form.endDate)) {
-      import('../../utils/notify').then(({ notify }) => notify('Start date cannot be greater than end date!', 'error'));
+      notify('Start date cannot be greater than end date!', 'error');
       return;
     }
 
@@ -44,6 +45,8 @@ export function ProjectFormPage() {
       // createProject returns the parsed JSON body. Treat the response as data.
       // send both category slug and numeric id in the body as requested
       const data = await createProject({ ...form, category, category_id });
+      notify(`Project "${form.name}" created successfully ✅`, 'success');
+
       // If backend/mock returns an item object with id, or returns the id directly
       const newId = data?.id ?? data;
       if (newId) {
@@ -53,8 +56,7 @@ export function ProjectFormPage() {
         navigate(`/categories/${category}`);
       }
     } catch (error) {
-      // show app-wide notification 
-      import('../../utils/notify').then(({ notify }) => notify(error.message || 'Unable to create project', 'error'));
+      notify(error.message || 'Unable to create project', 'error');
     } finally {
       setIsSubmitting(false);
     }
