@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './ProjectDashboardPage.module.css';
-import { getProjectById } from '../../APIs/project';
+import { getProjectById, updateProject, deleteProject } from '../../APIs/project';
 import {
   FaCheck,
   FaClipboardList,
@@ -18,16 +18,20 @@ import {
   FaUser,
   FaUserCheck,
   FaUserPlus,
-  FaUsers
+  FaUsers,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaBoxes
 } from 'react-icons/fa';
-import { createExpense } from '../../APIs/expense';
-import { recordSale, requestAllCustomers } from '../../APIs/sales';
-import { recordHarvest } from '../../APIs/harvest';
-import { recordActivity } from '../../APIs/activity';
+import { createExpense, updateExpense, deleteExpense } from '../../APIs/expense';
+import { recordSale, updateSale, deleteSale, requestAllCustomers } from '../../APIs/sales';
+import { recordHarvest, updateHarvest, deleteHarvest } from '../../APIs/harvest';
+import { recordActivity, updateActivity, deleteActivity } from '../../APIs/activity';
 import { getInventoryItems, useInventoryItem } from '../../APIs/inventory';
-import { notify, alertModal } from '../../utils/notify';
-import { FaBoxes } from 'react-icons/fa';
+import { notify, alertModal, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import useAuth from '../../useAuth';
 
 const recordTabs = ['expenses', 'activities', 'sales', 'harvest'];
 
@@ -53,6 +57,8 @@ const unwrapResponse = (response) => {
 export function ProjectDashboardPage() {
   const { category, projectId } = useParams();
   const navigate = useNavigate();
+  const currentUser = useAuth((state) => state.user);
+  const isSupervisor = (currentUser?.role || '').toUpperCase() === 'SUPERVISOR';
 
   const [project, setProject] = useState(null);
   const [activeTab, setActiveTab] = useState('expenses');
@@ -68,6 +74,20 @@ export function ProjectDashboardPage() {
   // Inventory usage
   const [useSuppliesModalOpen, setUseSuppliesModalOpen] = useState(false);
   const [inventoryItems, setInventoryItems] = useState([]);
+
+  // Edit record & Edit project state
+  const [editingRecord, setEditingRecord] = useState(null); // { tab: 'expenses'|'sales'|'harvest'|'activities', item: ... }
+  const [editRecordForm, setEditRecordForm] = useState({});
+  const [editingProject, setEditingProject] = useState(false);
+  const [projectEditForm, setProjectEditForm] = useState({
+    name: '',
+    season: '',
+    startDate: '',
+    endDate: '',
+    budget: '',
+    status: 'active',
+    description: ''
+  });
 
   // Refs for scrolling active tab button to the center
   const tabsContainerRef = useRef(null);
@@ -106,12 +126,13 @@ export function ProjectDashboardPage() {
             setProject(unwrapResponse(projectRes.value));
           } else {
             setProject(null);
-            const errMsg = projectRes.reason?.message || '';
+            const errMsg = projectRes.reason?.message || 'Failed to load project details';
             if (errMsg.toLowerCase().includes('access denied') || errMsg.toLowerCase().includes('not assigned')) {
               alertModal(errMsg || 'Access Denied: You are not assigned to this project.', 'error');
               navigate('/');
               return;
             }
+            notify(errMsg, 'error');
           }
 
           if (customersRes.status === 'fulfilled') {
@@ -212,62 +233,125 @@ export function ProjectDashboardPage() {
     }
   };
 
-  if (loading) {
-    return <div className={styles.emptyState}>Loading project dashboard...</div>;
-  }
-  if (!project) {
-    return <div className={styles.emptyState}>Failed to load project data ⚠</div>;
-  }
-
-  const projectRecords = project?.records || project || {};
-  const expensesList = projectRecords.expenses || [];
-  const salesList = projectRecords.sales || [];
-  const activitiesList = projectRecords.activities || [];
-  const harvestList = projectRecords.harvest || [];
-
-  const recordsMap = {
-    expenses: expensesList,
-    activities: activitiesList,
-    sales: salesList,
-    harvest: harvestList
+  const handleOpenEditRecord = (tab, record) => {
+    setEditingRecord({ tab, item: record });
+    if (tab === 'expenses') {
+      setEditRecordForm({
+        title: record.title || '',
+        unitPrice: record.unitPrice || '',
+        quantity: record.quantity || '',
+        amount: record.amount || '',
+        notes: record.notes || ''
+      });
+    } else if (tab === 'sales') {
+      setEditRecordForm({
+        item: record.item || '',
+        quantity: record.quantity || '',
+        unit_price: record.unit_price || record.unitPrice || ''
+      });
+    } else if (tab === 'harvest') {
+      setEditRecordForm({
+        item: record.item || '',
+        quantity: record.quantity || '',
+        units: record.units || '',
+        notes: record.notes || ''
+      });
+    } else if (tab === 'activities') {
+      setEditRecordForm({
+        title: record.title || '',
+        type: record.type || '',
+        notes: record.notes || ''
+      });
+    }
   };
 
-  // Read financials calculated directly by backend SQL queries
-  const totalExpenses = Number(project?.totalExpenses ?? expensesList.reduce((sum, item) => sum + Number(item.amount || 0), 0));
-  const totalSales = Number(project?.totalSales ?? salesList.reduce((sum, item) => {
-    const price = Number(item.unit_price ?? item.price ?? 0);
-    const qty = Number(item.quantity || 0);
-    return sum + (qty * price);
-  }, 0));
-  const netValue = Number(project?.netValue ?? (totalSales - totalExpenses));
-  const currentRecords = recordsMap[activeTab] || [];
-
-  const renderRecordLabel = (entry) => {
-    if (activeTab === 'expenses') return entry.title || 'Expense';
-    if (activeTab === 'activities') return entry.title || 'Activity';
-    if (activeTab === 'sales') return entry.item || 'Sale';
-    return entry.item || 'Harvest';
-  };
-
-  const renderRecordMeta = (entry) => {
-    if (activeTab === 'expenses') {
-      let meta = `Ksh ${Number(entry.amount || 0).toLocaleString()}`;
-      if (entry.unitPrice && entry.quantity) {
-        meta += ` (${entry.quantity} @ Ksh ${entry.unitPrice})`;
+  const handleSaveEditRecord = async (e) => {
+    e.preventDefault();
+    if (!editingRecord) return;
+    setIsSubmitting(true);
+    try {
+      let res;
+      const { tab, item } = editingRecord;
+      if (tab === 'expenses') {
+        res = await updateExpense(item.id, editRecordForm);
+      } else if (tab === 'sales') {
+        res = await updateSale(item.id, editRecordForm);
+      } else if (tab === 'harvest') {
+        res = await updateHarvest(item.id, editRecordForm);
+      } else if (tab === 'activities') {
+        res = await updateActivity(item.id, editRecordForm);
       }
-      return meta;
+
+      notify(res?.message || `${tab.slice(0, -1)} updated successfully ✅`, 'success');
+      setEditingRecord(null);
+
+      const refreshedProject = await getProjectById(projectId);
+      if (refreshedProject) setProject(unwrapResponse(refreshedProject));
+    } catch (err) {
+      notify(err.message || 'Failed to update record', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
-    if (activeTab === 'activities') return entry.type || 'Activity';
-    if (activeTab === 'sales') {
-      const price = Number(entry.unit_price ?? entry.price ?? 0);
-      const qty = Number(entry.quantity || 0);
-      return `Ksh ${(qty * price).toLocaleString()}`;
-    }
-    const units = entry.units || entry.unit || '';
-    return `${entry.quantity || 0} ${units}`.trim();
   };
 
-  const renderRecordDate = (entry) => entry.added_on || entry.date || 'N/A';
+  const handleDeleteRecord = async (tab, record) => {
+    const typeLabel = tab === 'harvest' ? 'harvest' : tab.slice(0, -1);
+    const label = record.title || record.item || 'record';
+    const confirmed = await confirmModal({
+      title: `Delete ${typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)}`,
+      message: `Are you sure you want to delete this ${typeLabel}: "${label}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+    if (!confirmed) return;
+    try {
+      let res;
+      if (tab === 'expenses') res = await deleteExpense(record.id);
+      else if (tab === 'sales') res = await deleteSale(record.id);
+      else if (tab === 'harvest') res = await deleteHarvest(record.id);
+      else if (tab === 'activities') res = await deleteActivity(record.id);
+
+      notify(res?.message || `${tab.slice(0, -1)} deleted successfully ✅`, 'success');
+      const refreshedProject = await getProjectById(projectId);
+      if (refreshedProject) setProject(unwrapResponse(refreshedProject));
+    } catch (err) {
+      notify(err.message || 'Failed to delete record', 'error');
+    }
+  };
+
+  const handleOpenEditProject = () => {
+    setProjectEditForm({
+      name: project.name || '',
+      season: project.season || '',
+      startDate: project.startDate || '',
+      endDate: project.endDate || '',
+      budget: project.budget || '',
+      status: project.status || 'active',
+      description: project.description || ''
+    });
+    setEditingProject(true);
+  };
+
+  const handleSaveEditProject = async (e) => {
+    e.preventDefault();
+    if (projectEditForm.startDate && projectEditForm.endDate && new Date(projectEditForm.startDate) > new Date(projectEditForm.endDate)) {
+      notify('Start date cannot be greater than end date!', 'error');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await updateProject(projectId, projectEditForm);
+      notify(res?.message || 'Project updated successfully ✅', 'success');
+      setEditingProject(false);
+      const refreshedProject = await getProjectById(projectId);
+      if (refreshedProject) setProject(unwrapResponse(refreshedProject));
+    } catch (err) {
+      notify(err.message || 'Failed to update project', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (loading) {
     return <Spinner fullPage label="Loading project dashboard..." />;
@@ -287,6 +371,57 @@ export function ProjectDashboardPage() {
     );
   }
 
+  const projectRecords = project?.records || project || {};
+  const expensesList = Array.isArray(projectRecords.expenses) ? projectRecords.expenses : [];
+  const salesList = Array.isArray(projectRecords.sales) ? projectRecords.sales : [];
+  const activitiesList = Array.isArray(projectRecords.activities) ? projectRecords.activities : [];
+  const harvestList = Array.isArray(projectRecords.harvest) ? projectRecords.harvest : [];
+
+  const recordsMap = {
+    expenses: expensesList,
+    activities: activitiesList,
+    sales: salesList,
+    harvest: harvestList
+  };
+
+  // Read financials calculated directly by backend SQL queries
+  const totalExpenses = Number(project?.totalExpenses ?? expensesList.reduce((sum, item) => sum + Number(item.amount || 0), 0));
+  const totalSales = Number(project?.totalSales ?? salesList.reduce((sum, item) => {
+    const price = Number(item.unit_price ?? item.price ?? 0);
+    const qty = Number(item.quantity || 0);
+    return sum + (qty * price);
+  }, 0));
+  const netValue = Number(project?.netValue ?? (totalSales - totalExpenses));
+  const currentRecords = recordsMap[activeTab] || [];
+
+  const renderRecordLabel = (entry) => {
+    if (activeTab === 'expenses') return entry?.title || 'Expense';
+    if (activeTab === 'activities') return entry?.title || 'Activity';
+    if (activeTab === 'sales') return entry?.item || 'Sale';
+    return entry?.item || 'Harvest';
+  };
+
+  const renderRecordMeta = (entry) => {
+    if (!entry) return '';
+    if (activeTab === 'expenses') {
+      let meta = `Ksh ${Number(entry.amount || 0).toLocaleString()}`;
+      if (entry.unitPrice && entry.quantity) {
+        meta += ` (${entry.quantity} @ Ksh ${entry.unitPrice})`;
+      }
+      return meta;
+    }
+    if (activeTab === 'activities') return entry.type || 'Activity';
+    if (activeTab === 'sales') {
+      const price = Number(entry.unit_price ?? entry.price ?? 0);
+      const qty = Number(entry.quantity || 0);
+      return `Ksh ${(qty * price).toLocaleString()}`;
+    }
+    const units = entry.units || entry.unit || '';
+    return `${entry.quantity || 0} ${units}`.trim();
+  };
+
+  const renderRecordDate = (entry) => entry?.added_on || entry?.date || 'N/A';
+
   return (
     <div className={styles.page}>
       <div className={styles.headerRow}>
@@ -294,7 +429,19 @@ export function ProjectDashboardPage() {
           <p className={styles.eyebrow}>{categoryLabel}</p>
           <h2>{project.name}</h2>
         </div>
-        <div />
+        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+          {!isSupervisor && (
+            <button
+              type="button"
+              className={styles.editProjectBtn}
+              onClick={handleOpenEditProject}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                <FaEdit /> Edit Project
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className={styles.summaryGrid}>
@@ -565,13 +712,33 @@ export function ProjectDashboardPage() {
               <p className={styles.emptyText}>No {activeTab} recorded yet.</p>
             ) : (
               <ul>
-                {currentRecords.slice(0, 8).map((entry) => (
+                {currentRecords.slice(0, 15).map((entry) => (
                   <li key={entry.id} className={styles.recordItem}>
-                    <div>
-                      <strong style={{ color: '#198d6c'}}>{renderRecordLabel(entry)}</strong>
-                      <small style={{ color: '#ee2ad1'}}>{renderRecordDate(entry)}</small>
+                    <div className={styles.recordTopRow}>
+                      <strong className={styles.recordTitle}>{renderRecordLabel(entry)}</strong>
+                      <div className={styles.recordActionGroup}>
+                        <button
+                          type="button"
+                          className={styles.recordActionBtn}
+                          onClick={() => handleOpenEditRecord(activeTab, entry)}
+                          title={`Edit ${activeTab.slice(0, -1)}`}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.recordActionBtn} ${styles.recordDeleteBtn}`}
+                          onClick={() => handleDeleteRecord(activeTab, entry)}
+                          title={`Delete ${activeTab.slice(0, -1)}`}
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </div>
-                    <span style={{ color: '#aa5704'}}>{renderRecordMeta(entry)}</span>
+                    <div className={styles.recordBottomRow}>
+                      <small className={styles.recordDate}>{renderRecordDate(entry)}</small>
+                      <span className={styles.recordMeta}>{renderRecordMeta(entry)}</span>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -601,6 +768,351 @@ export function ProjectDashboardPage() {
           ))}
         </aside>
       </div>
+
+      {/* Edit Record Modal */}
+      {editingRecord && (
+        <div className={styles.modalOverlay} onClick={() => setEditingRecord(null)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalHeaderInfo}>
+                <div className={styles.modalHeaderIcon} style={{ background: 'rgba(255,255,255,0.05)' }}>
+                  <FaEdit />
+                </div>
+                <div>
+                  <h3>Edit {editingRecord.tab.slice(0, -1)}</h3>
+                  <p>Update details for this {editingRecord.tab.slice(0, -1)}</p>
+                </div>
+              </div>
+              <button type="button" className={styles.modalCloseBtn} onClick={() => setEditingRecord(null)}>
+                <FaTimes />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditRecord} className={styles.modalForm}>
+              {editingRecord.tab === 'expenses' && (
+                <>
+                  <label>
+                    <span>Expense title</span>
+                    <input
+                      name="title"
+                      value={editRecordForm.title || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, title: e.target.value }))}
+                      required
+                    />
+                  </label>
+                  <div className={styles.formRow}>
+                    <label style={{ flex: 1 }}>
+                      <span>Unit Price (Ksh)</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="unitPrice"
+                        value={editRecordForm.unitPrice || ''}
+                        onChange={(e) => {
+                          const up = parseFloat(e.target.value) || 0;
+                          const q = parseFloat(editRecordForm.quantity) || 0;
+                          setEditRecordForm((prev) => ({
+                            ...prev,
+                            unitPrice: e.target.value,
+                            amount: up > 0 && q > 0 ? (up * q).toString() : prev.amount
+                          }));
+                        }}
+                      />
+                    </label>
+                    <label style={{ flex: 1 }}>
+                      <span>Quantity</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="quantity"
+                        value={editRecordForm.quantity || ''}
+                        onChange={(e) => {
+                          const q = parseFloat(e.target.value) || 0;
+                          const up = parseFloat(editRecordForm.unitPrice) || 0;
+                          setEditRecordForm((prev) => ({
+                            ...prev,
+                            quantity: e.target.value,
+                            amount: up > 0 && q > 0 ? (up * q).toString() : prev.amount
+                          }));
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <label>
+                    <span>Total Amount (Ksh)</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      name="amount"
+                      value={editRecordForm.amount || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, amount: e.target.value }))}
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Notes</span>
+                    <textarea
+                      name="notes"
+                      value={editRecordForm.notes || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, notes: e.target.value }))}
+                      rows="3"
+                    />
+                  </label>
+                </>
+              )}
+
+              {editingRecord.tab === 'sales' && (
+                <>
+                  <label>
+                    <span>Item Sold</span>
+                    <input
+                      name="item"
+                      value={editRecordForm.item || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, item: e.target.value }))}
+                      required
+                    />
+                  </label>
+                  <div className={styles.formRow}>
+                    <label style={{ flex: 1 }}>
+                      <span>Quantity</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="quantity"
+                        value={editRecordForm.quantity || ''}
+                        onChange={(e) => setEditRecordForm((prev) => ({ ...prev, quantity: e.target.value }))}
+                        required
+                      />
+                    </label>
+                    <label style={{ flex: 1 }}>
+                      <span>Unit Price (Ksh)</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="unit_price"
+                        value={editRecordForm.unit_price || ''}
+                        onChange={(e) => setEditRecordForm((prev) => ({ ...prev, unit_price: e.target.value }))}
+                        required
+                      />
+                    </label>
+                  </div>
+                  <div style={{ padding: '0.6rem 0.85rem', background: 'rgba(255,255,255,0.04)', borderRadius: '0.45rem', fontSize: '0.9rem', color: '#64748b' }}>
+                    Computed Total: <strong style={{ color: 'var(--green-text, #16a34a)' }}>Ksh {((parseFloat(editRecordForm.quantity) || 0) * (parseFloat(editRecordForm.unit_price) || 0)).toLocaleString()}</strong>
+                  </div>
+                </>
+              )}
+
+              {editingRecord.tab === 'harvest' && (
+                <>
+                  <label>
+                    <span>Harvest Item</span>
+                    <input
+                      name="item"
+                      value={editRecordForm.item || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, item: e.target.value }))}
+                      required
+                    />
+                  </label>
+                  <div className={styles.formRow}>
+                    <label style={{ flex: 1 }}>
+                      <span>Quantity</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="quantity"
+                        value={editRecordForm.quantity || ''}
+                        onChange={(e) => setEditRecordForm((prev) => ({ ...prev, quantity: e.target.value }))}
+                        required
+                      />
+                    </label>
+                    <label style={{ flex: 1 }}>
+                      <span>Units</span>
+                      <input
+                        type="text"
+                        name="units"
+                        value={editRecordForm.units || ''}
+                        onChange={(e) => setEditRecordForm((prev) => ({ ...prev, units: e.target.value }))}
+                        placeholder="kg / crates / litres"
+                        required
+                      />
+                    </label>
+                  </div>
+                  <label>
+                    <span>Notes</span>
+                    <textarea
+                      name="notes"
+                      value={editRecordForm.notes || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, notes: e.target.value }))}
+                      rows="3"
+                    />
+                  </label>
+                </>
+              )}
+
+              {editingRecord.tab === 'activities' && (
+                <>
+                  <label>
+                    <span>Activity Title</span>
+                    <input
+                      name="title"
+                      value={editRecordForm.title || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, title: e.target.value }))}
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Activity Type</span>
+                    <input
+                      name="type"
+                      value={editRecordForm.type || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, type: e.target.value }))}
+                      placeholder="Maintenance / Feeding / Veterinary"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Notes</span>
+                    <textarea
+                      name="notes"
+                      value={editRecordForm.notes || ''}
+                      onChange={(e) => setEditRecordForm((prev) => ({ ...prev, notes: e.target.value }))}
+                      rows="3"
+                    />
+                  </label>
+                </>
+              )}
+
+              <div className={styles.modalActions}>
+                <button type="button" className={styles.modalCancelBtn} onClick={() => setEditingRecord(null)}>Cancel</button>
+                <button type="submit" className={styles.modalSubmitBtn} disabled={isSubmitting}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <FaSave /> {isSubmitting ? 'Saving...' : 'Save Changes'}
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <div className={styles.modalOverlay} onClick={() => setEditingProject(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalHeaderInfo}>
+                <div className={styles.modalHeaderIcon} style={{ background: 'rgba(255,255,255,0.05)' }}>
+                  <FaEdit />
+                </div>
+                <div>
+                  <h3>Edit Project</h3>
+                  <p>Update project details and budget</p>
+                </div>
+              </div>
+              <button type="button" className={styles.modalCloseBtn} onClick={() => setEditingProject(false)}>
+                <FaTimes />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditProject} className={styles.modalForm}>
+              <label>
+                <span>Project Name</span>
+                <input
+                  type="text"
+                  value={projectEditForm.name || ''}
+                  onChange={(e) => setProjectEditForm((prev) => ({ ...prev, name: e.target.value }))}
+                  required
+                />
+              </label>
+
+              <div className={styles.formRow}>
+                <label style={{ flex: 1 }}>
+                  <span>Season</span>
+                  <input
+                    type="text"
+                    value={projectEditForm.season || ''}
+                    onChange={(e) => setProjectEditForm((prev) => ({ ...prev, season: e.target.value }))}
+                    placeholder="e.g. Q1 2026"
+                    required
+                  />
+                </label>
+                <label style={{ flex: 1 }}>
+                  <span>Status</span>
+                  <select
+                    value={projectEditForm.status || 'active'}
+                    onChange={(e) => setProjectEditForm((prev) => ({ ...prev, status: e.target.value }))}
+                  >
+                    <option value="active">Active</option>
+                    <option value="in_progress">In progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="done">Done</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className={styles.formRow}>
+                <label style={{ flex: 1 }}>
+                  <span>Start Date</span>
+                  <input
+                    type="date"
+                    value={projectEditForm.startDate || ''}
+                    max={projectEditForm.endDate || undefined}
+                    onChange={(e) => setProjectEditForm((prev) => ({ ...prev, startDate: e.target.value }))}
+                    required
+                  />
+                </label>
+                <label style={{ flex: 1 }}>
+                  <span>End Date</span>
+                  <input
+                    type="date"
+                    value={projectEditForm.endDate || ''}
+                    min={projectEditForm.startDate || undefined}
+                    onChange={(e) => setProjectEditForm((prev) => ({ ...prev, endDate: e.target.value }))}
+                    required
+                  />
+                </label>
+              </div>
+
+              <label>
+                <span>Budget (Ksh)</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={projectEditForm.budget || ''}
+                  onChange={(e) => setProjectEditForm((prev) => ({ ...prev, budget: e.target.value }))}
+                  required
+                />
+              </label>
+
+              <label>
+                <span>Description</span>
+                <textarea
+                  value={projectEditForm.description || ''}
+                  onChange={(e) => setProjectEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                  rows="3"
+                />
+              </label>
+
+              <div className={styles.modalActions}>
+                <button type="button" className={styles.modalCancelBtn} onClick={() => setEditingProject(false)}>Cancel</button>
+                <button type="submit" className={styles.modalSubmitBtn} disabled={isSubmitting}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <FaSave /> {isSubmitting ? 'Saving...' : 'Save Changes'}
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

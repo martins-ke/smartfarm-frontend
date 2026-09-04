@@ -11,7 +11,7 @@ import {
 } from '../../APIs/user';
 import { getCategories } from '../../APIs/category';
 import useAuth from '../../useAuth';
-import { notify } from '../../utils/notify';
+import { notify, confirmModal } from '../../utils/notify';
 import { 
   FaUserShield, 
   FaUserPlus, 
@@ -26,9 +26,10 @@ import {
   FaExclamationTriangle,
   FaCheck,
   FaFolderOpen,
-  FaEye
+  FaEye,
+  FaKey,
+  FaBan
 } from 'react-icons/fa';
-import UserDetailsModal from './UserDetailsModal';
 import { Spinner } from '../../Components/Spinner/Spinner';
 
 export default function UserManagementPage() {
@@ -41,7 +42,6 @@ export default function UserManagementPage() {
   const [categories, setCategories] = useState([]);
   const [quotaStats, setQuotaStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [viewUserId, setViewUserId] = useState(null);
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -115,7 +115,14 @@ export default function UserManagementPage() {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to permanently remove user "${username}"?`)) return;
+    const confirmed = await confirmModal({
+      title: 'Remove User',
+      message: `Are you sure you want to permanently remove user "${username}"? This action cannot be undone.`,
+      confirmText: 'Remove User',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+    if (!confirmed) return;
     try {
       await deleteUser(userId);
       notify(`User "${username}" was successfully removed ✅`, 'success');
@@ -264,6 +271,13 @@ export default function UserManagementPage() {
                 </div>
                 <div className={styles.pendingActions}>
                   <button 
+                    className={styles.viewBtn} 
+                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                    onClick={() => navigate(`/users/${u.id}`)}
+                  >
+                    <FaEye /> View
+                  </button>
+                  <button 
                     className={styles.approveBtn} 
                     onClick={() => handleStatusUpdate(u.id, 'ACTIVE')}
                   >
@@ -357,70 +371,13 @@ export default function UserManagementPage() {
                         </td>
                       )}
                       <td>
-                        <div className={styles.actionBtnGroup}>
-                          <button 
-                            className={styles.iconBtn}
-                            style={{ color: '#2aa1ee', borderColor: 'rgba(42, 161, 238, 0.35)' }}
-                            onClick={() => setViewUserId(u.id)}
-                            title="View full user details"
-                          >
-                            <FaEye /> View
-                          </button>
-
-                          {isAdmin && isUserManager && (
-                            <button 
-                              className={styles.iconBtn}
-                              onClick={() => navigate(`/users/${u.id}/categories`)}
-                            >
-                              <FaTags /> Assign Categories
-                            </button>
-                          )}
-
-                          {(isAdmin || isManager) && isUserSupervisor && (
-                            <button 
-                              className={styles.iconBtn}
-                              onClick={() => navigate(`/users/${u.id}/projects`)}
-                            >
-                              <FaFolderOpen /> Assign Projects
-                            </button>
-                          )}
-
-                          {!isUserAdmin && (
-                            <>
-                              <button 
-                                className={styles.iconBtn}
-                                onClick={() => setResetModalUser(u)}
-                                style={{ color: '#eab308' }} // warning yellow/orange
-                              >
-                                <FaUserShield /> Reset Password
-                              </button>
-
-                              {u.status === 'ACTIVE' ? (
-                                <button 
-                                  className={styles.iconBtn}
-                                  onClick={() => handleStatusUpdate(u.id, 'DISABLED')}
-                                >
-                                  <FaUserTimes /> Deactivate
-                                </button>
-                              ) : (
-                                <button 
-                                  className={styles.iconBtn}
-                                  onClick={() => handleStatusUpdate(u.id, 'ACTIVE')}
-                                >
-                                  <FaUserCheck /> Activate
-                                </button>
-                              )}
-
-                              <button 
-                                className={styles.iconBtn}
-                                style={{ color: '#ef4444' }}
-                                onClick={() => handleDelete(u.id, u.username)}
-                              >
-                                <FaTrash /> Delete
-                              </button>
-                            </>
-                          )}
-                        </div>
+                        <button 
+                          className={styles.viewBtn}
+                          onClick={() => navigate(`/users/${u.id}`)}
+                          title="View user details & manage"
+                        >
+                          <FaEye /> View
+                        </button>
                       </td>
                     </tr>
                   );
@@ -487,16 +444,6 @@ export default function UserManagementPage() {
             </form>
           </div>
         </div>
-      )}
-
-      {/* User Details & Management Modal */}
-      {viewUserId && (
-        <UserDetailsModal
-          userId={viewUserId}
-          currentAdminUser={currentUser}
-          onClose={() => setViewUserId(null)}
-          onUserUpdated={loadData}
-        />
       )}
 
       {/* Admin Reset Password Modal */}

@@ -3,9 +3,10 @@ import styles from './Mainlayout.module.css'
 import { TopBar } from "../Components/TopBar/TopBar";
 import { useState, useEffect } from "react";
 import { MessageCard } from "../Components/MessageCard/MessageCard";
-import { subscribe, subscribeAlert } from "../utils/notify";
+import { subscribe, subscribeAlert, subscribeConfirm } from "../utils/notify";
 import ErrorBoundary from '../Components/ErrorBoundary/ErrorBoundary';
 import { AlertModal } from "../Components/AlertModal/AlertModal";
+import { ConfirmModal } from "../Components/ConfirmModal/ConfirmModal";
 import { FaArrowLeft } from "react-icons/fa";
 
 export function Mainlayout(){
@@ -16,6 +17,7 @@ export function Mainlayout(){
     const [hideMenu, setHideMenu] = useState(true);
     const [messageState, setMessageState] = useState({ message: '', type: 'info', duration: 6000 });
     const [alertState, setAlertState] = useState({ message: '', type: 'info' });
+    const [confirmState, setConfirmState] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -36,9 +38,13 @@ export function Mainlayout(){
       const unsubAlert = subscribeAlert((payload) => {
         setAlertState(payload);
       });
+      const unsubConfirm = subscribeConfirm((payload) => {
+        setConfirmState(payload);
+      });
       return () => {
         unsub();
         unsubAlert();
+        unsubConfirm();
       };
     }, []);
 
@@ -84,6 +90,10 @@ export function Mainlayout(){
               message={alertState.message}
               type={alertState.type}
               onClose={() => setAlertState({ message: '', type: 'info' })}
+            />
+            <ConfirmModal
+              data={confirmState}
+              onClose={() => setConfirmState(null)}
             />
         </div>
     )

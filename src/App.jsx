@@ -13,6 +13,7 @@ import ForgotPasswordPage from './Pages/ForgotPasswordPage'
 import ResetPasswordPage from './Pages/ResetPasswordPage'
 import ForbiddenPage from './Pages/ForbiddenPage'
 import UserManagementPage from './Pages/UserManagement/UserManagementPage'
+import UserDetailsPage from './Pages/UserManagement/UserDetailsPage'
 import AssignCategoriesPage from './Pages/UserManagement/AssignCategoriesPage'
 import AssignProjectsPage from './Pages/UserManagement/AssignProjectsPage'
 import { ProtectedRoute } from './Components/ProtectedRoute'
@@ -45,6 +46,7 @@ export function App() {
 
             <Route element={<ProtectedRoute allowedRoles={[ROLE.ADMIN, ROLE.MANAGER]} />}>
               <Route path='/users' element={<UserManagementPage />} />
+              <Route path='/users/:userId' element={<UserDetailsPage />} />
               <Route path='/users/:userId/projects' element={<AssignProjectsPage />} />
             </Route>
 

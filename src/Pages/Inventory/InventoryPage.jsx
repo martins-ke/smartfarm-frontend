@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './InventoryPage.module.css';
 import { getInventoryItems, addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../APIs/inventory';
 import { FaPlus, FaBoxOpen, FaExclamationTriangle, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
-import { notify } from '../../utils/notify';
+import { notify, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { useAuth } from '../../useAuth';
 
@@ -154,10 +154,17 @@ export function InventoryPage() {
       notify('You do not have permission to delete inventory items.', 'error');
       return;
     }
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    const confirmed = await confirmModal({
+      title: 'Delete Inventory Item',
+      message: 'Are you sure you want to delete this inventory item? This action cannot be undone.',
+      confirmText: 'Delete Item',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+    if (!confirmed) return;
     try {
       await deleteInventoryItem(id);
-      notify('Item deleted', 'success');
+      notify('Item deleted successfully ✅', 'success');
       loadItems(page);
     } catch (err) {
       notify(err.message || 'Failed to delete item', 'error');

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from './EditProfileModal.module.css';
 import { FaUserEdit, FaTimes, FaEye, FaEyeSlash, FaExclamationTriangle, FaTrash } from 'react-icons/fa';
 import { updateUserProfile, deleteUser } from '../../APIs/user';
-import { notify } from '../../utils/notify';
+import { notify, confirmModal } from '../../utils/notify';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../useAuth';
 
@@ -63,11 +63,19 @@ export default function EditProfileModal({ onClose }) {
   };
 
   const handleDeleteAccount = async () => {
+    const promptTitle = isAdmin ? 'Delete Administrator Account' : 'Delete Account';
     const promptMessage = isAdmin
-      ? '⚠️ DANGER: Are you sure you want to delete your Administrator account? This will remove your account and return the farm portal to Bootstrap mode so a new Admin can register.'
+      ? 'Are you sure you want to delete your Administrator account? This will remove your account and return the farm portal to Bootstrap mode so a new Admin can register.'
       : 'Are you sure you want to delete your account? You will be logged out immediately.';
 
-    if (!window.confirm(promptMessage)) return;
+    const confirmed = await confirmModal({
+      title: promptTitle,
+      message: promptMessage,
+      confirmText: 'Delete Account',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+    if (!confirmed) return;
 
     try {
       setDeleting(true);

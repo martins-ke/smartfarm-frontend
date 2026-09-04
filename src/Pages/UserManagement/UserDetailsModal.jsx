@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserDetailsModal.module.css';
-import { getUserById, getSupervisorProjects, updateUserStatus, deleteUser, updateUserPrivileges } from '../../APIs/user';
-import { notify } from '../../utils/notify';
+import { getUserById, getSupervisorProjects, updateUserStatus, deleteUser, updateUserPrivileges, adminResetPassword } from '../../APIs/user';
+import { notify, confirmModal } from '../../utils/notify';
 import { 
   FaTimes, 
   FaUserShield, 
@@ -13,13 +13,15 @@ import {
   FaCheckCircle, 
   FaBan, 
   FaTrash, 
-  FaExternalLinkAlt,
-  FaIdBadge,
-  FaCheck,
-  FaShieldAlt,
-  FaToggleOn,
-  FaToggleOff,
-  FaSave
+  FaExternalLinkAlt, 
+  FaIdBadge, 
+  FaCheck, 
+  FaShieldAlt, 
+  FaToggleOn, 
+  FaToggleOff, 
+  FaSave,
+  FaKey,
+  FaLock
 } from 'react-icons/fa';
 
 export default function UserDetailsModal({ userId, currentAdminUser, onClose, onUserUpdated }) {
@@ -31,9 +33,31 @@ export default function UserDetailsModal({ userId, currentAdminUser, onClose, on
   const [privileges, setPrivileges] = useState([]);
   const [maxCapacity, setMaxCapacity] = useState(4);
   const [privilegeSaving, setPrivilegeSaving] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
 
   const isAdmin = currentAdminUser?.role?.toUpperCase() === 'ADMIN';
   const isCurrentManager = currentAdminUser?.role?.toUpperCase() === 'MANAGER';
+
+  const handleAdminResetPassword = async (e) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      notify('Password must be at least 6 characters', 'error');
+      return;
+    }
+    setResettingPassword(true);
+    try {
+      await adminResetPassword(userId, newPassword);
+      notify(`Password for user "${user?.username}" successfully reset ✅`, 'success');
+      setNewPassword('');
+      setShowPasswordSection(false);
+    } catch (err) {
+      notify(err.message || 'Failed to reset password', 'error');
+    } finally {
+      setResettingPassword(false);
+    }
+  };
 
   const loadUserDetails = async () => {
     setLoading(true);
@@ -98,11 +122,18 @@ export default function UserDetailsModal({ userId, currentAdminUser, onClose, on
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`Are you sure you want to permanently remove user "${user?.username}"?`)) return;
+    const confirmed = await confirmModal({
+      title: 'Remove User',
+      message: `Are you sure you want to permanently remove user "${user?.username}"? This action cannot be undone.`,
+      confirmText: 'Remove User',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+    if (!confirmed) return;
     setActionLoading(true);
     try {
       await deleteUser(userId);
-      notify(`User ${user?.username} deleted`, 'success');
+      notify(`User ${user?.username} deleted successfully ✅`, 'success');
       if (onUserUpdated) onUserUpdated();
       onClose();
     } catch (err) {
@@ -346,6 +377,57 @@ export default function UserDetailsModal({ userId, currentAdminUser, onClose, on
                       );
                     })}
                   </div>
+                </div>
+              )}
+
+              {/* Security & Password Reset Section */}
+              {isAdmin && !isUserAdmin && (
+                <div className={styles.sectionBlock}>
+                  <div className={styles.sectionTitle}>
+                    <span>
+                      <FaKey style={{ marginRight: '0.4rem', color: '#eab308' }} />
+                      Security & Password Reset
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.actionBtn}
+                      style={{ padding: '0.25rem 0.65rem', fontSize: '0.78rem' }}
+                      onClick={() => setShowPasswordSection(!showPasswordSection)}
+                    >
+                      {showPasswordSection ? 'Cancel' : 'Reset Password'}
+                    </button>
+                  </div>
+
+                  {showPasswordSection && (
+                    <form onSubmit={handleAdminResetPassword} style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                      <input
+                        type="password"
+                        placeholder="New password (min 6 characters)"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        style={{
+                          flex: 1,
+                          minWidth: '200px',
+                          padding: '0.45rem 0.75rem',
+                          borderRadius: '0.45rem',
+                          border: '1px solid var(--border, rgba(138, 180, 219, 0.25))',
+                          background: 'rgba(0, 0, 0, 0.15)',
+                          color: 'var(--text)',
+                          fontSize: '0.85rem'
+                        }}
+                      />
+                      <button
+                        type="submit"
+                        className={styles.actionBtn}
+                        style={{ background: '#eab308', color: '#000', fontWeight: 600, border: 'none', padding: '0.45rem 0.85rem' }}
+                        disabled={resettingPassword}
+                      >
+                        {resettingPassword ? 'Updating...' : 'Update Password'}
+                      </button>
+                    </form>
+                  )}
                 </div>
               )}
             </>

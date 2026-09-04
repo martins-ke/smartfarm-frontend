@@ -184,22 +184,44 @@
   background: #16a34a;
   color: #fff;
   border: none;
-  border-radius: 0.45rem;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+}
+
+.approveBtn:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
 }
 
 .rejectBtn {
   background: #dc2626;
   color: #fff;
   border: none;
-  border-radius: 0.45rem;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+}
+
+.rejectBtn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
 /* ── Users Table & Cards ── */
@@ -325,29 +347,128 @@
 }
 
 .actionBtnGroup {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
 }
 
-.iconBtn {
-  background: transparent;
-  border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
-  color: var(--text);
-  border-radius: 0.45rem;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.78rem;
+.viewBtn {
+  background: rgba(42, 161, 238, 0.12);
+  color: var(--accent, #2aa1ee);
+  border: 1px solid rgba(42, 161, 238, 0.35);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  transition: all 0.15s ease;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.iconBtn:hover {
+.viewBtn:hover {
   background: var(--accent, #2aa1ee);
   color: #fff;
-  border-color: transparent;
+  border-color: var(--accent, #2aa1ee);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(42, 161, 238, 0.25);
+}
+
+.assignBtn {
+  background: var(--green-bg, rgba(22, 163, 74, 0.12));
+  color: var(--green-text, #16a34a);
+  border: 1px solid var(--green-border, rgba(22, 163, 74, 0.35));
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.assignBtn:hover {
+  background: var(--green-solid, #16a34a);
+  color: #fff;
+  border-color: var(--green-solid, #16a34a);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+.iconToolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(138, 180, 219, 0.08);
+  padding: 0.2rem 0.35rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.18));
+}
+
+.actionIconBtn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.82rem;
+  transition: all 0.18s ease;
+  color: var(--muted, #64748b);
+  padding: 0;
+}
+
+.actionIconBtn:hover {
+  transform: scale(1.1);
+}
+
+.resetPassBtn {
+  color: #eab308;
+}
+
+.resetPassBtn:hover {
+  background: rgba(234, 179, 8, 0.16);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #ca8a04;
+}
+
+.deactivateBtn {
+  color: #f97316;
+}
+
+.deactivateBtn:hover {
+  background: rgba(249, 115, 22, 0.16);
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #ea580c;
+}
+
+.activateBtn {
+  color: #10b981;
+}
+
+.activateBtn:hover {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #059669;
+}
+
+.deleteBtn {
+  color: #ef4444;
+}
+
+.deleteBtn:hover {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #dc2626;
 }
 
 /* ── Modal Overlay ── */

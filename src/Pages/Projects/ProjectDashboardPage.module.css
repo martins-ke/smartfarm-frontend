@@ -823,7 +823,56 @@ label {
   gap: 0.65rem;
 }
 
-.recordItem,
+.recordItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: rgba(116, 136, 154, 0.06);
+  border: 1px solid var(--card-border, rgba(138, 180, 219, 0.15));
+  transition: all 0.2s ease;
+}
+
+.recordItem:hover {
+  background: rgba(116, 136, 154, 0.1);
+  border-color: var(--card-border-hover, rgba(42, 161, 238, 0.35));
+}
+
+.recordTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.recordTitle {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--green-text, #16a34a);
+  line-height: 1.3;
+}
+
+.recordBottomRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.recordDate {
+  font-size: 0.8rem;
+  color: var(--muted, #acbfd7);
+}
+
+.recordMeta {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ea580c;
+}
+
 .recordGroup li {
   display: flex;
   justify-content: space-between;
@@ -834,23 +883,7 @@ label {
   border: 1px solid rgba(0,0,0,0.04);
 }
 
-.recordItem div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.recordItem strong {
-  font-size: 0.95rem;
-}
-
-.recordItem small,
 .recordGroup li span {
-  color: var(--muted, #acbfd7);
-  font-size: 0.82rem;
-}
-
-.recordItem span {
   color: var(--muted, #acbfd7);
   font-size: 0.82rem;
 }
@@ -1621,4 +1654,103 @@ label {
 .recordItem div, .recordItem span, .recordItem strong {
   word-break: break-word;
   white-space: normal;
+}
+
+.editProjectBtn {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, #cbd5e1);
+  color: var(--text, #0f172a);
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--card-shadow);
+}
+
+.editProjectBtn:hover {
+  background: #2b8a3e;
+  color: #ffffff;
+  border-color: #2b8a3e;
+}
+
+.recordActionGroup {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.45rem !important;
+  flex-wrap: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.recordActionBtn {
+  background: transparent;
+  border: 1px solid var(--card-border, #cbd5e1);
+  border-radius: 6px;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  color: var(--muted, #64748b);
+  font-size: 0.82rem;
+  transition: all 0.15s ease;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.recordActionBtn:hover {
+  background: rgba(43, 138, 62, 0.12);
+  color: #2b8a3e;
+  border-color: #2b8a3e;
+}
+
+.recordDeleteBtn:hover {
+  background: rgba(220, 38, 38, 0.12) !important;
+  color: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+.recordTopRow {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+}
+
+.recordBottomRow {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+}
+
+.recordTitle {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text, #102330);
+  line-height: 1.3;
+}
+
+.recordDate {
+  font-size: 0.8rem;
+  color: var(--muted, #64748b);
+}
+
+.recordMeta {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ea580c;
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CategoryForm.module.css';
 import { createCategory } from '../../APIs/category';
+import { notify } from '../../utils/notify';
 
 export default function CategoryForm(){
   const [data, setData] = useState({name:'', description:''});
@@ -10,19 +11,28 @@ export default function CategoryForm(){
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!data.name.trim() || !data.description.trim()) return;
+    if (!data.name.trim()) {
+      notify('Please enter a category name', 'error');
+      return;
+    }
+    if (!data.description.trim()) {
+      notify('Please enter a category description', 'error');
+      return;
+    }
     setSubmitting(true);
     try{
       const request = await createCategory(data);
-      const message = request.message;
-      const success = request.success;
+      const message = request?.message;
+      const success = request?.success !== false;
       if(success){
-        alert(message);
+        notify(message || 'Category created successfully ✅', 'success');
         navigate('/categories');
-        setData({...data, name:'', description:''});
+        setData({ name:'', description:'' });
+      } else {
+        notify(message || 'Failed to create category', 'error');
       }
     }catch(err){
-      alert(err.message);
+      notify(err?.message || 'Failed to create category', 'error');
     }finally{
       setSubmitting(false);
     }
