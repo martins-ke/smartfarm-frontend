@@ -9,11 +9,25 @@ import { AlertModal } from "../Components/AlertModal/AlertModal";
 import { FaArrowLeft } from "react-icons/fa";
 
 export function Mainlayout(){
-    const[darkTheme, setDarkTheme] = useState(false);
+    const [darkTheme, setDarkTheme] = useState(() => {
+      const saved = localStorage.getItem('smartfarm_theme');
+      return saved !== null ? saved === 'dark' : true;
+    });
     const [hideMenu, setHideMenu] = useState(true);
     const [messageState, setMessageState] = useState({ message: '', type: 'info', duration: 6000 });
     const [alertState, setAlertState] = useState({ message: '', type: 'info' });
     const navigate = useNavigate();
+
+    useEffect(() => {
+      localStorage.setItem('smartfarm_theme', darkTheme ? 'dark' : 'light');
+      if (darkTheme) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
+    }, [darkTheme]);
 
     useEffect(() => {
       const unsub = subscribe((payload) => {
@@ -41,7 +55,7 @@ export function Mainlayout(){
     };
 
     return(
-        <div className={`${styles.container} ${darkTheme? styles.light: styles.dark}`}> 
+        <div className={`${styles.container} ${darkTheme ? styles.dark : styles.light}`}> 
             <TopBar darkTheme={darkTheme} setDarkTheme={setDarkTheme} hideMenu={hideMenu} setHideMenu={setHideMenu} />
             
             {/* Back button: visible when menu is closed, disappears when menu is open */}

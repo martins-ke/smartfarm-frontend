@@ -105,15 +105,15 @@ export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, set
                        )}
                    </ul>
 
-                   <div className={styles.theme}>
-                       <p>Theme</p>
-                       <div className={styles.themeToggleWrap}>
-                           {darkTheme ? <FaSun className={styles.themeIcon} /> : <FaMoon className={styles.themeIcon} />}
-                           <div className={styles.themeBtn} onClick={()=> setDarkTheme(!darkTheme)} aria-label="Toggle theme">
-                               <div className={`${styles.child} ${darkTheme ? styles.on : ''}`}></div>
-                           </div>
-                       </div>
-                   </div>
+                    <div className={styles.theme}>
+                        <p>Theme</p>
+                        <div className={styles.themeToggleWrap}>
+                            {darkTheme ? <FaMoon className={styles.themeIcon} title="Dark Mode Active" /> : <FaSun className={styles.themeIcon} title="Light Mode Active" />}
+                            <div className={styles.themeBtn} onClick={()=> setDarkTheme(!darkTheme)} aria-label="Toggle theme">
+                                <div className={`${styles.child} ${darkTheme ? styles.on : ''}`}></div>
+                            </div>
+                        </div>
+                    </div>
                </nav>
 
                {/* overlay covering rest of the app to block interactions when menu is open */}
