@@ -58,7 +58,26 @@ export function ProjectDashboardPage() {
   const { category, projectId } = useParams();
   const navigate = useNavigate();
   const currentUser = useAuth((state) => state.user);
-  const isSupervisor = (currentUser?.role || '').toUpperCase() === 'SUPERVISOR';
+  const userRole = (currentUser?.role || '').toUpperCase();
+  const isAdmin = userRole === 'ADMIN';
+  const isManager = userRole === 'MANAGER';
+  const isSupervisor = userRole === 'SUPERVISOR';
+  const userPrivileges = currentUser?.privileges || [];
+
+  const canEditProject = isAdmin || (isManager && userPrivileges.includes('CAN_MANAGE_BUDGETS'));
+  const canUseSupplies = isAdmin || isManager || (isSupervisor && userPrivileges.includes('CAN_USE_INVENTORY'));
+  const canModifyRecord = !isSupervisor;
+
+  const canRecordInTab = useMemo(() => {
+    if (isAdmin || isManager) return true;
+    if (isSupervisor) {
+      if (activeTab === 'expenses') return userPrivileges.includes('CAN_RECORD_EXPENSES');
+      if (activeTab === 'sales') return userPrivileges.includes('CAN_RECORD_SALES');
+      if (activeTab === 'harvest') return userPrivileges.includes('CAN_RECORD_HARVEST');
+      if (activeTab === 'activities') return userPrivileges.includes('CAN_LOG_ACTIVITIES');
+    }
+    return false;
+  }, [isAdmin, isManager, isSupervisor, activeTab, userPrivileges]);
 
   const [project, setProject] = useState(null);
   const [activeTab, setActiveTab] = useState('expenses');
@@ -430,7 +449,7 @@ export function ProjectDashboardPage() {
           <h2>{project.name}</h2>
         </div>
         <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-          {!isSupervisor && (
+          {canEditProject && (
             <button
               type="button"
               className={styles.editProjectBtn}
@@ -481,7 +500,7 @@ export function ProjectDashboardPage() {
             </div>
 
             <div className={styles.actionButtonsWrap}>
-              {activeTab === 'expenses' && (
+              {activeTab === 'expenses' && canUseSupplies && (
                 <button 
                   type="button" 
                   className={styles.useSuppliesBtn}
@@ -502,22 +521,24 @@ export function ProjectDashboardPage() {
                 </button>
               )}
 
-              <button 
-                type="button" 
-                className={styles.addButton} 
-                onClick={() => {
-                  if (activeTab === 'sales' && harvestList.length === 0) {
-                    alertModal('You cannot record a sale because no harvest has been recorded yet.', 'error');
-                    return;
-                  }
-                  setShowRecordForm((current) => !current);
-                }}
-              >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
-                  {showRecordForm ? <FaMinus /> : <FaPlus />}
-                  {showRecordForm ? 'Close form' : `Record ${activeTab}`}
-                </span>
-              </button>
+              {canRecordInTab && (
+                <button 
+                  type="button" 
+                  className={styles.addButton} 
+                  onClick={() => {
+                    if (activeTab === 'sales' && harvestList.length === 0) {
+                      alertModal('You cannot record a sale because no harvest has been recorded yet.', 'error');
+                      return;
+                    }
+                    setShowRecordForm((current) => !current);
+                  }}
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                    {showRecordForm ? <FaMinus /> : <FaPlus />}
+                    {showRecordForm ? 'Close form' : `Record ${activeTab}`}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -716,24 +737,26 @@ export function ProjectDashboardPage() {
                   <li key={entry.id} className={styles.recordItem}>
                     <div className={styles.recordTopRow}>
                       <strong className={styles.recordTitle}>{renderRecordLabel(entry)}</strong>
-                      <div className={styles.recordActionGroup}>
-                        <button
-                          type="button"
-                          className={styles.recordActionBtn}
-                          onClick={() => handleOpenEditRecord(activeTab, entry)}
-                          title={`Edit ${activeTab.slice(0, -1)}`}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles.recordActionBtn} ${styles.recordDeleteBtn}`}
-                          onClick={() => handleDeleteRecord(activeTab, entry)}
-                          title={`Delete ${activeTab.slice(0, -1)}`}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
+                      {canModifyRecord && (
+                        <div className={styles.recordActionGroup}>
+                          <button
+                            type="button"
+                            className={styles.recordActionBtn}
+                            onClick={() => handleOpenEditRecord(activeTab, entry)}
+                            title={`Edit ${activeTab.slice(0, -1)}`}
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.recordActionBtn} ${styles.recordDeleteBtn}`}
+                            onClick={() => handleDeleteRecord(activeTab, entry)}
+                            title={`Delete ${activeTab.slice(0, -1)}`}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className={styles.recordBottomRow}>
                       <small className={styles.recordDate}>{renderRecordDate(entry)}</small>

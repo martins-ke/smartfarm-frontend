@@ -37,6 +37,7 @@ export default function UserManagementPage() {
   const currentUser = useAuth((state) => state.user);
   const isAdmin = currentUser?.role?.toUpperCase() === 'ADMIN';
   const isManager = currentUser?.role?.toUpperCase() === 'MANAGER';
+  const canCreateSupervisor = isAdmin || (isManager && currentUser?.privileges?.includes('CAN_CREATE_SUPERVISORS'));
 
   const [users, setUsers] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -182,16 +183,18 @@ export default function UserManagementPage() {
               <FaUserPlus /> Add Manager {managersReached && '(Max 2)'}
             </button>
           )}
-          <button 
-            className={styles.secondaryBtn}
-            onClick={() => {
-              setTargetRoleToCreate('SUPERVISOR');
-              setShowCreateModal(true);
-            }}
-            disabled={supervisorsReached}
-          >
-            <FaUserTie /> Add Supervisor {supervisorsReached && '(Max 10)'}
-          </button>
+          {canCreateSupervisor && (
+            <button 
+              className={styles.secondaryBtn}
+              onClick={() => {
+                setTargetRoleToCreate('SUPERVISOR');
+                setShowCreateModal(true);
+              }}
+              disabled={supervisorsReached}
+            >
+              <FaUserTie /> Add Supervisor {supervisorsReached && '(Max 10)'}
+            </button>
+          )}
         </div>
       </div>
 
