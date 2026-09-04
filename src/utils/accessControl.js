@@ -21,6 +21,8 @@ export const normalizeUser = (user = {}) => ({
   role: normalizeRole(user.role),
   employmentType: user.employmentType ? String(user.employmentType).toLowerCase() : 'temporary',
   permissions: Array.isArray(user.permissions) ? user.permissions : [],
+  privileges: Array.isArray(user.privileges) ? user.privileges : [],
+  assignedCategories: Array.isArray(user.assignedCategories) ? user.assignedCategories : [],
   managerId: user.managerId ?? null,
   isActive: user.isActive ?? true,
 });

@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CategoryForm.module.css';
 import { createCategory } from '../../APIs/category';
 import { notify } from '../../utils/notify';
+import useAuth from '../../useAuth';
 
 export default function CategoryForm(){
   const [data, setData] = useState({name:'', description:''});
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const currentUser = useAuth((state) => state.user);
+
+  const role = (currentUser?.role || '').toUpperCase();
+  const canCreate = role === 'ADMIN' || (role === 'MANAGER' && currentUser?.privileges?.includes('CAN_CREATE_CATEGORIES'));
+
+  useEffect(() => {
+    if (currentUser && !canCreate) {
+      notify('Access Denied: You do not have permission to create categories.', 'error');
+      navigate('/categories');
+    }
+  }, [currentUser, canCreate, navigate]);
 
   const onSubmit = async (e) => {
     e.preventDefault();

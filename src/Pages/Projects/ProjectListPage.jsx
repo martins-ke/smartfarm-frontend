@@ -86,7 +86,19 @@ export function ProjectListPage() {
   const { category_id, category } = useParams();
   const navigate = useNavigate();
   const currentUser = useAuth((state) => state.user);
-  const isSupervisor = (currentUser?.role || '').toUpperCase() === 'SUPERVISOR';
+  const role = (currentUser?.role || '').toUpperCase();
+  const isSupervisor = role === 'SUPERVISOR';
+  const isManager = role === 'MANAGER';
+  const isAdmin = role === 'ADMIN';
+
+  // Check if manager is assigned to this category
+  const isAssignedManager = isManager && (
+    currentUser?.assignedCategories?.some(
+      (c) => c.id === category_id || (c.name && c.name.toLowerCase() === category?.toLowerCase())
+    )
+  );
+
+  const canCreateProject = isAdmin || isAssignedManager;
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -142,7 +154,7 @@ export function ProjectListPage() {
           <p className={styles.eyebrow}>Category</p>
           <h2>{categoryLabel}</h2>
         </div>
-        {!isSupervisor && (
+        {canCreateProject && (
           <button
             className={styles.create_btn}
             onClick={() => navigate(`/categories/${category_id}/${category}/new`)}
@@ -189,7 +201,7 @@ export function ProjectListPage() {
       ) : projects.length === 0 ? (
         <div className={styles.emptyState}>
           <p>{isSupervisor ? 'No assigned projects found for you in this category.' : 'No projects found for this category.'}</p>
-          {!isSupervisor && (
+          {canCreateProject && (
             <button onClick={() => navigate(`/categories/${category_id}/${category}/new`)}>
               Create first project
             </button>

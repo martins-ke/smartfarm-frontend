@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './ProjectFormPage.module.css';
 import { createProject } from '../../APIs/project';
 import { notify } from '../../utils/notify';
 import { FaFolderPlus, FaSave, FaTimes } from 'react-icons/fa';
+import useAuth from '../../useAuth';
 
 const initialState = {
   name: '',
@@ -18,8 +19,29 @@ const initialState = {
 export function ProjectFormPage() {
   const { category_id, category } = useParams();
   const navigate = useNavigate();
+  const currentUser = useAuth((state) => state.user);
   const [form, setForm] = useState(initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const role = (currentUser?.role || '').toUpperCase();
+  const isSupervisor = role === 'SUPERVISOR';
+  const isManager = role === 'MANAGER';
+  const isAdmin = role === 'ADMIN';
+
+  const isAssignedManager = isManager && (
+    currentUser?.assignedCategories?.some(
+      (c) => c.id === category_id || (c.name && c.name.toLowerCase() === category?.toLowerCase())
+    )
+  );
+
+  const canCreateProject = isAdmin || isAssignedManager;
+
+  useEffect(() => {
+    if (currentUser && !canCreateProject) {
+      notify('Access Denied: You cannot create projects in this category.', 'error');
+      navigate(category_id && category ? `/categories/${category_id}/${category}` : '/categories');
+    }
+  }, [currentUser, canCreateProject, navigate, category_id, category]);
 
   const categoryLabel = useMemo(
     () => category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Project',

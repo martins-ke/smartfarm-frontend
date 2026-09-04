@@ -19,7 +19,12 @@ export function Category() {
 
   const navigate = useNavigate();
   const currentUser = useAuth((state) => state.user);
-  const isSupervisor = (currentUser?.role || '').toUpperCase() === 'SUPERVISOR';
+  const role = (currentUser?.role || '').toUpperCase();
+  const isAdmin = role === 'ADMIN';
+  const isManager = role === 'MANAGER';
+  const isSupervisor = role === 'SUPERVISOR';
+  const canCreateCategory = isAdmin || (isManager && currentUser?.privileges?.includes('CAN_CREATE_CATEGORIES'));
+  const canEditOrDelete = isAdmin;
 
   const loadCategories = async () => {
     try {
@@ -92,7 +97,7 @@ export function Category() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2 className={styles.title}>Categories</h2>
-        {!isSupervisor && (
+        {canCreateCategory && (
           <button className={styles.addBtn} onClick={() => navigate('/categories/new')}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
               <FaFolderPlus /> Add Category
@@ -120,7 +125,7 @@ export function Category() {
                   <div className={styles.cardIcon}>
                     {icons[c.name.toLowerCase()] ? icons[c.name.toLowerCase()] : '📁'}
                   </div>
-                  {!isSupervisor && (
+                  {canEditOrDelete && (
                     <div style={{ display: 'flex', gap: '0.4rem' }} onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
@@ -149,7 +154,29 @@ export function Category() {
             ))}
           </div>
         ) : (
-          <div className={styles.empty}>No categories available</div>
+          <div className={styles.empty}>
+            <p style={{ fontSize: '1.05rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem' }}>
+              {isSupervisor
+                ? 'No Supervised Sectors'
+                : isManager
+                ? 'No Farm Categories Assigned'
+                : 'No Categories Available'}
+            </p>
+            <p style={{ fontSize: '0.875rem', color: '#64748b', maxWidth: '420px', margin: '0 auto 1.25rem' }}>
+              {isSupervisor
+                ? 'You do not have any projects or sectors assigned to your supervision yet.'
+                : isManager
+                ? 'You do not have any farm sectors assigned to your portfolio yet. Please contact an Administrator to assign categories.'
+                : 'No farm categories or sectors have been registered in the system yet.'}
+            </p>
+            {canCreateCategory && (
+              <button className={styles.addBtn} onClick={() => navigate('/categories/new')}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <FaFolderPlus /> Add Category
+                </span>
+              </button>
+            )}
+          </div>
         )}
       </main>
 
