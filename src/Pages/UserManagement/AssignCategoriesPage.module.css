@@ -196,9 +196,8 @@
 }
 
 .categoryCardSelected {
-  background: linear-gradient(145deg, rgba(20, 42, 60, 0.85) 0%, rgba(12, 24, 38, 0.95) 100%);
+  background: linear-gradient(145deg, rgba(45, 176, 67, 0.15) 0%, rgba(99, 164, 237, 0.35) 100%);
   border-color: #2aa1ee;
-  box-shadow: 0 0 0 1px #2aa1ee, 0 12px 32px rgba(42, 161, 238, 0.25);
 }
 
 .cardTop {
@@ -275,7 +274,7 @@
 
 .statusIndicatorActive {
   color: var(--green-text, #15803d);
-  background: var(--green-bg, rgba(22, 163, 74, 0.12));
+  background: var(--green-bg, rgba(65, 231, 126, 0.12));
   padding: 0.2rem 0.5rem;
   border-radius: 0.4rem;
   border: 1px solid var(--green-border, rgba(22, 163, 74, 0.25));
@@ -287,7 +286,6 @@
   bottom: 1rem;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  background: linear-gradient(145deg, rgba(18, 26, 34, 0.92) 0%, rgba(10, 15, 20, 0.96) 100%);
   border: 1px solid var(--border, rgba(138, 180, 219, 0.25));
   border-radius: 1rem;
   padding: 1rem 1.5rem;

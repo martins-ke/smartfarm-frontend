@@ -34,11 +34,13 @@ export function ProjectFormPage() {
     )
   );
 
-  const canCreateProject = isAdmin || isAssignedManager;
+  const userPrivileges = currentUser?.privileges || [];
+  const canManageBudgets = isAdmin || (isManager && userPrivileges.includes('CAN_MANAGE_BUDGETS'));
+  const canCreateProject = isAdmin || (isAssignedManager && canManageBudgets);
 
   useEffect(() => {
     if (currentUser && !canCreateProject) {
-      notify('Access Denied: You cannot create projects in this category.', 'error');
+      notify('Access Denied: You do not have privilege to create projects or manage budgets.', 'error');
       navigate(category_id && category ? `/categories/${category_id}/${category}` : '/categories');
     }
   }, [currentUser, canCreateProject, navigate, category_id, category]);

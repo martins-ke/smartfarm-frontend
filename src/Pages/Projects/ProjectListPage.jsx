@@ -98,7 +98,9 @@ export function ProjectListPage() {
     )
   );
 
-  const canCreateProject = isAdmin || isAssignedManager;
+  const userPrivileges = currentUser?.privileges || [];
+  const canManageBudgets = isAdmin || (isManager && userPrivileges.includes('CAN_MANAGE_BUDGETS'));
+  const canCreateProject = isAdmin || (isAssignedManager && canManageBudgets);
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -216,7 +218,7 @@ export function ProjectListPage() {
                 <StatusDropdown
                   value={String(project.status || 'active').toLowerCase()}
                   projectId={project.id}
-                  disabled={updatingId === project.id}
+                  disabled={updatingId === project.id || (!isAdmin && !canManageBudgets && !isSupervisor)}
                   onChange={handleStatusChange}
                 />
               </div>

@@ -340,6 +340,10 @@ export function ProjectDashboardPage() {
   };
 
   const handleOpenEditProject = () => {
+    if (!canEditProject) {
+      notify('Access Denied: You do not have privilege to edit project details or budgets.', 'error');
+      return;
+    }
     setProjectEditForm({
       name: project.name || '',
       season: project.season || '',
@@ -354,6 +358,10 @@ export function ProjectDashboardPage() {
 
   const handleSaveEditProject = async (e) => {
     e.preventDefault();
+    if (!canEditProject) {
+      notify('Access Denied: You do not have privilege to edit project details or budgets.', 'error');
+      return;
+    }
     if (projectEditForm.startDate && projectEditForm.endDate && new Date(projectEditForm.startDate) > new Date(projectEditForm.endDate)) {
       notify('Start date cannot be greater than end date!', 'error');
       return;
