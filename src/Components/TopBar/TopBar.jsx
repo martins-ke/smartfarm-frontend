@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './TopBar.module.css'
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaBars, FaCog, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf, FaBoxes, FaUsersCog, FaUsers, FaUserEdit, FaChevronDown } from 'react-icons/fa';
+import { FaBars, FaCog, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf, FaBoxes, FaUsersCog, FaUsers, FaUserEdit, FaChevronDown, FaTruck, FaHandHoldingUsd } from 'react-icons/fa';
 
 import { notify } from '../../utils/notify';
 import useAuth from '../../useAuth';
@@ -91,10 +91,22 @@ export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, set
                            <span className={styles.menuItemIcon}><FaBoxes /></span>
                            <span>Inventory</span>
                        </li>
+                       {(isAdmin || isManager) && (
+                           <>
+                               <li className={isActive('/suppliers') ? styles.active : ''} onClick={() => { setHideMenu(true); navigate('/suppliers'); }}>
+                                   <span className={styles.menuItemIcon}><FaTruck /></span>
+                                   <span>Suppliers (AP)</span>
+                               </li>
+                               <li className={isActive('/customers') ? styles.active : ''} onClick={() => { setHideMenu(true); navigate('/customers'); }}>
+                                   <span className={styles.menuItemIcon}><FaHandHoldingUsd /></span>
+                                   <span>Customers (AR)</span>
+                               </li>
+                           </>
+                       )}
                        {isAdmin && (
                            <li className={isActive('/users') ? styles.active : ''} onClick={() => { setHideMenu(true); navigate('/users'); }}>
                                <span className={styles.menuItemIcon}><FaUsersCog /></span>
-                               <span>Staff & Managers</span>
+                               <span>Staff & Workforce</span>
                            </li>
                        )}
                        {isManager && (

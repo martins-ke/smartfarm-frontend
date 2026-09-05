@@ -20,6 +20,10 @@ import { ProtectedRoute } from './Components/ProtectedRoute'
 import { ROLE } from './utils/accessControl'
 
 import { InventoryPage } from './Pages/Inventory/InventoryPage'
+import SuppliersPage from './Pages/Suppliers/SuppliersPage'
+import SupplierDetailsPage from './Pages/Suppliers/SupplierDetailsPage'
+import CustomersPage from './Pages/Customers/CustomersPage'
+import CustomerDetailsPage from './Pages/Customers/CustomerDetailsPage'
 
 export function App() {
   return (
@@ -48,6 +52,10 @@ export function App() {
               <Route path='/users' element={<UserManagementPage />} />
               <Route path='/users/:userId' element={<UserDetailsPage />} />
               <Route path='/users/:userId/projects' element={<AssignProjectsPage />} />
+              <Route path='/suppliers' element={<SuppliersPage />} />
+              <Route path='/suppliers/:supplierId' element={<SupplierDetailsPage />} />
+              <Route path='/customers' element={<CustomersPage />} />
+              <Route path='/customers/:customerId' element={<CustomerDetailsPage />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={[ROLE.ADMIN]} />}>

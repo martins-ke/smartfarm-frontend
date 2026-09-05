@@ -10,6 +10,8 @@ import {
   adminResetPassword
 } from '../../APIs/user';
 import { getCategories } from '../../APIs/category';
+import { getEmployees, toggleEmployeeStatus } from '../../APIs/employee';
+import { EmployeeModal } from '../../Components/Labor/EmployeeModal';
 import useAuth from '../../useAuth';
 import { notify, confirmModal } from '../../utils/notify';
 import { 
@@ -28,7 +30,8 @@ import {
   FaFolderOpen,
   FaEye,
   FaKey,
-  FaBan
+  FaBan,
+  FaIdCard
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
 
@@ -40,12 +43,14 @@ export default function UserManagementPage() {
   const canCreateSupervisor = isAdmin || (isManager && currentUser?.privileges?.includes('CAN_CREATE_SUPERVISORS'));
 
   const [users, setUsers] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [categories, setCategories] = useState([]);
   const [quotaStats, setQuotaStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [targetRoleToCreate, setTargetRoleToCreate] = useState(isAdmin ? 'MANAGER' : 'SUPERVISOR');
   const [createForm, setCreateForm] = useState({ username: '', email: '', password: '', role: 'MANAGER' });
 
@@ -56,19 +61,32 @@ export default function UserManagementPage() {
     setLoading(true);
     try {
       // If admin, load all users. If manager, load supervisors under this manager.
-      const [usersRes, catsRes, quotaRes] = await Promise.all([
+      const [usersRes, catsRes, quotaRes, empList] = await Promise.all([
         fetchUsers(null, isManager ? currentUser?.id : null),
         getCategories().catch(() => ({ body: [] })),
-        checkBootstrapStatus().catch(() => ({ body: null }))
+        checkBootstrapStatus().catch(() => ({ body: null })),
+        getEmployees().catch(() => [])
       ]);
 
       setUsers(usersRes?.body || []);
       setCategories(catsRes?.body || []);
       setQuotaStats(quotaRes?.body || null);
+      setEmployees(Array.isArray(empList) ? empList : []);
     } catch (err) {
       notify('Failed to load user management data', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleEmployeeStatus = async (empId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      await toggleEmployeeStatus(empId, newStatus);
+      notify(`Worker status updated to ${newStatus}`, 'success');
+      loadData();
+    } catch (err) {
+      notify(err.message || 'Failed to update employee status', 'error');
     }
   };
 
@@ -390,6 +408,94 @@ export default function UserManagementPage() {
           </table>
         </div>
       </div>
+
+      {/* Verified Farm Workforce (Labor Compliance) */}
+      <div className={styles.tableCard} style={{ marginTop: '1.5rem' }}>
+        <div className={styles.tableHeader}>
+          <div>
+            <h2>
+              <FaUsers style={{ color: '#10b981' }} /> Verified Farm Workforce (Labor Compliance)
+            </h2>
+            <p>
+              Legal adult workforce registry verified by official Kenyan National ID numbers (Age 18+)
+            </p>
+          </div>
+          <button 
+            className={styles.primaryBtn}
+            onClick={() => setShowEmployeeModal(true)}
+          >
+            <FaUserPlus /> Register Verified Worker
+          </button>
+        </div>
+
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Worker Name</th>
+                <th>National ID (Adult Verified)</th>
+                <th>Phone / M-Pesa</th>
+                <th>Employment Type</th>
+                <th>Daily Wage Rate</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {employees.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted, #94a3b8)' }}>
+                    No farm employees registered yet. Click "Register Verified Worker" to add.
+                  </td>
+                </tr>
+              ) : (
+                employees.map((emp) => (
+                  <tr key={emp.id}>
+                    <td>
+                      <strong style={{ color: '#fff' }}>{emp.fullName}</strong>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)' }}>ID: {emp.id}</div>
+                    </td>
+                    <td>
+                      <span style={{ fontFamily: 'monospace', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', padding: '0.2rem 0.5rem', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                        <FaIdCard style={{ marginRight: '0.3rem' }} /> {emp.idNumber}
+                      </span>
+                    </td>
+                    <td>{emp.phoneNumber || '—'}</td>
+                    <td>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: emp.employmentType === 'PERMANENT' ? '#38bdf8' : '#fbbf24' }}>
+                        {emp.employmentType}
+                      </span>
+                    </td>
+                    <td>KES {Number(emp.dailyRate || 0).toLocaleString()} / day</td>
+                    <td>
+                      <span className={emp.status === 'ACTIVE' ? styles.statusActive : styles.statusDisabled}>
+                        {emp.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className={styles.viewBtn}
+                        style={{ padding: '0.35rem 0.7rem', fontSize: '0.8rem' }}
+                        onClick={() => handleToggleEmployeeStatus(emp.id, emp.status)}
+                      >
+                        {emp.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Employee Modal */}
+      <EmployeeModal 
+        isOpen={showEmployeeModal}
+        onClose={() => setShowEmployeeModal(false)}
+        onSuccess={loadData}
+        currentUserId={currentUser?.id}
+      />
 
       {/* Create Staff Modal */}
       {showCreateModal && (

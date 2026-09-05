@@ -235,6 +235,32 @@
   box-shadow: var(--card-shadow);
 }
 
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.1rem 1.3rem;
+  border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.15));
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tableHeader h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tableHeader p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.82rem;
+  color: var(--muted, #8bb4d9);
+}
+
 .tableWrapper {
   width: 100%;
   overflow-x: auto;
