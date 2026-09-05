@@ -41,7 +41,7 @@ export function CustomersPage() {
       const cList = Array.isArray(list) ? list : [];
       setCustomers(cList);
     } catch (err) {
-      notify('Failed to load customers data', 'error');
+      setCustomers([]);
     } finally {
       setLoading(false);
     }

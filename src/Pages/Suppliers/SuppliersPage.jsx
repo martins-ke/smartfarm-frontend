@@ -39,10 +39,10 @@ export function SuppliersPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const supList = await getSuppliers().catch(() => []);
+      const supList = await getSuppliers();
       setSuppliers(Array.isArray(supList) ? supList : []);
     } catch (err) {
-      notify('Failed to load supplier data', 'error');
+      setSuppliers([]);
     } finally {
       setLoading(false);
     }

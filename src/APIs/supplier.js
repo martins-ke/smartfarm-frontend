@@ -3,9 +3,13 @@ import { apiClient } from './request';
 const unwrap = (res) => (res && res.body !== undefined ? res.body : (res && res.data !== undefined ? res.data : res));
 
 export const getSuppliers = async () => {
-  const res = await apiClient('/suppliers');
-  const data = unwrap(res);
-  return Array.isArray(data) ? data : [];
+  try {
+    const res = await apiClient('/suppliers');
+    const data = unwrap(res);
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    return [];
+  }
 };
 
 export const getSupplierById = async (supplierId) => {
