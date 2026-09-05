@@ -148,7 +148,7 @@ export function CustomerDetailsPage() {
       {creditLimit > 0 && (
         <div className={styles.creditHealthCard}>
           <div className={styles.creditHealthHeader}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700, color: '#f8fafc' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 700 }}>
               <FaChartLine /> Credit Ceiling Utilization
             </span>
             <span style={{ fontWeight: 600, color: debt >= creditLimit ? '#ef4444' : debt > creditLimit * 0.75 ? '#f59e0b' : '#34d399' }}>
