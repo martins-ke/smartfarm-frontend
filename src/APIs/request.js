@@ -4,7 +4,7 @@ export const apiClient = async (endpoint, options = {}) => {
     let authHeaders = {};
     if (typeof window !== 'undefined') {
         try {
-            const raw = window.localStorage.getItem('smartfarm-auth-user');
+            const raw = window.sessionStorage.getItem('smartfarm-auth-user') || window.localStorage.getItem('smartfarm-auth-user');
             if (raw) {
                 const user = JSON.parse(raw);
                 if (user?.id) authHeaders['X-User-Id'] = user.id;

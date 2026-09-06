@@ -7,7 +7,7 @@ const readStoredUser = () => {
   if (typeof window === 'undefined') return null;
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.sessionStorage.getItem(STORAGE_KEY) || window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     return normalizeUser(JSON.parse(raw));
   } catch {
@@ -19,11 +19,15 @@ const persistUser = (user) => {
   if (typeof window === 'undefined') return;
 
   if (!user) {
+    window.sessionStorage.removeItem(STORAGE_KEY);
     window.localStorage.removeItem(STORAGE_KEY);
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeUser(user)));
+  const normalized = JSON.stringify(normalizeUser(user));
+  window.sessionStorage.setItem(STORAGE_KEY, normalized);
+  // Clear from localStorage so tabs remain strictly isolated
+  window.localStorage.removeItem(STORAGE_KEY);
 };
 
 export const useAuth = create((set) => ({
