@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CustomersPage.module.css';
 import { getCustomers, createCustomer } from '../../APIs/customer';
@@ -11,15 +11,33 @@ import {
   FaPhone, 
   FaIdCard, 
   FaMapMarkerAlt, 
-  FaBan
+  FaBan,
+  FaSearch,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaArrowRight,
+  FaCoins,
+  FaFilter
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
+
+const getInitials = (name) => {
+  if (!name) return 'CU';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 export function CustomersPage() {
   const navigate = useNavigate();
   const currentUser = useAuth((state) => state.user);
+  const searchInputRef = useRef(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('ALL'); // 'ALL' | 'DEBT' | 'NO_DEBT' | category name
 
   // Modals & Views
   const [showAddCustomer, setShowAddCustomer] = useState(false);
@@ -111,12 +129,43 @@ export function CustomersPage() {
     }
   };
 
+  // Metrics
   const totalDebtAll = customers.reduce((sum, c) => sum + Number(c.outstandingDebt || 0), 0);
   const totalPurchasesAll = customers.reduce((sum, c) => sum + Number(c.totalPurchases || 0), 0);
   const totalPaidAll = customers.reduce((sum, c) => sum + Number(c.totalPaid || 0), 0);
+  const debtCustomersCount = customers.filter((c) => Number(c.outstandingDebt || 0) > 0).length;
+  const noDebtCustomersCount = customers.filter((c) => Number(c.outstandingDebt || 0) <= 0).length;
+
+  // Filtered & Searched Customers
+  const filteredCustomers = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return customers.filter((c) => {
+      // Search matching
+      const matchesSearch = !q || (
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.contact && c.contact.toLowerCase().includes(q)) ||
+        (c.id_number && c.id_number.toLowerCase().includes(q)) ||
+        (c.address && c.address.toLowerCase().includes(q)) ||
+        (c.category && c.category.toLowerCase().includes(q)) ||
+        (c.id && c.id.toLowerCase().includes(q))
+      );
+
+      // Filter tab matching
+      let matchesFilter = true;
+      if (selectedFilter === 'DEBT') {
+        matchesFilter = Number(c.outstandingDebt || 0) > 0;
+      } else if (selectedFilter === 'NO_DEBT' || selectedFilter === 'CLEARED') {
+        matchesFilter = Number(c.outstandingDebt || 0) <= 0;
+      } else if (selectedFilter !== 'ALL') {
+        matchesFilter = (c.category || 'General Produce Buyer').toLowerCase() === selectedFilter.toLowerCase();
+      }
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [customers, searchQuery, selectedFilter]);
 
   if (loading) {
-    return <Spinner fullPage label="Loading customers & Accounts Receivable ledger..." />;
+    return <Spinner fullPage label="Loading customer ledger..." />;
   }
 
   return (
@@ -125,7 +174,7 @@ export function CustomersPage() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}><FaUsers className={styles.titleIcon} /> Customer Accounts Receivable (AR)</h1>
-          <p className={styles.subtitle}>Track wholesale & retail buyers, sales credit ledgers, debt recovery, and credit ceilings</p>
+          <p className={styles.subtitle}>Track wholesale & retail buyers, credit ledgers, and payments</p>
         </div>
         <button className={styles.addBtn} onClick={() => { setIsCustomCategory(false); setShowAddCustomer(true); }}>
           <FaUserPlus /> Register Customer
@@ -135,14 +184,14 @@ export function CustomersPage() {
       {/* Metrics */}
       <div className={styles.metricsGrid}>
         <div className={styles.metricCard}>
-          <span className={styles.metricLabel}>Total Outstanding Receivables (AR)</span>
+          <span className={styles.metricLabel}>Total Outstanding AR</span>
           <span className={`${styles.metricVal} ${styles.warningText}`}>KES {totalDebtAll.toLocaleString()}</span>
-          <span className={styles.metricSub}>Debt owed to farm by customers</span>
+          <span className={styles.metricSub}>{debtCustomersCount} buyer{debtCustomersCount === 1 ? '' : 's'} with balance</span>
         </div>
         <div className={styles.metricCard}>
-          <span className={styles.metricLabel}>Total Produce Sales Invoiced</span>
+          <span className={styles.metricLabel}>Total Produce Invoiced</span>
           <span className={styles.metricVal}>KES {totalPurchasesAll.toLocaleString()}</span>
-          <span className={styles.metricSub}>Cumulative customer purchases</span>
+          <span className={styles.metricSub}>Cumulative sales</span>
         </div>
         <div className={styles.metricCard}>
           <span className={styles.metricLabel}>Total Remitted Payments</span>
@@ -152,14 +201,78 @@ export function CustomersPage() {
         <div className={styles.metricCard}>
           <span className={styles.metricLabel}>Active Customers</span>
           <span className={styles.metricVal}>{customers.length}</span>
-          <span className={styles.metricSub}>Registered produce buyers</span>
+          <span className={styles.metricSub}>Registered buyers</span>
         </div>
       </div>
 
-      {/* Mobile Responsive 4-Column Table */}
+      {/* Toolbar: Search & Filter Tabs */}
+      <section className={styles.toolbar}>
+        <div className={styles.searchWrap}>
+          <FaSearch className={styles.searchIcon} />
+          <input
+            ref={searchInputRef}
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search buyers by name, phone, ID, location..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setSearchQuery('');
+                searchInputRef.current?.blur();
+              }
+            }}
+          />
+        </div>
+
+        <div className={styles.filterTabs}>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${selectedFilter === 'ALL' ? styles.tabBtnActive : ''}`}
+            onClick={() => setSelectedFilter('ALL')}
+          >
+            All <span className={styles.tabCount}>{customers.length}</span>
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${styles.tabDebt} ${selectedFilter === 'DEBT' ? styles.tabBtnActive : ''}`}
+            onClick={() => setSelectedFilter('DEBT')}
+          >
+            With Debt <span className={styles.tabCount}>{debtCustomersCount}</span>
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${selectedFilter === 'NO_DEBT' ? styles.tabBtnActive : ''}`}
+            onClick={() => setSelectedFilter('NO_DEBT')}
+          >
+            No Debt <span className={styles.tabCount}>{noDebtCustomersCount}</span>
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${selectedFilter === 'Wholesaler / Bulk Buyer' ? styles.tabBtnActive : ''}`}
+            onClick={() => setSelectedFilter('Wholesaler / Bulk Buyer')}
+          >
+            Wholesalers
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabBtn} ${selectedFilter === 'Retailer / Local Shop' ? styles.tabBtnActive : ''}`}
+            onClick={() => setSelectedFilter('Retailer / Local Shop')}
+          >
+            Retailers
+          </button>
+        </div>
+      </section>
+
+      {/* Compact SaaS Customer Table */}
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>
-          <h2>Customer Directory & Credit Ledger</h2>
+          <div className={styles.tableHeaderLeft}>
+            <h2>Customer Directory & Credit Ledger</h2>
+            <span className={styles.resultBadge}>
+              {filteredCustomers.length} {filteredCustomers.length === 1 ? 'customer' : 'customers'}
+            </span>
+          </div>
         </div>
 
         {customers.length === 0 ? (
@@ -170,71 +283,142 @@ export function CustomersPage() {
               <FaUserPlus /> Register First Customer
             </button>
           </div>
+        ) : filteredCustomers.length === 0 ? (
+          <div className={styles.emptyState}>
+            <FaSearch className={styles.emptyIcon} />
+            <p>No customers matched your search & filter criteria.</p>
+            <button 
+              className={styles.smallOutlineBtn} 
+              onClick={() => { setSearchQuery(''); setSelectedFilter('ALL'); }}
+            >
+              Reset Filters
+            </button>
+          </div>
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th style={{ minWidth: '180px' }}>Customer / Buyer</th>
-                  <th style={{ minWidth: '160px' }}>Category</th>
-                  <th style={{ minWidth: '180px' }}>Contact</th>
-                  <th style={{ minWidth: '130px', textAlign: 'center' }}>Actions</th>
+                  <th>Customer / Buyer</th>
+                  <th>Category</th>
+                  <th>Contact & Location</th>
+                  <th>Credit Ceiling</th>
+                  <th style={{ textAlign: 'right' }}>Outstanding AR Debt</th>
+                  <th style={{ textAlign: 'center', width: '85px' }}>Ledger</th>
                 </tr>
               </thead>
               <tbody>
-                {customers.map((cust) => {
+                {filteredCustomers.map((cust) => {
                   const debt = Number(cust.outstandingDebt || 0);
+                  const creditLimit = Number(cust.creditLimit || cust.credit_limit || 0);
                   const isBlocked = cust.creditStatus === 'BLOCKED';
+                  const initials = getInitials(cust.name);
+
                   return (
-                    <tr key={cust.id} className={styles.tableRowClickable} onClick={() => handleOpenDetails(cust)}>
+                    <tr 
+                      key={cust.id} 
+                      className={styles.tableRowClickable} 
+                      onClick={() => handleOpenDetails(cust)}
+                      title={`View ledger for ${cust.name}`}
+                    >
+                      {/* Customer Info */}
                       <td>
-                        <div className={styles.custName}>{cust.name}</div>
-                        {cust.id_number ? (
-                          <div className={styles.custSubText}><FaIdCard className={styles.iconMini} /> ID: {cust.id_number}</div>
-                        ) : cust.address ? (
-                          <div className={styles.custSubText}><FaMapMarkerAlt className={styles.iconMini} /> {cust.address}</div>
-                        ) : (
-                          <div className={styles.custSubText}>Buyer ID: #{cust.id.slice(0, 6)}</div>
-                        )}
-                        <div className={styles.badgeRowMini}>
-                          {debt > 0 ? (
-                            <span className={styles.mobileDebtSummary}>KES {debt.toLocaleString()} Debt</span>
+                        <div className={styles.custCell}>
+                          <div className={styles.custAvatar}>
+                            {initials}
+                          </div>
+                          <div className={styles.custDetails}>
+                            <div className={styles.custName}>{cust.name}</div>
+                            <div className={styles.custSubText}>
+                              {cust.id_number ? (
+                                <span><FaIdCard className={styles.iconMini} /> ID: {cust.id_number}</span>
+                              ) : (
+                                <span>Buyer #{cust.id ? cust.id.slice(0, 6).toUpperCase() : '---'}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Category */}
+                      <td>
+                        <span className={styles.badgeCategory}>
+                          {cust.category || 'General Buyer'}
+                        </span>
+                      </td>
+
+                      {/* Contact & Location */}
+                      <td>
+                        <div className={styles.contactCell}>
+                          {cust.contact ? (
+                            <a 
+                              href={`tel:${cust.contact}`} 
+                              onClick={(e) => e.stopPropagation()} 
+                              className={styles.contactPhone}
+                              title="Call customer"
+                            >
+                              <FaPhone className={styles.iconMini} /> {cust.contact}
+                            </a>
                           ) : (
-                            <span className={styles.mobileClearedSummary}>Cleared ✅</span>
+                            <span className={styles.noContactText}>No phone</span>
                           )}
-                          {isBlocked && (
-                            <span className={styles.mobileBlockedBadge}><FaBan size={9} /> BLOCKED</span>
+                          {cust.address && (
+                            <div className={styles.contactAddress} title={cust.address}>
+                              <FaMapMarkerAlt className={styles.iconMini} /> {cust.address}
+                            </div>
                           )}
                         </div>
                       </td>
+
+                      {/* Credit Ceiling & Status */}
                       <td>
-                        <span className={styles.badgeCategory}>{cust.category || 'General Buyer'}</span>
+                        <div className={styles.creditCell}>
+                          <span className={styles.creditLimitText}>
+                            {creditLimit > 0 ? `KES ${creditLimit.toLocaleString()}` : 'Cash Only'}
+                          </span>
+                          {isBlocked ? (
+                            <span className={styles.statusBlockedBadge}>
+                              <FaBan className={styles.iconMini} /> Blocked
+                            </span>
+                          ) : debt > 0 ? (
+                            <span className={styles.statusDebtBadge}>
+                              <FaExclamationTriangle className={styles.iconMini} /> Active Debt
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
-                      <td>
-                        {cust.contact ? (
-                          <div className={styles.contactLine}>
-                            <FaPhone className={styles.iconMini} /> 
-                            <a href={`tel:${cust.contact}`} onClick={(e) => e.stopPropagation()} className={styles.contactLink}>
-                              {cust.contact}
-                            </a>
-                          </div>
-                        ) : null}
-                        {cust.address && (
-                          <div className={styles.custAddress}>
-                            <FaMapMarkerAlt className={styles.iconMini} /> {cust.address}
-                          </div>
-                        )}
-                        {!cust.contact && !cust.address && (
-                          <span className={styles.noContactText}>No contact saved</span>
-                        )}
+
+                      {/* Outstanding Debt */}
+                      <td style={{ textAlign: 'right' }}>
+                        <div className={styles.debtCell}>
+                          {debt > 0 ? (
+                            <>
+                              <span className={styles.debtAmountHigh}>
+                                KES {debt.toLocaleString()}
+                              </span>
+                              <span className={styles.debtSub}>
+                                Invoiced: KES {Number(cust.totalPurchases || 0).toLocaleString()}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className={styles.debtAmountZero}>
+                                KES 0.00
+                              </span>
+                              <span className={styles.debtSubZero}>No Balance</span>
+                            </>
+                          )}
+                        </div>
                       </td>
+
+                      {/* Actions */}
                       <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
                         <button 
-                          className={styles.actionBtnDetails}
+                          className={styles.actionBtnDetails} 
                           onClick={() => handleOpenDetails(cust)}
-                          title="View full profile, credit ledger, and actions"
+                          title="Open full ledger"
                         >
-                          Actions
+                          View <FaArrowRight className={styles.actionArrow} />
                         </button>
                       </td>
                     </tr>
@@ -246,12 +430,12 @@ export function CustomersPage() {
         )}
       </div>
 
-      {/* Modal: Register Customer */}
+      {/* Modal: Add Customer */}
       {showAddCustomer && (
         <div className={styles.modalOverlay} onClick={() => setShowAddCustomer(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3><FaUserPlus /> Register Produce Buyer / Customer</h3>
+              <h3><FaUserPlus /> Register New Customer</h3>
               <button className={styles.closeBtn} onClick={() => setShowAddCustomer(false)}><FaTimes /></button>
             </div>
             <form onSubmit={handleCreateCustomer} className={styles.form}>
@@ -260,7 +444,7 @@ export function CustomersPage() {
                 <input 
                   type="text" 
                   required 
-                  placeholder="e.g. Mama Mboga Wholesale / Peter Kinyua" 
+                  placeholder="e.g. Mama Mboga Supermarket / John Doe" 
                   value={customerForm.name} 
                   onChange={(e) => setCustomerForm({ ...customerForm, name: e.target.value })}
                 />
@@ -268,78 +452,72 @@ export function CustomersPage() {
 
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>Buyer Category</label>
-                  {!isCustomCategory ? (
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      <select 
-                        style={{ flex: 1 }}
-                        value={customerForm.category} 
-                        onChange={(e) => {
-                          if (e.target.value === '__CUSTOM__') {
-                            setIsCustomCategory(true);
-                            setCustomCategoryInput('');
-                          } else {
-                            setCustomerForm({ ...customerForm, category: e.target.value });
-                          }
-                        }}
-                      >
-                        {allCategories.map((cat) => (
-                          <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                        <option value="__CUSTOM__">➕ Enter New / Custom Category...</option>
-                      </select>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      <input 
-                        type="text" 
-                        required
-                        placeholder="Type category (e.g. Cooperative Exporter)" 
-                        value={customCategoryInput} 
-                        onChange={(e) => setCustomCategoryInput(e.target.value)} 
-                        autoFocus
-                      />
-                      <button 
-                        type="button" 
-                        className={styles.smallOutlineBtn}
-                        onClick={() => setIsCustomCategory(false)}
-                        title="Back to predefined categories"
-                      >
-                        Presets
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className={styles.formGroup}>
                   <label>Phone / M-Pesa Contact *</label>
                   <input 
                     type="text" 
                     required 
-                    placeholder="e.g. 0722123456" 
+                    placeholder="e.g. 0712345678" 
                     value={customerForm.contact} 
                     onChange={(e) => setCustomerForm({ ...customerForm, contact: e.target.value })}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>National ID / Business Reg No.</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 12345678" 
+                    value={customerForm.id_number} 
+                    onChange={(e) => setCustomerForm({ ...customerForm, id_number: e.target.value })}
                   />
                 </div>
               </div>
 
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>National ID / Business Reg</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. 24891023" 
-                    value={customerForm.id_number} 
-                    onChange={(e) => setCustomerForm({ ...customerForm, id_number: e.target.value })}
-                  />
+                  <label>Customer Category</label>
+                  {!isCustomCategory ? (
+                    <select 
+                      value={customerForm.category} 
+                      onChange={(e) => {
+                        if (e.target.value === '__CUSTOM__') {
+                          setIsCustomCategory(true);
+                          setCustomCategoryInput('');
+                        } else {
+                          setCustomerForm({ ...customerForm, category: e.target.value });
+                        }
+                      }}
+                    >
+                      {allCategories.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                      <option value="__CUSTOM__">+ Add Custom Category...</option>
+                    </select>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <input 
+                        type="text" 
+                        placeholder="Enter custom category" 
+                        value={customCategoryInput} 
+                        onChange={(e) => setCustomCategoryInput(e.target.value)}
+                        autoFocus
+                      />
+                      <button 
+                        type="button" 
+                        className={styles.smallOutlineBtn} 
+                        onClick={() => setIsCustomCategory(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Credit Limit (KES)</label>
+                  <label>Credit Ceiling Limit (KES)</label>
                   <input 
                     type="number" 
                     min="0" 
-                    placeholder="e.g. 50000 (0 for cash-only)" 
+                    placeholder="0 for Cash-Only" 
                     value={customerForm.credit_limit} 
                     onChange={(e) => setCustomerForm({ ...customerForm, credit_limit: e.target.value })}
                   />
@@ -347,10 +525,10 @@ export function CustomersPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Location / Delivery Address</label>
+                <label>Physical Address / Delivery Location</label>
                 <input 
                   type="text" 
-                  placeholder="e.g. Wakulima Market Stall 45" 
+                  placeholder="e.g. Stall 44, Wakulima Market, Nairobi" 
                   value={customerForm.address} 
                   onChange={(e) => setCustomerForm({ ...customerForm, address: e.target.value })}
                 />
@@ -358,7 +536,7 @@ export function CustomersPage() {
 
               <div className={styles.modalActions}>
                 <button type="button" className={styles.cancelBtn} onClick={() => setShowAddCustomer(false)}>Cancel</button>
-                <button type="submit" className={styles.submitBtn}>Register Customer</button>
+                <button type="submit" className={styles.submitBtn}>Save Customer</button>
               </div>
             </form>
           </div>
