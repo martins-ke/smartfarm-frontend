@@ -433,6 +433,7 @@ export function UserDetailsPage() {
               {[
                 { key: 'CAN_CREATE_CATEGORIES', label: 'Create Farm Categories / Sectors', desc: 'Allow manager to create and configure new categories.' },
                 { key: 'CAN_CREATE_SUPERVISORS', label: 'Create & Provision Supervisors', desc: 'Allow manager to hire and register dedicated field supervisors.' },
+                { key: 'CAN_ASSIGN_PRIVILEGES', label: 'Assign & Toggle Supervisor Privileges', desc: 'Allow manager to grant, customize, and toggle operational field privileges for their supervisors.' },
                 { key: 'CAN_VIEW_FINANCIALS', label: 'View Sector Financials & Cash Flow', desc: 'Allow manager to view revenue and expense analytics for their sectors.' },
                 { key: 'CAN_MANAGE_BUDGETS', label: 'Manage & Edit Project Budgets', desc: 'Allow manager to modify budget allocations on projects.' },
                 { key: 'CAN_DELETE_INVENTORY', label: 'Delete Inventory Items', desc: 'Allow manager to permanently remove items from the inventory catalog.' },

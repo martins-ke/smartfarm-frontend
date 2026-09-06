@@ -31,7 +31,8 @@ import {
   FaEye,
   FaKey,
   FaBan,
-  FaIdCard
+  FaIdCard,
+  FaShieldAlt
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
 
@@ -392,13 +393,24 @@ export default function UserManagementPage() {
                         </td>
                       )}
                       <td>
-                        <button 
-                          className={styles.viewBtn}
-                          onClick={() => navigate(`/users/${u.id}`)}
-                          title="View user details & manage"
-                        >
-                          <FaEye /> View
-                        </button>
+                        <div className={styles.actionBtnGroup}>
+                          <button 
+                            className={styles.viewBtn}
+                            onClick={() => navigate(`/users/${u.id}`)}
+                            title="View user details & profile"
+                          >
+                            <FaEye /> Profile
+                          </button>
+                          {isUserSupervisor && (isAdmin || isManager) && (
+                            <button 
+                              className={styles.assignBtn}
+                              onClick={() => navigate(`/users/${u.id}`)}
+                              title="Assign & toggle supervisor privileges"
+                            >
+                              <FaShieldAlt /> Privileges
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

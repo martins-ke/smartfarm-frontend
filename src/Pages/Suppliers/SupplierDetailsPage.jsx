@@ -74,21 +74,39 @@ export function SupplierDetailsPage() {
 
   const handleRecordPurchase = async (e) => {
     e.preventDefault();
-    if (!purchaseForm.invoiceAmount || Number(purchaseForm.invoiceAmount) <= 0) {
-      notify('Please enter a valid invoice amount', 'error');
+    const invAmt = Number(purchaseForm.invoiceAmount);
+    if (!purchaseForm.invoiceAmount || isNaN(invAmt) || invAmt <= 0) {
+      notify('Total invoice amount must be provided and greater than zero', 'error');
       return;
     }
+
+    const paidAmt = Number(purchaseForm.amountPaid !== '' ? purchaseForm.amountPaid : 0);
+    if (isNaN(paidAmt) || paidAmt < 0) {
+      notify('Amount paid now cannot be negative', 'error');
+      return;
+    }
+
+    if (paidAmt > invAmt) {
+      notify('Amount paid now cannot exceed the total invoice amount', 'error');
+      return;
+    }
+
+    if (!purchaseForm.notes || !purchaseForm.notes.trim()) {
+      notify('Delivery notes / items description must be provided for clarity', 'error');
+      return;
+    }
+
     try {
       await recordSupplierPurchase({
         supplierId: supplier.id,
-        invoiceNumber: purchaseForm.invoiceNumber,
-        invoiceAmount: Number(purchaseForm.invoiceAmount),
-        amountPaid: Number(purchaseForm.amountPaid || 0),
+        invoiceNumber: purchaseForm.invoiceNumber?.trim() || null,
+        invoiceAmount: invAmt,
+        amountPaid: paidAmt,
         inventoryItemId: purchaseForm.inventoryItemId || null,
         restockQuantity: purchaseForm.restockQuantity ? Number(purchaseForm.restockQuantity) : null,
-        notes: purchaseForm.notes
+        notes: purchaseForm.notes.trim()
       });
-      notify('Purchase invoice recorded & Accounts Payable updated!', 'success');
+      notify('Purchase invoice recorded & Accounts Payable updated ✅', 'success');
       setShowPurchaseModal(false);
       setPurchaseForm({
         invoiceNumber: '',
@@ -347,10 +365,10 @@ export function SupplierDetailsPage() {
             <form onSubmit={handleRecordPurchase} className={styles.form}>
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>Invoice / Receipt Number</label>
+                  <label>Invoice / Receipt Number <span style={{ color: 'var(--muted)', fontWeight: 'normal' }}>(Optional)</span></label>
                   <input 
                     type="text" 
-                    placeholder="e.g. INV-8842" 
+                    placeholder="Optional (e.g. INV-8842)" 
                     value={purchaseForm.invoiceNumber} 
                     onChange={(e) => setPurchaseForm({ ...purchaseForm, invoiceNumber: e.target.value })}
                   />
@@ -369,11 +387,21 @@ export function SupplierDetailsPage() {
               </div>
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>Amount Paid Now (KES)</label>
+                  <div className={styles.labelRowWithAction}>
+                    <label>Amount Paid Now (KES) *</label>
+                    <button 
+                      type="button" 
+                      className={styles.fullDebtBtn}
+                      onClick={() => setPurchaseForm(prev => ({ ...prev, amountPaid: '0' }))}
+                      title="Set Amount Paid to 0 (Take on Full Debt / Credit)"
+                    >
+                      💳 Full Debt
+                    </button>
+                  </div>
                   <input 
                     type="number" 
                     min="0" 
-                    placeholder="0 for full credit" 
+                    placeholder="0 for full debt" 
                     value={purchaseForm.amountPaid} 
                     onChange={(e) => setPurchaseForm({ ...purchaseForm, amountPaid: e.target.value })}
                   />
@@ -423,10 +451,11 @@ export function SupplierDetailsPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Notes / Delivery Remarks</label>
+                <label>Delivery Notes / Items Description *</label>
                 <textarea 
                   rows={2} 
-                  placeholder="e.g. Delivered 20 bags of DAP fertilizer to store 1" 
+                  required
+                  placeholder="e.g. Delivered 20 bags of DAP fertilizer and 5 rolls of drip tape to Main Store" 
                   value={purchaseForm.notes} 
                   onChange={(e) => setPurchaseForm({ ...purchaseForm, notes: e.target.value })}
                 />

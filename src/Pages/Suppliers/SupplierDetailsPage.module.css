@@ -535,6 +535,39 @@
   color: var(--text);
 }
 
+.labelRowWithAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.labelRowWithAction label {
+  margin-bottom: 0;
+}
+
+.fullDebtBtn {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  line-height: 1;
+}
+
+.fullDebtBtn:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: #ef4444;
+  transform: translateY(-1px);
+}
+
 .formGroup input,
 .formGroup select,
 .formGroup textarea {
