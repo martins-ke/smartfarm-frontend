@@ -114,6 +114,7 @@
   font-weight: 700;
   color: var(--text, #f8fafc);
   letter-spacing: -0.02em;
+  word-break: break-word;
 }
 
 .metricCard small {

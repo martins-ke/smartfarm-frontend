@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Mainlayout } from './Layout/Mainlayout'
 import { DashboardPage } from './Pages/Dashboard/DashboardPage'
 import { Category } from './Pages/Category/Category'
@@ -30,7 +30,9 @@ export function App() {
     <BrowserRouter>
       <Routes>
         <Route path='/login' element={<LoginPage />} />
+        <Route path='/users/login' element={<Navigate to="/login" replace />} />
         <Route path='/signup' element={<SignupPage />} />
+        <Route path='/users/signup' element={<Navigate to="/signup" replace />} />
         <Route path='/forgot-password' element={<ForgotPasswordPage />} />
         <Route path='/reset-password' element={<ResetPasswordPage />} />
         <Route path='/forbidden' element={<ForbiddenPage />} />

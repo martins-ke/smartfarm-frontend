@@ -6,32 +6,23 @@ import {
   createStaff, 
   updateUserStatus, 
   deleteUser,
-  checkBootstrapStatus,
-  adminResetPassword
+  getSupervisorProjects
 } from '../../APIs/user';
-import { getCategories } from '../../APIs/category';
 import { getEmployees, toggleEmployeeStatus } from '../../APIs/employee';
 import { EmployeeModal } from '../../Components/Labor/EmployeeModal';
 import useAuth from '../../useAuth';
 import { notify, confirmModal } from '../../utils/notify';
 import { 
-  FaUserShield, 
   FaUserPlus, 
-  FaUserCheck, 
-  FaUserTimes, 
-  FaTrash, 
-  FaTags, 
-  FaCrown, 
   FaUserTie, 
   FaUsers, 
   FaTimes, 
   FaExclamationTriangle,
   FaCheck,
-  FaFolderOpen,
   FaEye,
-  FaKey,
-  FaBan,
-  FaIdCard
+  FaIdCard,
+  FaSearch,
+  FaFilter
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
 
@@ -44,9 +35,13 @@ export default function UserManagementPage() {
 
   const [users, setUsers] = useState([]);
   const [employees, setEmployees] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [quotaStats, setQuotaStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Search & Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -54,23 +49,34 @@ export default function UserManagementPage() {
   const [targetRoleToCreate, setTargetRoleToCreate] = useState(isAdmin ? 'MANAGER' : 'SUPERVISOR');
   const [createForm, setCreateForm] = useState({ username: '', email: '', password: '', role: 'MANAGER' });
 
-  const [resetModalUser, setResetModalUser] = useState(null);
-  const [resetPasswordValue, setResetPasswordValue] = useState('');
-
   const loadData = async () => {
     setLoading(true);
     try {
       // If admin, load all users. If manager, load supervisors under this manager.
-      const [usersRes, catsRes, quotaRes, empList] = await Promise.all([
+      const [usersRes, empList] = await Promise.all([
         fetchUsers(null, isManager ? currentUser?.id : null),
-        getCategories().catch(() => ({ body: [] })),
-        checkBootstrapStatus().catch(() => ({ body: null })),
         getEmployees().catch(() => [])
       ]);
 
-      setUsers(usersRes?.body || []);
-      setCategories(catsRes?.body || []);
-      setQuotaStats(quotaRes?.body || null);
+      const usersList = usersRes?.body || [];
+      const supervisors = usersList.filter(u => u.role?.toUpperCase() === 'SUPERVISOR');
+      if (supervisors.length > 0) {
+        const counts = await Promise.all(
+          supervisors.map(s =>
+            getSupervisorProjects(s.id)
+              .then(res => ({ id: s.id, count: (res?.body || []).length }))
+              .catch(() => ({ id: s.id, count: s.assignedProjectsCount ?? 0 }))
+          )
+        );
+        const countMap = Object.fromEntries(counts.map(c => [c.id, c.count]));
+        usersList.forEach(u => {
+          if (countMap[u.id] !== undefined) {
+            u.assignedProjectsCount = countMap[u.id];
+          }
+        });
+      }
+
+      setUsers(usersList);
       setEmployees(Array.isArray(empList) ? empList : []);
     } catch (err) {
       notify('Failed to load user management data', 'error');
@@ -118,52 +124,38 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleStatusUpdate = async (userId, newStatus) => {
+  const handleApproveUser = async (userId) => {
+    setActionLoading(true);
     try {
-      await updateUserStatus(userId, newStatus);
-      notify(`User status set to ${newStatus}`, 'success');
+      await updateUserStatus(userId, 'ACTIVE');
+      notify('User account approved & activated ✅', 'success');
       loadData();
     } catch (err) {
-      notify(err.message || 'Failed to update user status', 'error');
+      notify(err.message || 'Failed to approve user', 'error');
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const handleDelete = async (userId, username) => {
-    if (userId === currentUser?.id) {
-      notify('You cannot delete your own active account!', 'error');
-      return;
-    }
-
+  const handleRejectUser = async (userId) => {
     const confirmed = await confirmModal({
-      title: 'Remove User',
-      message: `Are you sure you want to permanently remove user "${username}"? This action cannot be undone.`,
-      confirmText: 'Remove User',
+      title: 'Reject User Account',
+      message: 'Are you sure you want to reject and remove this registration request?',
+      confirmText: 'Reject & Remove',
       cancelText: 'Cancel',
       type: 'danger'
     });
     if (!confirmed) return;
+
+    setActionLoading(true);
     try {
       await deleteUser(userId);
-      notify(`User "${username}" was successfully removed ✅`, 'success');
+      notify('User registration rejected and removed ✅', 'success');
       loadData();
     } catch (err) {
-      notify(err.message || 'Failed to remove user', 'error');
-    }
-  };
-
-  const handleAdminResetPassword = async (e) => {
-    e.preventDefault();
-    if (!resetPasswordValue || resetPasswordValue.length < 6) {
-      notify('Password must be at least 6 characters', 'error');
-      return;
-    }
-    try {
-      await adminResetPassword(resetModalUser.id, resetPasswordValue);
-      notify(`Password for ${resetModalUser.username} has been reset.`, 'success');
-      setResetModalUser(null);
-      setResetPasswordValue('');
-    } catch (err) {
-      notify(err.message || 'Failed to reset password', 'error');
+      notify(err.message || 'Failed to reject user', 'error');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -175,6 +167,20 @@ export default function UserManagementPage() {
 
   const managersReached = managerCount >= 2;
   const supervisorsReached = supervisorCount >= 10;
+
+  // Filtered Users List
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      !searchQuery.trim() ||
+      u.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesRole = roleFilter === 'ALL' || u.role?.toUpperCase() === roleFilter;
+    const matchesStatus = statusFilter === 'ALL' || u.status === statusFilter;
+
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   return (
     <div className={styles.page}>
@@ -226,7 +232,7 @@ export default function UserManagementPage() {
             </div>
             <div className={styles.quotaValue}>{adminCount} / 1</div>
             <div className={styles.quotaProgress}>
-              <div className={styles.progressBar} style={{ width: '100%', background: '#ef4444' }} />
+              <div className={styles.progressBar} style={{ width: '100%', background: 'linear-gradient(90deg, #f59e0b, #d97706)' }} />
             </div>
           </div>
         )}
@@ -247,22 +253,6 @@ export default function UserManagementPage() {
           </div>
         )}
 
-        {isManager && (
-          <div className={styles.quotaCard}>
-            <div className={styles.quotaCardHeader}>
-              <span>🏷️ Assigned Sectors</span>
-              <span className={styles.roleManager}>Portfolio</span>
-            </div>
-            <div className={styles.quotaValue}>{(currentUser?.assignedCategories || []).length} Sectors</div>
-            <div className={styles.quotaProgress}>
-              <div 
-                className={styles.progressBar} 
-                style={{ width: `${Math.min(100, ((currentUser?.assignedCategories || []).length / 3) * 100)}%`, background: '#38bdf8' }} 
-              />
-            </div>
-          </div>
-        )}
-
         <div className={styles.quotaCard}>
           <div className={styles.quotaCardHeader}>
             <span>👷 Field Supervisors</span>
@@ -278,35 +268,32 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {/* Pending Approvals Alert (Admin Only) */}
       {isAdmin && pendingUsers.length > 0 && (
         <div className={styles.pendingBox}>
           <div className={styles.pendingHeader}>
             <FaExclamationTriangle /> {pendingUsers.length} Account(s) Awaiting Your Approval
           </div>
+          <p className={styles.pendingDescription}>
+            Supervisors and Managers need your confirmation before they can access their accounts.
+          </p>
           <div className={styles.pendingList}>
             {pendingUsers.map(u => (
               <div key={u.id} className={styles.pendingItem}>
                 <div>
-                  <strong>{u.username}</strong> — Requested Role: <span className={styles.roleBadge}>{u.role}</span>
+                  <strong>{u.username}</strong> ({u.role}) — {u.email}
                 </div>
                 <div className={styles.pendingActions}>
                   <button 
-                    className={styles.viewBtn} 
-                    style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
-                    onClick={() => navigate(`/users/${u.id}`)}
-                  >
-                    <FaEye /> View
-                  </button>
-                  <button 
                     className={styles.approveBtn} 
-                    onClick={() => handleStatusUpdate(u.id, 'ACTIVE')}
+                    onClick={() => handleApproveUser(u.id)}
+                    disabled={actionLoading}
                   >
-                    <FaCheck /> Approve & Activate
+                    <FaCheck /> Approve
                   </button>
                   <button 
                     className={styles.rejectBtn} 
-                    onClick={() => handleDelete(u.id, u.username)}
+                    onClick={() => handleRejectUser(u.id)}
+                    disabled={actionLoading}
                   >
                     <FaTimes /> Reject
                   </button>
@@ -317,37 +304,72 @@ export default function UserManagementPage() {
         </div>
       )}
 
-      {/* Staff Table */}
+      <div className={styles.filterBar}>
+        <div className={styles.searchWrapper}>
+          <FaSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search by username, email, phone..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.filterControls}>
+          <div className={styles.selectWrapper}>
+            <FaFilter className={styles.filterIcon} />
+            <select 
+              value={roleFilter} 
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className={styles.selectInput}
+            >
+              <option value="ALL">All Roles</option>
+              <option value="ADMIN">Admin</option>
+              <option value="MANAGER">Manager</option>
+              <option value="SUPERVISOR">Supervisor</option>
+            </select>
+          </div>
+
+          <div className={styles.selectWrapper}>
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className={styles.selectInput}
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="PENDING_APPROVAL">Pending Approval</option>
+              <option value="DISABLED">Disabled</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div className={styles.tableCard}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Status</th>
-                {isAdmin && <th>Assigned Categories</th>}
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+        {filteredUsers.length === 0 ? (
+          <div className={styles.emptyState}>
+            <FaUserTie className={styles.emptyIcon} />
+            <h4>No Users Found</h4>
+            <p>Try refining your search or filters.</p>
+          </div>
+        ) : (
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '2rem' }}>
-                    Loading staff members...
-                  </td>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Categories / Projects Count</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '2rem' }}>
-                    No staff members registered yet.
-                  </td>
-                </tr>
-              ) : (
-                users.map(u => {
-                  const isUserAdmin = u.role?.toUpperCase() === 'ADMIN';
-                  const isUserManager = u.role?.toUpperCase() === 'MANAGER';
-                  const isUserSupervisor = u.role?.toUpperCase() === 'SUPERVISOR';
+              </thead>
+              <tbody>
+                {filteredUsers.map((u) => {
+                  const isUserAdmin = u.role === 'ADMIN';
+                  const isUserManager = u.role === 'MANAGER';
+                  const isUserSupervisor = u.role === 'SUPERVISOR';
 
                   let roleBadgeClass = styles.roleSupervisor;
                   if (isUserAdmin) roleBadgeClass = styles.roleAdmin;
@@ -366,7 +388,7 @@ export default function UserManagementPage() {
                           </div>
                           <div>
                             <strong>{u.username}</strong>
-                            {isUserAdmin && <span style={{ marginLeft: '0.4rem', color: '#ef4444' }}>👑 Primary</span>}
+                            {isUserAdmin && <span style={{ marginLeft: '0.4rem', color: '#f59e0b' }}>👑 Primary</span>}
                           </div>
                         </div>
                       </td>
@@ -376,22 +398,22 @@ export default function UserManagementPage() {
                       <td>
                         <span className={`${styles.statusBadge} ${statusBadgeClass}`}>{u.status}</span>
                       </td>
-                      {isAdmin && (
-                        <td>
-                          {isUserManager ? (
-                            (u.assignedCategories || []).length > 0 ? (
-                              (u.assignedCategories || []).map(c => (
-                                <span key={c.id} className={styles.catPill}>{c.name}</span>
-                              ))
-                            ) : (
-                              <span style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>None assigned</span>
-                            )
-                          ) : (
-                            <span style={{ color: 'var(--muted)', fontSize: '0.8rem' }}>—</span>
-                          )}
-                        </td>
-                      )}
                       <td>
+                        {isUserManager ? (
+                          <span>
+                            {(u.assignedCategories || []).length} Categories
+                          </span>
+                        ) : isUserSupervisor ? (
+                          <span>
+                            {u.assignedProjectsCount ?? 0} Projects
+                          </span>
+                        ) : (
+                          <span style={{ color: 'var(--muted)' }}>
+                            Full Access
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
                         <button 
                           className={styles.viewBtn}
                           onClick={() => navigate(`/users/${u.id}`)}
@@ -402,11 +424,11 @@ export default function UserManagementPage() {
                       </td>
                     </tr>
                   );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Verified Farm Workforce (Labor Compliance) */}
@@ -548,43 +570,6 @@ export default function UserManagementPage() {
                 </button>
                 <button type="submit" className={styles.primaryBtn}>
                   Create {targetRoleToCreate}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Admin Reset Password Modal */}
-      {resetModalUser && (
-        <div className={styles.modalOverlay} onClick={() => setResetModalUser(null)}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>Reset Password for {resetModalUser.username}</h3>
-              <button className={styles.closeBtn} onClick={() => setResetModalUser(null)}>
-                <FaTimes />
-              </button>
-            </div>
-            <form onSubmit={handleAdminResetPassword}>
-              <div className={styles.formGroup}>
-                <label>New Temporary Password</label>
-                <input
-                  type="password"
-                  className={styles.input}
-                  placeholder="Min 6 characters"
-                  value={resetPasswordValue}
-                  onChange={e => setResetPasswordValue(e.target.value)}
-                  required
-                  autoFocus
-                />
-              </div>
-
-              <div className={styles.modalActions}>
-                <button type="button" className={styles.secondaryBtn} onClick={() => setResetModalUser(null)}>
-                  Cancel
-                </button>
-                <button type="submit" className={styles.primaryBtn} style={{ background: '#eab308' }}>
-                  Confirm Reset
                 </button>
               </div>
             </form>
