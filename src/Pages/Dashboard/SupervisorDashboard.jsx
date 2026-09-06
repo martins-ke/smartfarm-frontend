@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SupervisorDashboard.module.css';
 import { getSupervisorProjects } from '../../APIs/user';
@@ -15,7 +15,6 @@ import {
   FaThLarge,
   FaList,
   FaBoxes,
-  FaTimes,
   FaSeedling
 } from 'react-icons/fa';
 import { GiChicken } from 'react-icons/gi';
@@ -30,11 +29,27 @@ const normalizeArrayResponse = (response) => {
 
 export default function SupervisorDashboard({ user }) {
   const navigate = useNavigate();
+  const searchInputRef = useRef(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
+
+  // Global keyboard shortcut to focus search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === '/' && document.activeElement !== searchInputRef.current && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Time-of-day dynamic greeting
   const greeting = useMemo(() => {
@@ -266,26 +281,23 @@ export default function SupervisorDashboard({ user }) {
 
           {/* ── 3. Toolbar (Search, Filter Tabs, View Switcher) ── */}
           <section className={styles.toolbar}>
-            {/* Search Box */}
+            {/* Single Clean Search Input */}
             <div className={styles.searchWrap}>
               <FaSearch className={styles.searchIcon} />
               <input
+                ref={searchInputRef}
                 type="text"
                 className={styles.searchInput}
-                placeholder="Search projects or season..."
+                placeholder="Search projects, season, crops..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setSearchQuery('');
+                    searchInputRef.current?.blur();
+                  }
+                }}
               />
-              {searchQuery && (
-                <button
-                  type="button"
-                  className={styles.clearBtn}
-                  onClick={() => setSearchQuery('')}
-                  title="Clear search"
-                >
-                  <FaTimes />
-                </button>
-              )}
             </div>
 
             {/* Category Filter Pills */}
