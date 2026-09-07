@@ -8,6 +8,8 @@ import ErrorBoundary from '../Components/ErrorBoundary/ErrorBoundary';
 import { AlertModal } from "../Components/AlertModal/AlertModal";
 import { ConfirmModal } from "../Components/ConfirmModal/ConfirmModal";
 import { FaArrowLeft } from "react-icons/fa";
+import useAuth from '../useAuth';
+import { getUserById } from '../APIs/user';
 
 export function Mainlayout(){
     const [darkTheme, setDarkTheme] = useState(() => {
@@ -19,6 +21,20 @@ export function Mainlayout(){
     const [alertState, setAlertState] = useState({ message: '', type: 'info' });
     const [confirmState, setConfirmState] = useState(null);
     const navigate = useNavigate();
+
+    const currentUser = useAuth((state) => state.user);
+    const updateUser = useAuth((state) => state.updateUser);
+
+    useEffect(() => {
+      // Silently sync the user's profile and privileges on page load
+      if (currentUser?.id) {
+        getUserById(currentUser.id)
+          .then(res => {
+            if (res?.body) updateUser(res.body);
+          })
+          .catch(err => console.error('Failed to sync user profile:', err));
+      }
+    }, []);
 
     useEffect(() => {
       localStorage.setItem('smartfarm_theme', darkTheme ? 'dark' : 'light');
