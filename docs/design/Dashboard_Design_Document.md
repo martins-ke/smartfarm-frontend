@@ -1,8 +1,5 @@
 # SmartFarm Dashboard - Technical Design Document
 
-**Phase:** SDLC - Design Phase
-**Status:** DRAFT (Pending Review)
-**Version:** 1.0
 
 ## 1. Overview
 The SmartFarm Main Dashboard serves as the central command center for the application. Following SDLC best practices, this document outlines the UI topology, component specifications, and backend data requirements before any code is written. This document will serve as our single source of truth for the dashboard's implementation and future iterations.
@@ -84,6 +81,3 @@ The UI rendering will conditionally hide/show data based on the logged-in user:
 | **KPI: Inventory Alerts** | Global low stock | Category-specific low stock | *Hidden* |
 | **Sales Trend Chart** | Global sales | Category-specific sales | *Hidden* |
 | **Low Stock Table** | Visible | Visible (Category filtered) | Visible (Request Restock) |
-
-> [!IMPORTANT]
-> **SDLC Review Action:** Before moving to the Implementation phase, please review this layout and data mapping. Once approved, we will build the backend `GET /dashboard/summary` API, followed by the frontend React components.
