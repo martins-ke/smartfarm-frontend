@@ -460,7 +460,7 @@ export function UserDetailsPage() {
         )}
 
         {/* Supervisor Privileges Delegation (PBAC) */}
-        {(isUserSupervisor && (isAdmin || isCurrentManager)) && (
+        {(isUserSupervisor && (isAdmin || (isCurrentManager && currentUser?.privileges?.includes('CAN_ASSIGN_PRIVILEGES')))) && (
           <div className={styles.card}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitleMain}>

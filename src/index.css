@@ -68,14 +68,14 @@
 /* ── Pro-Level Root Typography & Projector/Presentation Scaling ── */
 /* Standard Desktop: Crisp, pro-level SaaS information density */
 html {
-  font-size: 14px;
+  font-size: 16px;
   -webkit-text-size-adjust: 100%;
 }
 
-/* Tablets & Laptops */
+/* Tablets & Small Laptops */
 @media (max-width: 1024px) {
   html {
-    font-size: 13.5px;
+    font-size: 14px;
   }
 }
 
@@ -97,14 +97,14 @@ html {
 /* Large Monitors & 1080p Presentation Displays (>= 1600px) */
 @media (min-width: 1600px) {
   html {
-    font-size: 15.5px;
+    font-size: 16px;
   }
 }
 
 /* Conference Room Projectors & High-Res Presentation Screens (>= 1920px) */
 @media (min-width: 1920px) {
   html {
-    font-size: 17px;
+    font-size: 17.5px;
   }
 }
 
