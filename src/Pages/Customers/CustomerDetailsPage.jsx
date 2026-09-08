@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './CustomerDetailsPage.module.css';
 import { getCustomerById, recordCustomerPayment, getCustomerSales } from '../../APIs/customer';
@@ -62,7 +61,7 @@ export function CustomerDetailsPage() {
       setSales(content);
       setSalesTotalPages(res?.totalPages || (content.length > 0 ? 1 : 0));
       setSalesTotalElements(res?.totalElements !== undefined ? res.totalElements : content.length);
-    } catch (err) {
+    } catch (_err) {
       setSales([]);
     } finally {
       setSalesLoading(false);

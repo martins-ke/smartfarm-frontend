@@ -1,4 +1,3 @@
-import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './UserDetailsPage.module.css';
 import { 
@@ -28,7 +27,8 @@ import {
   FaSave,
   FaKey,
   FaLock,
-  FaFolderOpen
+  FaFolderOpen,
+  FaArrowLeft
 } from 'react-icons/fa';
 
 export function UserDetailsPage() {
@@ -76,7 +76,7 @@ export function UserDetailsPage() {
         const projRes = await getSupervisorProjects(userId).catch(() => ({ body: [] }));
         setSupervisedProjects(projRes?.body || []);
       }
-    } catch (err) {
+    } catch (_err) {
       notify('Failed to load user details', 'error');
       navigate('/users');
     } finally {
@@ -460,7 +460,7 @@ export function UserDetailsPage() {
         )}
 
         {/* Supervisor Privileges Delegation (PBAC) */}
-        {(isUserSupervisor && (isAdmin || (isCurrentManager && currentUser?.privileges?.includes('CAN_ASSIGN_PRIVILEGES')))) && (
+        {(isUserSupervisor && (isAdmin || (isCurrentManager && currentAdminUser?.privileges?.includes('CAN_ASSIGN_PRIVILEGES')))) && (
           <div className={styles.card}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitleMain}>

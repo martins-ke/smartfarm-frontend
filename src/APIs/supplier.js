@@ -7,7 +7,7 @@ export const getSuppliers = async () => {
     const res = await apiClient('/suppliers');
     const data = unwrap(res);
     return Array.isArray(data) ? data : [];
-  } catch (err) {
+  } catch (_err) {
     return [];
   }
 };

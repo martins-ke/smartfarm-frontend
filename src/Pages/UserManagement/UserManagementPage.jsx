@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserManagementPage.module.css';
 import { 
@@ -78,7 +77,7 @@ export default function UserManagementPage() {
 
       setUsers(usersList);
       setEmployees(Array.isArray(empList) ? empList : []);
-    } catch (err) {
+    } catch (_err) {
       notify('Failed to load user management data', 'error');
     } finally {
       setLoading(false);

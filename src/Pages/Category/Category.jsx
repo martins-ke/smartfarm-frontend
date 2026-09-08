@@ -31,7 +31,7 @@ export function Category() {
       const request = await getCategories();
       const data = request.body;
       setCategories(Array.isArray(data) ? data : []);
-    } catch (err) {
+    } catch (_err) {
       setCategories([]);
     } finally {
       setLoading(false);

@@ -1,4 +1,3 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CustomersPage.module.css';
 import { getCustomers, createCustomer } from '../../APIs/customer';
@@ -30,7 +29,6 @@ const getInitials = (name) => {
 
 export function CustomersPage() {
   const navigate = useNavigate();
-  const currentUser = useAuth((state) => state.user);
   const searchInputRef = useRef(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +56,7 @@ export function CustomersPage() {
       const list = await getCustomers();
       const cList = Array.isArray(list) ? list : [];
       setCustomers(cList);
-    } catch (err) {
+    } catch (_err) {
       setCustomers([]);
     } finally {
       setLoading(false);

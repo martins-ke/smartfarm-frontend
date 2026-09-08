@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import styles from './Mainlayout.module.css'
 import { TopBar } from "../Components/TopBar/TopBar";
 import { useState, useEffect } from "react";
@@ -71,7 +71,7 @@ export function Mainlayout(){
         } else {
           navigate('/');
         }
-      } catch (err) {
+      } catch (_err) {
         navigate('/');
       }
     };

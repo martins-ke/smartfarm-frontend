@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SuppliersPage.module.css';
 import { 
@@ -18,7 +17,6 @@ import { Spinner } from '../../Components/Spinner/Spinner';
 
 export function SuppliersPage() {
   const navigate = useNavigate();
-  const currentUser = useAuth((state) => state.user);
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +39,7 @@ export function SuppliersPage() {
     try {
       const supList = await getSuppliers();
       setSuppliers(Array.isArray(supList) ? supList : []);
-    } catch (err) {
+    } catch (_err) {
       setSuppliers([]);
     } finally {
       setLoading(false);

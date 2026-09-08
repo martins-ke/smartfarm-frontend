@@ -7,7 +7,7 @@ export const getCustomers = async () => {
     const res = await apiClient('/customers');
     const data = unwrap(res);
     return Array.isArray(data) ? data : [];
-  } catch (err) {
+  } catch (_err) {
     return [];
   }
 };
@@ -40,7 +40,7 @@ export const getCustomerSales = async (customerId, page = 0, size = 10, customer
     if (data && (data.content !== undefined || Array.isArray(data))) {
       return data;
     }
-  } catch (err) {
+  } catch (_err) {
     // Fallback to /sales/all if dedicated endpoint not yet deployed
   }
 

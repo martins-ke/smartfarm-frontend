@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import styles from './InventoryPage.module.css';
 import { getInventoryItems, addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../APIs/inventory';
-import { FaPlus, FaBoxOpen, FaExclamationTriangle, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
+import { FaPlus,  FaExclamationTriangle, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import { notify, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { useAuth } from '../../useAuth';
@@ -33,7 +32,7 @@ function InventoryModal({ item, onClose, onSave }) {
         notify('Item added successfully', 'success');
       }
       onSave();
-    } catch (err) {
+    } catch (_err) {
       notify('Failed to save item', 'error');
       onClose(); // Force close on error as requested
     } finally {
@@ -133,7 +132,7 @@ export function InventoryPage() {
       setItems(pageData?.content || []);
       setTotalPages(pageData?.totalPages ?? 0);
       setTotalElements(pageData?.totalElements ?? 0);
-    } catch (err) {
+    } catch (_err) {
       notify('Failed to load inventory', 'error');
     } finally {
       setLoading(false);

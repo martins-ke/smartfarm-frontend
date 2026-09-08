@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './AssignCategoriesPage.module.css';
 import { fetchUsers, assignCategoriesToUser } from '../../APIs/user';
@@ -51,7 +50,7 @@ export default function AssignCategoriesPage() {
         // Pre-select already assigned categories
         const existingIds = (targetUser.assignedCategories || []).map(c => c.id);
         setSelectedCatIds(existingIds);
-      } catch (err) {
+      } catch (_err) {
         notify('Failed to load category assignment data', 'error');
       } finally {
         setLoading(false);

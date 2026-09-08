@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { FaEye, FaEyeSlash, FaCheckCircle, FaCrown, FaUserShield, FaInfoCircle } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaCheckCircle, FaCrown,  FaInfoCircle } from 'react-icons/fa';
 import styles from './AuthPage.module.css';
 import { signup, checkBootstrapStatus } from '../APIs/user';
 import useAuth from '../useAuth';
@@ -26,7 +25,7 @@ const SignupPage = () => {
         const data = res.body;
         // If there are 0 users or 0 admins, this is the bootstrap administrator
         setIsBootstrap(data?.isBootstrap || data?.adminCount === 0);
-      } catch (err) {
+      } catch (_err) {
         setIsBootstrap(false);
       } finally {
         setCheckingBootstrap(false);

@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserDetailsModal.module.css';
 import { getUserById, getSupervisorProjects, updateUserStatus, deleteUser, updateUserPrivileges, adminResetPassword } from '../../APIs/user';
@@ -72,7 +71,7 @@ export default function UserDetailsModal({ userId, currentAdminUser, onClose, on
         const projRes = await getSupervisorProjects(userId).catch(() => ({ body: [] }));
         setSupervisedProjects(projRes?.body || []);
       }
-    } catch (err) {
+    } catch (_err) {
       notify('Failed to load user details', 'error');
       onClose();
     } finally {

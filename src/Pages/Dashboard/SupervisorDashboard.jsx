@@ -73,7 +73,7 @@ export default function SupervisorDashboard({ user }) {
         if (isMounted) {
           setProjects(data);
         }
-      } catch (err) {
+      } catch (_err) {
         if (isMounted) {
           setProjects([]);
         }

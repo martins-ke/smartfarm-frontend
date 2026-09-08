@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
 import styles from './ActivityLaborModal.module.css';
 import { getLaborAssignments, assignLabor } from '../../APIs/activity';
 import { getEmployees } from '../../APIs/employee';
 import { notify } from '../../utils/notify';
-import { FaUsers, FaUserPlus, FaTimes, FaIdCard, FaMoneyBillWave, FaClock, FaCheckCircle } from 'react-icons/fa';
+import { FaUsers, FaUserPlus, FaTimes, FaIdCard,  FaClock } from 'react-icons/fa';
 import { Spinner } from '../Spinner/Spinner';
 
 export function ActivityLaborModal({ isOpen, onClose, activity }) {
@@ -28,7 +27,7 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
       ]);
       setEmployees(Array.isArray(empList) ? empList : []);
       setAssignments(Array.isArray(assignList) ? assignList : []);
-    } catch (err) {
+    } catch (_err) {
       notify('Failed to load labor data', 'error');
     } finally {
       setLoading(false);
