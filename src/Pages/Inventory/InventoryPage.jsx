@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import styles from './InventoryPage.module.css';
 import { getInventoryItems, addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../APIs/inventory';
 import { FaPlus,  FaExclamationTriangle, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';

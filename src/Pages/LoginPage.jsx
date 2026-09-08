@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import styles from './AuthPage.module.css';
 import { loginUser } from '../APIs/user';

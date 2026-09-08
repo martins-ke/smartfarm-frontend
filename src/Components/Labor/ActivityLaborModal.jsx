@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import styles from './ActivityLaborModal.module.css';
 import { getLaborAssignments, assignLabor } from '../../APIs/activity';
 import { getEmployees } from '../../APIs/employee';

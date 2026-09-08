@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AuthPage.module.css';
 import { forgotPassword } from '../APIs/user';

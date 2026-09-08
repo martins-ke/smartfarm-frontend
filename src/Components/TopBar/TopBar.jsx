@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './TopBar.module.css'
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaBars, FaCog, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf, FaBoxes, FaUsersCog, FaUsers, FaUserEdit, FaChevronDown, FaTruck, FaHandHoldingUsd } from 'react-icons/fa';
+import { FaBars,  FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf, FaBoxes, FaUsersCog, FaUsers, FaUserEdit, FaChevronDown, FaTruck, FaHandHoldingUsd } from 'react-icons/fa';
 
 import { notify } from '../../utils/notify';
 import useAuth from '../../useAuth';

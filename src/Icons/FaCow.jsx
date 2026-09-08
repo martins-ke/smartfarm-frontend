@@ -1,4 +1,3 @@
-import React from 'react';
 
 // Minimal cow icon component to act like a Fa... icon (no external deps)
 export default function FaCow({ className, title = 'cow' }) {

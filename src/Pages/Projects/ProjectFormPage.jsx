@@ -24,7 +24,6 @@ export function ProjectFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const role = (currentUser?.role || '').toUpperCase();
-  const isSupervisor = role === 'SUPERVISOR';
   const isManager = role === 'MANAGER';
   const isAdmin = role === 'ADMIN';
 

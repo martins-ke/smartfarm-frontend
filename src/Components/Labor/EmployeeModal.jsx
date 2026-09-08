@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styles from './EmployeeModal.module.css';
 import { registerEmployee } from '../../APIs/employee';
 import { notify } from '../../utils/notify';
-import { FaUserCheck, FaTimes, FaIdCard, FaPhone, FaMoneyBillWave, FaUserTie } from 'react-icons/fa';
+import { FaUserCheck, FaTimes } from 'react-icons/fa';
 
 export function EmployeeModal({ isOpen, onClose, onSuccess, currentUserId }) {
   const [form, setForm] = useState({

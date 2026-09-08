@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './AssignCategoriesPage.module.css';
 import { fetchUsers, assignCategoriesToUser } from '../../APIs/user';

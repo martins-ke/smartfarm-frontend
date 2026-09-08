@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import styles from './Dashboard.module.css';
 
 // Simple donut chart using SVG circles and stroke offsets. No external deps.

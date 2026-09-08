@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { FaEye, FaEyeSlash, FaCheckCircle, FaCrown,  FaInfoCircle } from 'react-icons/fa';
 import styles from './AuthPage.module.css';
 import { signup, checkBootstrapStatus } from '../APIs/user';

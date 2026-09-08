@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from './ProjectListPage.module.css';
 import { getProjectsByCategory, updateProjectStatus } from '../../APIs/project';
 import useAuth from '../../useAuth';
-import { FaFolderOpen, FaMoneyBillWave, FaPlus, FaArrowRight, FaChevronDown, FaCheck, FaUserShield } from 'react-icons/fa';
+import { FaFolderOpen, FaMoneyBillWave, FaPlus, FaArrowRight, FaChevronDown, FaCheck } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
 
 const STATUS_OPTIONS = [

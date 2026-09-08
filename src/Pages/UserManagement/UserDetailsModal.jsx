@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserDetailsModal.module.css';
 import { getUserById, getSupervisorProjects, updateUserStatus, deleteUser, updateUserPrivileges, adminResetPassword } from '../../APIs/user';

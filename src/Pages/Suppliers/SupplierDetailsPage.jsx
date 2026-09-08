@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './SupplierDetailsPage.module.css';
 import { getSupplierById, getSupplierPurchases, recordSupplierPurchase, recordSupplierPayment } from '../../APIs/supplier';

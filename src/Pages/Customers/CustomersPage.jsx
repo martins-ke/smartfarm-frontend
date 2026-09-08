@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CustomersPage.module.css';
 import { getCustomers, createCustomer } from '../../APIs/customer';

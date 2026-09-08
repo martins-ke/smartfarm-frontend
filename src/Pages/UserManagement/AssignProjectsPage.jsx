@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './AssignProjectsPage.module.css';
 import { getUserById, getSupervisorProjects, assignProjectsToSupervisor } from '../../APIs/user';
@@ -230,7 +230,6 @@ export default function AssignProjectsPage() {
           {filteredProjects.map((p) => {
             const isSelected = selectedProjectIds.includes(p.id);
             const currentSup = p.supervisor;
-            const isAssignedToThisSupervisor = currentSup && String(currentSup.id) === String(userId);
             const isAssignedToOther = currentSup && String(currentSup.id) !== String(userId);
 
             return (

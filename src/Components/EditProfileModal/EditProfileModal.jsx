@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styles from './EditProfileModal.module.css';
 import { FaUserEdit, FaTimes, FaEye, FaEyeSlash, FaExclamationTriangle, FaTrash } from 'react-icons/fa';
 import { updateUserProfile, deleteUser } from '../../APIs/user';
