@@ -23,7 +23,7 @@ export const normalizeUser = (user = {}) => ({
   permissions: Array.isArray(user.permissions) ? user.permissions : [],
   privileges: Array.isArray(user.privileges) ? user.privileges : [],
   assignedCategories: Array.isArray(user.assignedCategories) ? user.assignedCategories : [],
-  managerId: user.managerId ?? null,
+  createdById: user.createdById ?? null,
   isActive: user.isActive ?? true,
 });
 

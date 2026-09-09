@@ -31,6 +31,16 @@ export const getSupplierPurchases = async (supplierId) => {
   return Array.isArray(data) ? data : [];
 };
 
+export const getAllSupplierPurchases = async () => {
+  try {
+    const res = await apiClient('/suppliers/purchases');
+    const data = unwrap(res);
+    return Array.isArray(data) ? data : [];
+  } catch (_err) {
+    return [];
+  }
+};
+
 export const recordSupplierPurchase = async (purchaseData) => {
   const res = await apiClient('/suppliers/purchases', {
     method: 'POST',

@@ -189,7 +189,9 @@ export default function SupervisorDashboard({ user }) {
               <span className={styles.liveDot} /> Supervisor
             </span>
           </div>
-          <h1>{greeting}, {user?.name || user?.username || 'Supervisor'}</h1>
+          <h1 className={styles.welcomeTitle}>
+            {greeting}, <span className={styles.usernameText}>{user?.name || user?.username || 'Supervisor'}</span>
+          </h1>
         </div>
 
         <div className={styles.headerQuickActions}>

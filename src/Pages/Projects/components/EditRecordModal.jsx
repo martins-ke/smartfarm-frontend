@@ -240,7 +240,7 @@ export function EditRecordModal({
           {editingRecord.tab === 'activities' && (
             <>
               <label>
-                <span>Activity Title</span>
+                <span>Activity / Task Title</span>
                 <input
                   name="title"
                   value={editRecordForm.title || ''}
@@ -250,20 +250,78 @@ export function EditRecordModal({
                   required
                 />
               </label>
+              <div className={styles.formRow}>
+                <label style={{ flex: 1 }}>
+                  <span>Activity Type</span>
+                  <input
+                    name="type"
+                    value={editRecordForm.type || ''}
+                    onChange={(e) =>
+                      onFormChange((prev) => ({ ...prev, type: e.target.value }))
+                    }
+                    placeholder="Field Care / Spraying / Health"
+                    required
+                  />
+                </label>
+                <label style={{ flex: 1 }}>
+                  <span>Priority</span>
+                  <select
+                    name="priority"
+                    value={editRecordForm.priority || 'MEDIUM'}
+                    onChange={(e) =>
+                      onFormChange((prev) => ({ ...prev, priority: e.target.value }))
+                    }
+                    className={styles.formSelect}
+                  >
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="URGENT">Urgent ⚡</option>
+                  </select>
+                </label>
+              </div>
+              <div className={styles.formRow}>
+                <label style={{ flex: 1 }}>
+                  <span>Status</span>
+                  <select
+                    name="status"
+                    value={editRecordForm.status || 'SCHEDULED'}
+                    onChange={(e) =>
+                      onFormChange((prev) => ({ ...prev, status: e.target.value }))
+                    }
+                    className={styles.formSelect}
+                  >
+                    <option value="SCHEDULED">Scheduled</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </label>
+                <label style={{ flex: 1 }}>
+                  <span>Scheduled Date</span>
+                  <input
+                    type="date"
+                    name="scheduledDate"
+                    value={editRecordForm.scheduledDate || ''}
+                    onChange={(e) =>
+                      onFormChange((prev) => ({ ...prev, scheduledDate: e.target.value }))
+                    }
+                  />
+                </label>
+              </div>
               <label>
-                <span>Activity Type</span>
+                <span>Due Date (Optional)</span>
                 <input
-                  name="type"
-                  value={editRecordForm.type || ''}
+                  type="date"
+                  name="dueDate"
+                  value={editRecordForm.dueDate || ''}
                   onChange={(e) =>
-                    onFormChange((prev) => ({ ...prev, type: e.target.value }))
+                    onFormChange((prev) => ({ ...prev, dueDate: e.target.value }))
                   }
-                  placeholder="Maintenance / Feeding / Veterinary"
-                  required
                 />
               </label>
               <label>
-                <span>Notes</span>
+                <span>Notes & Guidelines</span>
                 <textarea
                   name="notes"
                   value={editRecordForm.notes || ''}

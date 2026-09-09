@@ -4,6 +4,12 @@ const unwrap = (res) => (res && res.body !== undefined ? res.body : (res && res.
 
 export const recordActivity = async(data)=> apiClient('/activities/record', {method: 'POST', body:JSON.stringify(data)});
 export const updateActivity = async(id, data)=> apiClient(`/activities/${id}`, {method: 'PUT', body:JSON.stringify(data)});
+export const updateActivityStatus = async(id, status = 'COMPLETED') => {
+  const res = await apiClient(`/activities/${id}/status?status=${encodeURIComponent(status)}`, {
+    method: 'PATCH',
+  });
+  return unwrap(res);
+};
 export const deleteActivity = async(id)=> apiClient(`/activities/${id}`, {method: 'DELETE'});
 
 export const getLaborAssignments = async(activityId) => {

@@ -7,12 +7,7 @@ export function DashboardPage() {
   const isSupervisor = currentUser?.role?.toUpperCase() === 'SUPERVISOR';
 
   if (isSupervisor) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        <UnifiedDashboard />
-        <SupervisorDashboard user={currentUser} />
-      </div>
-    );
+    return <SupervisorDashboard user={currentUser} />;
   }
 
   return <UnifiedDashboard />;

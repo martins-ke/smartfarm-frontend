@@ -5,7 +5,7 @@ import { getProjectById, updateProject } from '../../APIs/project';
 import { createExpense, updateExpense, deleteExpense } from '../../APIs/expense';
 import { recordSale, updateSale, deleteSale, requestAllCustomers } from '../../APIs/sales';
 import { recordHarvest, updateHarvest, deleteHarvest } from '../../APIs/harvest';
-import { recordActivity, updateActivity, deleteActivity } from '../../APIs/activity';
+import { recordActivity, updateActivity, deleteActivity, updateActivityStatus } from '../../APIs/activity';
 import { getInventoryItems } from '../../APIs/inventory';
 import { ActivityLaborModal } from '../../Components/Labor/ActivityLaborModal';
 import { notify, alertModal, confirmModal } from '../../utils/notify';
@@ -28,7 +28,15 @@ import { EditRecordModal } from './components/EditRecordModal';
 
 const initialForm = {
   expenses: { title: '', unitPrice: '', quantity: '', amount: '', notes: '' },
-  activities: { title: '', type: '', notes: '' },
+  activities: {
+    title: '',
+    type: '',
+    notes: '',
+    scheduledDate: '',
+    dueDate: '',
+    priority: 'MEDIUM',
+    status: 'SCHEDULED',
+  },
   sales: { item: '', quantity: '', unit_price: '', amount_paid: '', payment_mode: 'CASH' },
   harvest: { item: '', quantity: '', units: '', notes: '' },
 };
@@ -328,7 +336,24 @@ export function ProjectDashboardPage() {
         title: record.title || '',
         type: record.type || '',
         notes: record.notes || '',
+        scheduledDate: record.scheduledDate || record.scheduled_date || record.added_on || '',
+        dueDate: record.dueDate || record.due_date || '',
+        priority: record.priority || 'MEDIUM',
+        status: record.status || 'SCHEDULED',
       });
+    }
+  };
+
+  const handleToggleActivityStatus = async (activity) => {
+    const isCompleted = (activity.status || '').toUpperCase() === 'COMPLETED';
+    const nextStatus = isCompleted ? 'SCHEDULED' : 'COMPLETED';
+    try {
+      const res = await updateActivityStatus(activity.id, nextStatus);
+      notify(res?.message || `Task marked as ${nextStatus === 'COMPLETED' ? 'completed' : 'scheduled'} ✅`, 'success');
+      const refreshedProject = await getProjectById(projectId);
+      if (refreshedProject) setProject(unwrapResponse(refreshedProject));
+    } catch (err) {
+      notify(err?.message || 'Failed to update task status', 'error');
     }
   };
 
@@ -561,12 +586,14 @@ export function ProjectDashboardPage() {
               showRecordForm={showRecordForm}
               formState={form.activities}
               onFieldChange={handleFieldChange}
+              setFormState={setForm}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
               canModifyRecord={canModifyRecord}
               onOpenEditRecord={handleOpenEditRecord}
               onDeleteRecord={handleDeleteRecord}
               onSelectActivityForLabor={setSelectedActivityForLabor}
+              onToggleStatus={handleToggleActivityStatus}
             />
           )}
 

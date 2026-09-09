@@ -1754,3 +1754,347 @@ label {
   font-weight: 600;
   color: #ea580c;
 }
+
+/* ==========================================================================
+   Task Scheduling & Activities Styling
+   ========================================================================== */
+
+.taskPresetsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(42, 161, 238, 0.05);
+  border: 1px dashed rgba(42, 161, 238, 0.25);
+  border-radius: 0.65rem;
+  margin-bottom: 0.25rem;
+}
+
+.taskPresetsLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2aa1ee;
+  text-transform: uppercase;
+  letter-spacing: 0.03rem;
+}
+
+.taskPresetsBtnGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.presetChipBtn {
+  background: var(--card-bg, rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(42, 161, 238, 0.22);
+  border-radius: 0.45rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text, #e2e8f0);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.presetChipBtn:hover {
+  background: rgba(42, 161, 238, 0.18);
+  border-color: #2aa1ee;
+  color: #2aa1ee;
+  transform: translateY(-1px);
+}
+
+.formSelect {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: var(--input-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
+  border-radius: 0.5rem;
+  color: var(--text, #e2e8f0);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.formSelect:focus {
+  border-color: #2aa1ee;
+}
+
+.submitRecordBtn {
+  background: linear-gradient(135deg, #2aa1ee 0%, #1e88e5 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 0.55rem;
+  padding: 0.65rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(42, 161, 238, 0.25);
+  margin-top: 0.35rem;
+}
+
+.submitRecordBtn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.submitRecordBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.taskHeaderWithTabs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.taskFilterTabs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(0, 0, 0, 0.12);
+  padding: 0.2rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.taskTabBtn {
+  background: transparent;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted, #94a3b8);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.taskTabBtn span {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+.taskTabBtn:hover {
+  color: var(--text, #f8fafc);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.taskTabBtnActive {
+  background: rgba(42, 161, 238, 0.16) !important;
+  color: #2aa1ee !important;
+  border: 1px solid rgba(42, 161, 238, 0.3) !important;
+}
+
+.taskTabBtnActive span {
+  background: rgba(42, 161, 238, 0.25);
+  color: #2aa1ee;
+}
+
+.taskTabOverdue {
+  color: #ef4444 !important;
+}
+
+.taskTabOverdue span {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+}
+
+.taskListUl {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.taskCardItem {
+  background: var(--card-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--card-border, rgba(255, 255, 255, 0.08));
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.taskCardItem:hover {
+  border-color: rgba(42, 161, 238, 0.3);
+  transform: translateY(-1px);
+}
+
+.taskCardCompleted {
+  opacity: 0.7;
+  background: rgba(16, 185, 129, 0.03);
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+.taskCardMain {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.taskCompleteToggleBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--muted, #64748b);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.taskCompleteToggleBtn:hover {
+  color: #10b981;
+  transform: scale(1.15);
+}
+
+.toggleCompleted {
+  color: #10b981 !important;
+}
+
+.taskCardDetails {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.taskCardTitleRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.taskTitleText {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text, #f8fafc);
+}
+
+.taskCompletedText {
+  text-decoration: line-through;
+  color: var(--muted, #94a3b8);
+}
+
+.priorityBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+}
+
+.priorityLOW {
+  background: rgba(100, 116, 139, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.priorityMEDIUM {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.priorityHIGH {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+.priorityURGENT {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+}
+
+.statusBadgeSuccess {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.statusBadgeWarning {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.statusBadgeDanger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.statusBadgeInfo {
+  background: rgba(42, 161, 238, 0.12);
+  color: #2aa1ee;
+  border: 1px solid rgba(42, 161, 238, 0.25);
+}
+
+.statusBadgeMuted {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+  border: 1px solid rgba(100, 116, 139, 0.25);
+}
+
+.taskCardMetaRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  font-size: 0.78rem;
+  color: var(--muted, #94a3b8);
+}
+
+.taskCategoryTag {
+  color: #ea580c;
+  font-weight: 600;
+}
+
+.taskDateText {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.taskNotesSnippet {
+  color: var(--muted, #94a3b8);
+  font-style: italic;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

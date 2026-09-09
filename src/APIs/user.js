@@ -42,13 +42,12 @@ export const resetPassword = ({ token, newPassword }) =>
   });
 
 /**
- * GET /users?role=...&createdById=...&managerId=...
+ * GET /users?role=...&createdById=...
  */
-export const fetchUsers = (role, createdById, managerId) => {
+export const fetchUsers = (role, createdById) => {
   const params = new URLSearchParams();
   if (role) params.append('role', role);
   if (createdById) params.append('createdById', createdById);
-  if (managerId) params.append('managerId', managerId);
   const query = params.toString() ? `?${params.toString()}` : '';
   return apiClient(`/users${query}`, { method: 'GET' });
 };
