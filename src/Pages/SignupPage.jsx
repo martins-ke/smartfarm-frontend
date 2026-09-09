@@ -4,6 +4,7 @@ import styles from './AuthPage.module.css';
 import { signup, checkBootstrapStatus } from '../APIs/user';
 import useAuth from '../useAuth';
 import { useNavigate } from 'react-router-dom';
+import { AgroSyncLogo } from '../Components/Logo/AgroSyncLogo';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -15,28 +16,37 @@ const SignupPage = () => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isBootstrap, setIsBootstrap] = useState(false);
   const [adminConfirmed, setAdminConfirmed] = useState(false);
+
+  // Bootstrap state: check if any users exist in the system yet
+  const [isBootstrap, setIsBootstrap] = useState(false);
   const [checkingBootstrap, setCheckingBootstrap] = useState(true);
 
   useEffect(() => {
-    const fetchStatus = async () => {
+    let isMounted = true;
+    const verifyBootstrap = async () => {
       try {
         const res = await checkBootstrapStatus();
-        const data = res.body;
-        // If there are 0 users or 0 admins, this is the bootstrap administrator
-        setIsBootstrap(data?.isBootstrap || data?.adminCount === 0);
-      } catch (_err) {
-        setIsBootstrap(false);
+        const data = res?.body;
+        if (isMounted) {
+          const isBoot = Boolean(data?.isBootstrap || data?.adminCount === 0 || data === true);
+          setIsBootstrap(isBoot);
+          if (isBoot) {
+            setForm(prev => ({ ...prev, role: 'ADMIN' }));
+          }
+        }
+      } catch {
+        // Fallback default if offline/error
       } finally {
-        setCheckingBootstrap(false);
+        if (isMounted) setCheckingBootstrap(false);
       }
     };
-    fetchStatus();
+    verifyBootstrap();
+    return () => { isMounted = false; };
   }, []);
 
-  const passwordsMatch = form.password && form.confirmPassword && form.password === form.confirmPassword;
-  const passwordMismatch = form.password && form.confirmPassword && form.password !== form.confirmPassword;
+  const passwordsMatch = Boolean(form.password && form.confirmPassword && form.password === form.confirmPassword);
+  const passwordMismatch = Boolean(form.password && form.confirmPassword && form.password !== form.confirmPassword);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -46,16 +56,21 @@ const SignupPage = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!form.username || !form.password || !form.confirmPassword) {
-      setError('All fields are required.');
+
+    if (!form.username.trim()) {
+      setError('Username is required.');
+      return;
+    }
+    if (!form.email.trim()) {
+      setError('Email address is required.');
+      return;
+    }
+    if (form.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
       return;
     }
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match.');
-      return;
-    }
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters.');
       return;
     }
     if (isBootstrap && !adminConfirmed) {
@@ -63,32 +78,35 @@ const SignupPage = () => {
       return;
     }
 
+    setIsSubmitting(true);
     setError('');
     setSuccessMsg('');
-    setIsSubmitting(true);
 
     try {
-      const res = await signup({
-        username: form.username,
-        email: form.email,
+      const payload = {
+        username: form.username.trim(),
+        email: form.email.trim(),
         password: form.password,
         cpassword: form.confirmPassword,
         role: isBootstrap ? 'ADMIN' : form.role,
-      });
+      };
+
+      const res = await signup(payload);
 
       if (res.success) {
         const user = res.body;
-        if (user.status === 'ACTIVE') {
+        if (user?.status === 'ACTIVE' || (isBootstrap && user?.id)) {
           login(user);
-          navigate('/');
-        } else {
-          setSuccessMsg(res.message || 'Account created and pending Administrator approval.');
+          navigate('/', { replace: true });
+          return;
         }
+
+        setSuccessMsg(res.message || 'Account created successfully! Your request is pending Administrator approval.');
       } else {
-        setError(res.message || 'Sign up failed. Please try again.');
+        setError(res.message || 'Signup failed. Please try again.');
       }
     } catch (err) {
-      setError(err.message || 'Registration error. Please try again.');
+      setError(err.message || 'Network error. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -100,8 +118,10 @@ const SignupPage = () => {
 
         {/* Brand Header */}
         <div className={styles.brandHeader}>
-          <div className={styles.brandIcon}>🌱</div>
-          <h1 className={styles.brandName}>SmartFarm</h1>
+          <div style={{ marginBottom: '0.65rem' }}>
+            <AgroSyncLogo size={48} iconOnly variant="badge" />
+          </div>
+          <h1 className={styles.brandName}>AgroSync</h1>
           <p className={styles.brandTagline}>Agricultural Management System</p>
         </div>
 

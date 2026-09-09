@@ -547,7 +547,7 @@ export default function UserManagementPage() {
                 <input
                   type="email"
                   className={styles.input}
-                  placeholder="e.g. staff@smartfarm.com"
+                  placeholder="e.g. staff@agrosync.com"
                   value={createForm.email}
                   onChange={e => setCreateForm(prev => ({ ...prev, email: e.target.value }))}
                 />

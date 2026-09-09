@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './AuthPage.module.css';
 import { resetPassword } from '../APIs/user';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { AgroSyncLogo } from '../Components/Logo/AgroSyncLogo';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
@@ -65,8 +66,11 @@ const ResetPasswordPage = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.card}>
         <div className={styles.brandHeader}>
-          <div className={styles.brandIcon}>🌱</div>
-          <h1 className={styles.brandName}>SmartFarm</h1>
+          <div style={{ marginBottom: '0.65rem' }}>
+            <AgroSyncLogo size={48} iconOnly variant="badge" />
+          </div>
+          <h1 className={styles.brandName}>AgroSync</h1>
+          <p className={styles.brandTagline}>Smart Farm Management</p>
         </div>
 
         <h2 className={styles.formTitle}>Set New Password</h2>

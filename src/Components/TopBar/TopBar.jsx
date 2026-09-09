@@ -12,6 +12,7 @@ import { notify } from '../../utils/notify';
 import useAuth from '../../useAuth';
 import { getNotifications } from '../../APIs/notification';
 import EditProfileModal from '../EditProfileModal/EditProfileModal';
+import { AgroSyncLogo } from '../Logo/AgroSyncLogo';
 
 export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, setHideMenu: externalSetHideMenu}){
     const [localHideMenu, setLocalHideMenu] = useState(true);
@@ -199,9 +200,8 @@ export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, set
                {/* overlay covering rest of the app to block interactions when menu is open */}
                {!hideMenu && <div className={styles.appOverlay} onClick={() => setHideMenu(true)} aria-hidden="true" />} 
 
-               <aside className={styles.logo}>
-                   <FaLeaf className={styles.logoIcon} />
-                   <h3>smart farm</h3>
+               <aside className={styles.brandLogoWrap} onClick={goToDashboard} title="AgroSync Dashboard">
+                   <AgroSyncLogo size={26} />
                </aside>
            </div>
 

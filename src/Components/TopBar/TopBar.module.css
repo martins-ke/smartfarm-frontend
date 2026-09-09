@@ -810,3 +810,16 @@
     gap: 0.5rem;
 }
 
+.brandLogoWrap {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+    user-select: none;
+}
+
+.brandLogoWrap:hover {
+    transform: translateY(-1px);
+    opacity: 0.92;
+}
+

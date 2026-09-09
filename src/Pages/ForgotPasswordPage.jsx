@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AuthPage.module.css';
 import { forgotPassword } from '../APIs/user';
+import { AgroSyncLogo } from '../Components/Logo/AgroSyncLogo';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
@@ -13,19 +14,17 @@ const ForgotPasswordPage = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     if (!email) {
-      setError('Email is required.');
+      setError('Please enter your email address.');
       return;
     }
+
     setError('');
     setSuccess('');
     setIsSubmitting(true);
+
     try {
       const res = await forgotPassword({ email });
-      if (res.success) {
-        setSuccess(res.message || 'Password reset link has been sent to your email. Please check your inbox.');
-      } else {
-        setError(res.message || 'No account found with this email address.');
-      }
+      setSuccess(res.message || 'If that email exists in our system, a password reset link has been sent.');
     } catch (err) {
       setError(err.message || 'Network error. Please try again.');
     } finally {
@@ -37,8 +36,11 @@ const ForgotPasswordPage = () => {
     <div className={styles.pageWrapper}>
       <div className={styles.card}>
         <div className={styles.brandHeader}>
-          <div className={styles.brandIcon}>🌱</div>
-          <h1 className={styles.brandName}>SmartFarm</h1>
+          <div style={{ marginBottom: '0.65rem' }}>
+            <AgroSyncLogo size={48} iconOnly variant="badge" />
+          </div>
+          <h1 className={styles.brandName}>AgroSync</h1>
+          <p className={styles.brandTagline}>Smart Farm Management</p>
         </div>
 
         <h2 className={styles.formTitle}>Reset Password</h2>

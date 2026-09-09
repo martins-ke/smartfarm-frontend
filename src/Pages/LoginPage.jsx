@@ -4,6 +4,7 @@ import styles from './AuthPage.module.css';
 import { loginUser } from '../APIs/user';
 import useAuth from '../useAuth';
 import { useNavigate } from 'react-router-dom';
+import { AgroSyncLogo } from '../Components/Logo/AgroSyncLogo';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -14,28 +15,31 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
     if (error) setError('');
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username || !form.password) {
-      setError('Username and password are required.');
+    if (!form.username.trim() || !form.password) {
+      setError('Please enter both username/email and password.');
       return;
     }
-    setError('');
+
     setIsSubmitting(true);
+    setError('');
+
     try {
-      const res = await loginUser({ username: form.username, password: form.password });
-      if (res.success) {
-        login(res.body);
-        navigate('/');
-      } else {
-        setError(res.message || 'Login failed. Please try again.');
-      }
+      const response = await loginUser({
+        username: form.username.trim(),
+        password: form.password,
+      });
+
+      const user = response?.body || response?.user || response;
+      login(user);
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err.message || 'Network error. Please try again.');
     } finally {
@@ -49,9 +53,11 @@ const LoginPage = () => {
 
         {/* Brand */}
         <div className={styles.brandHeader}>
-          <div className={styles.brandIcon}>🌱</div>
-          <h1 className={styles.brandName}>SmartFarm</h1>
-          <p className={styles.brandTagline}>Manage your farm effortlessly</p>
+          <div style={{ marginBottom: '0.65rem' }}>
+            <AgroSyncLogo size={48} iconOnly variant="badge" />
+          </div>
+          <h1 className={styles.brandName}>AgroSync</h1>
+          <p className={styles.brandTagline}>Smart Farm Management & Operations</p>
         </div>
 
         <h2 className={styles.formTitle}>Log In</h2>
