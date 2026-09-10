@@ -120,7 +120,6 @@ export function ProjectFormPage() {
             <span>Status</span>
             <select name="status" value={form.status} onChange={handleChange}>
               <option value="active">Active</option>
-              <option value="in_progress">In progress</option>
               <option value="completed">Completed</option>
             </select>
           </label>

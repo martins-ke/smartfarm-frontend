@@ -20,6 +20,7 @@ import {
   FaFilter
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 
 const getInitials = (name) => {
   if (!name) return 'CU';
@@ -33,6 +34,7 @@ export function CustomersPage() {
   const searchInputRef = useRef(null);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,11 +55,13 @@ export function CustomersPage() {
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const list = await getCustomers();
       const cList = Array.isArray(list) ? list : [];
       setCustomers(cList);
-    } catch (_err) {
+    } catch (err) {
+      setLoadError(err);
       setCustomers([]);
     } finally {
       setLoading(false);
@@ -274,7 +278,14 @@ export function CustomersPage() {
           </div>
         </div>
 
-        {customers.length === 0 ? (
+        {loadError && customers.length === 0 ? (
+          <ErrorState 
+            error={loadError} 
+            title="Could Not Load Customers" 
+            onRetry={loadData} 
+            variant="card"
+          />
+        ) : customers.length === 0 ? (
           <div className={styles.emptyState}>
             <FaUsers className={styles.emptyIcon} />
             <p>No customers registered yet.</p>

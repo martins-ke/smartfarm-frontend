@@ -4,6 +4,7 @@ import { getInventoryItems, addInventoryItem, updateInventoryItem, deleteInvento
 import { FaPlus,  FaExclamationTriangle, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 import { notify, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import { useAuth } from '../../useAuth';
 
 function InventoryModal({ item, onClose, onSave }) {
@@ -115,6 +116,7 @@ export function InventoryPage() {
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [filterCategory, setFilterCategory] = useState('All');
@@ -127,13 +129,15 @@ export function InventoryPage() {
 
   const loadItems = async (currentPage = page) => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await getInventoryItems(currentPage, PAGE_SIZE);
       const pageData = res.body;
       setItems(pageData?.content || []);
       setTotalPages(pageData?.totalPages ?? 0);
       setTotalElements(pageData?.totalElements ?? 0);
-    } catch (_err) {
+    } catch (err) {
+      setLoadError(err);
       notify('Failed to load inventory', 'error');
     } finally {
       setLoading(false);
@@ -207,6 +211,12 @@ export function InventoryPage() {
 
       {loading ? (
         <Spinner fullPage label="Loading inventory..." />
+      ) : loadError && items.length === 0 ? (
+        <ErrorState 
+          error={loadError} 
+          title="Could Not Load Inventory" 
+          onRetry={() => loadItems(page)} 
+        />
       ) : filteredItems.length === 0 ? (
         <div className={styles.loading}>No items found in inventory.</div>
       ) : (

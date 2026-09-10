@@ -853,3 +853,121 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Audit / History Button & Modal Styles ── */
+.historyBtn {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  padding: 0.32rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.historyBtn:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+.auditModalContent {
+  composes: modalContent;
+  max-width: 720px;
+  width: 95%;
+}
+
+.auditOverviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin: 0.85rem 0 1.25rem;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.auditMetaCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.auditMetaLabel {
+  font-size: 0.74rem;
+  color: var(--muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.auditMetaVal {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text, #edf6ff);
+}
+
+.auditHistoryWrapper {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  margin-bottom: 1.2rem;
+}
+
+.auditTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.auditTable th {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.55rem 0.75rem;
+  color: var(--muted, #94a3b8);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.auditTable td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text, #edf6ff);
+}
+
+.auditTable tr:last-child td {
+  border-bottom: none;
+}
+
+.emptyAudit {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--muted, #94a3b8);
+  font-size: 0.88rem;
+}
+
+.payActionBtn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 1.15rem;
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: opacity 0.15s ease;
+}
+
+.payActionBtn:hover {
+  opacity: 0.9;
+}
+

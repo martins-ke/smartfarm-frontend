@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './CustomerDetailsPage.module.css';
-import { getCustomerById, recordCustomerPayment, getCustomerSales } from '../../APIs/customer';
+import { getCustomerById, recordCustomerPayment, getCustomerSales, getSalePaymentHistory } from '../../APIs/customer';
 import { notify } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import {
   FaUserCheck,
   FaHandHoldingUsd,
@@ -20,8 +21,142 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaCalendarAlt,
-  FaMoneyBillWave
+  FaMoneyBillWave,
+  FaFileInvoiceDollar
 } from 'react-icons/fa';
+
+function SaleHistoryModal({ sale, customer, onClose, onPaySale }) {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!sale?.id) return;
+    let isMounted = true;
+    setLoading(true);
+    getSalePaymentHistory(customer?.id, sale.id)
+      .then((res) => {
+        if (isMounted) setPayments(Array.isArray(res) ? res : []);
+      })
+      .catch(() => {
+        if (isMounted) setPayments([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => { isMounted = false; };
+  }, [sale?.id, customer?.id]);
+
+  const totalBilled = Number(sale.total_amount || 0);
+  const totalPaid = Number(sale.amountPaid || (sale.amount_paid !== undefined ? sale.amount_paid : totalBilled));
+  const balanceDue = Number(sale.balanceDue || (totalBilled - totalPaid));
+  const isFullyPaid = balanceDue <= 0;
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.auditModalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h3><FaHistory /> Sale Payment & Installment Audit</h3>
+          <button className={styles.closeBtn} onClick={onClose}><FaTimes /></button>
+        </div>
+
+        <p className={styles.customerSubText}>
+          Customer: <strong>{customer?.name}</strong> | Item: <strong>{sale.item}</strong> (#{sale.id?.slice(0, 8).toUpperCase()})
+        </p>
+
+        {/* Overview Metric Grid */}
+        <div className={styles.auditOverviewGrid}>
+          <div className={styles.auditMetaCard}>
+            <span className={styles.auditMetaLabel}>Total Invoice</span>
+            <span className={styles.auditMetaVal}>KES {totalBilled.toLocaleString()}</span>
+          </div>
+          <div className={styles.auditMetaCard}>
+            <span className={styles.auditMetaLabel}>Total Paid</span>
+            <span className={`${styles.auditMetaVal} ${styles.successText}`}>KES {totalPaid.toLocaleString()}</span>
+          </div>
+          <div className={styles.auditMetaCard}>
+            <span className={styles.auditMetaLabel}>Balance Due</span>
+            <span className={`${styles.auditMetaVal} ${balanceDue > 0 ? styles.warningText : styles.successText}`}>
+              KES {balanceDue.toLocaleString()}
+            </span>
+          </div>
+          <div className={styles.auditMetaCard}>
+            <span className={styles.auditMetaLabel}>Status</span>
+            <span className={isFullyPaid ? styles.statusPaidBadge : styles.statusPartialBadge}>
+              {isFullyPaid ? 'PAID IN FULL' : 'ACTIVE DEBT'}
+            </span>
+          </div>
+        </div>
+
+        {/* Installment History Table */}
+        <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text, #edf6ff)' }}>
+          Installment Payment Breakdown
+        </h4>
+
+        {loading ? (
+          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <Spinner label="Loading payment audit logs..." />
+          </div>
+        ) : payments.length === 0 ? (
+          <div className={styles.emptyAudit}>
+            <p>No separate installment payments logged yet for this sale.</p>
+            {balanceDue > 0 && (
+              <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>This balance can be paid in installments using the button below.</p>
+            )}
+          </div>
+        ) : (
+          <div className={styles.auditHistoryWrapper}>
+            <table className={styles.auditTable}>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Mode</th>
+                  <th>Reference</th>
+                  <th style={{ textAlign: 'right' }}>Amount Paid</th>
+                  <th style={{ textAlign: 'right' }}>Balance After</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.paymentDate || 'Recent'}</td>
+                    <td>
+                      <span className={styles.modeBadge}>{p.paymentMode || 'CASH'}</span>
+                    </td>
+                    <td><strong>{p.referenceNumber || '—'}</strong></td>
+                    <td style={{ textAlign: 'right', color: '#10b981', fontWeight: 600 }}>
+                      KES {Number(p.amount || 0).toLocaleString()}
+                    </td>
+                    <td style={{ textAlign: 'right', color: '#94a3b8' }}>
+                      KES {Number(p.balanceAfter || 0).toLocaleString()}
+                    </td>
+                    <td style={{ color: '#cbd5e1', fontSize: '0.78rem' }}>{p.notes || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className={styles.modalActions} style={{ justifyContent: 'space-between' }}>
+          <button type="button" className={styles.cancelBtn} onClick={onClose}>Close</button>
+          {!isFullyPaid && (
+            <button 
+              type="button" 
+              className={styles.payActionBtn}
+              onClick={() => {
+                onClose();
+                onPaySale(sale);
+              }}
+            >
+              <FaHandHoldingUsd /> Pay Towards This Sale
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function CustomerDetailsPage() {
   const { customerId } = useParams();
@@ -29,6 +164,7 @@ export function CustomerDetailsPage() {
 
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   // Paginated Purchase History State (Page size 10, latest first)
   const [sales, setSales] = useState([]);
@@ -38,16 +174,27 @@ export function CustomerDetailsPage() {
   const [salesTotalElements, setSalesTotalElements] = useState(0);
   const SALES_PAGE_SIZE = 10;
 
-  // Payment Modal
+  // Selected Sale for Payment History Audit Modal
+  const [selectedSaleForHistory, setSelectedSaleForHistory] = useState(null);
+
+  // Payment Modal State
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState('');
+  const [targetSaleForPayment, setTargetSaleForPayment] = useState(null);
+  const [paymentForm, setPaymentForm] = useState({
+    amount: '',
+    paymentMode: 'MPESA',
+    referenceNumber: '',
+    notes: ''
+  });
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await getCustomerById(customerId);
       setCustomer(res);
     } catch (err) {
+      setLoadError(err);
       notify(err.message || 'Failed to load customer details', 'error');
     } finally {
       setLoading(false);
@@ -81,17 +228,37 @@ export function CustomerDetailsPage() {
     }
   }, [customerId, salesPage, customer?.contact]);
 
+  const handleOpenPaymentModal = (sale = null) => {
+    setTargetSaleForPayment(sale);
+    const maxDue = sale ? Number(sale.balanceDue || (sale.total_amount - (sale.amountPaid || 0))) : Number(customer?.outstandingDebt || 0);
+    setPaymentForm({
+      amount: maxDue > 0 ? String(maxDue) : '',
+      paymentMode: 'MPESA',
+      referenceNumber: '',
+      notes: sale ? `Installment payment for ${sale.item}` : 'General debt settlement'
+    });
+    setShowPaymentModal(true);
+  };
+
   const handleRecordPayment = async (e) => {
     e.preventDefault();
-    if (!paymentAmount || Number(paymentAmount) <= 0) {
+    const amt = Number(paymentForm.amount);
+    if (!paymentForm.amount || amt <= 0) {
       notify('Please enter a valid payment amount', 'error');
       return;
     }
     try {
-      await recordCustomerPayment(customer.id, Number(paymentAmount));
-      notify('Payment recorded successfully!', 'success');
+      await recordCustomerPayment(customer.id, {
+        amount: amt,
+        paymentMode: paymentForm.paymentMode,
+        referenceNumber: paymentForm.referenceNumber,
+        saleId: targetSaleForPayment?.id || null,
+        notes: paymentForm.notes
+      });
+      notify('Payment recorded successfully ✅', 'success');
       setShowPaymentModal(false);
-      setPaymentAmount('');
+      setTargetSaleForPayment(null);
+      setPaymentForm({ amount: '', paymentMode: 'MPESA', referenceNumber: '', notes: '' });
       loadData();
       loadSales(salesPage);
     } catch (err) {
@@ -121,7 +288,12 @@ export function CustomerDetailsPage() {
         <div className={styles.breadcrumbs}>
           <span className={styles.breadcrumbLink} onClick={() => navigate('/customers')}>Customers</span> / <strong>Not Found</strong>
         </div>
-        <p style={{ marginTop: '1.5rem', color: '#94a3b8' }}>Customer not found or has been removed.</p>
+        <ErrorState
+          error={loadError || 'Customer not found or has been removed.'}
+          title="Customer Unavailable"
+          onRetry={loadData}
+          variant="card"
+        />
       </div>
     );
   }
@@ -161,7 +333,7 @@ export function CustomerDetailsPage() {
 
         <div className={styles.headerActions}>
           {debt > 0 && (
-            <button className={styles.actionBtnCollect} onClick={() => setShowPaymentModal(true)}>
+            <button className={styles.actionBtnCollect} onClick={() => handleOpenPaymentModal(null)}>
               <FaHandHoldingUsd /> Collect Payment
             </button>
           )}
@@ -210,27 +382,20 @@ export function CustomerDetailsPage() {
               className={styles.progressBarFill} 
               style={{ 
                 width: `${utilizationPercent}%`,
-                backgroundColor: debt >= creditLimit ? '#ef4444' : debt > creditLimit * 0.75 ? '#f59e0b' : '#10b981'
-              }}
+                background: debt >= creditLimit ? '#ef4444' : debt > creditLimit * 0.75 ? '#f59e0b' : '#10b981'
+              }} 
             />
           </div>
         </div>
       )}
 
-      {/* Two Column Layout: Profile & AR Ledger */}
+      {/* Two-Column Details Grid */}
       <div className={styles.detailsGrid}>
+        {/* Contact & KYC Info */}
         <div className={styles.detailsCard}>
-          <h3>Buyer & Contact Information</h3>
+          <h3>Account Information & KYC</h3>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Customer / Business:</span>
-            <strong className={styles.infoValue}>{customer.name}</strong>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Category:</span>
-            <span className={styles.infoValue}>{customer.category || 'General Produce Buyer'}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Phone / M-Pesa:</span>
+            <span className={styles.infoLabel}>Primary Phone:</span>
             <span className={styles.infoValue}>
               {customer.contact ? (
                 <a href={`tel:${customer.contact}`} className={styles.contactLink}>
@@ -240,104 +405,111 @@ export function CustomerDetailsPage() {
             </span>
           </div>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>National ID / Reg No:</span>
-            <strong className={styles.infoValue}>{customer.id_number || '-'}</strong>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Location:</span>
-            <span className={styles.infoValue}>{customer.address || '-'}</span>
-          </div>
-        </div>
-
-        <div className={styles.detailsCard}>
-          <h3>Accounts Receivable Ledger</h3>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Invoiced Sales:</span>
-            <strong className={styles.infoValue}>KES {Number(customer.totalPurchases || 0).toLocaleString()}</strong>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Payments Remitted:</span>
-            <strong className={`${styles.infoValue} ${styles.successText}`}>KES {Number(customer.totalPaid || 0).toLocaleString()}</strong>
-          </div>
-          <div className={`${styles.infoRow} ${styles.infoRowHighlight}`}>
-            <span className={styles.infoLabel}>Debt Balance:</span>
-            <strong className={`${styles.infoValue} ${debt > 0 ? styles.warningText : styles.successText}`}>
-              KES {debt.toLocaleString()}
+            <span className={styles.infoLabel}>National ID / Passport:</span>
+            <strong className={styles.infoValue}>
+              <FaIdCard className={styles.iconMini} /> {customer.idNumber || customer.id_number || '-'}
             </strong>
           </div>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Credit Line:</span>
-            <strong className={styles.infoValue}>KES {creditLimit.toLocaleString()}</strong>
+            <span className={styles.infoLabel}>Delivery Address:</span>
+            <span className={styles.infoValue}>
+              <FaMapMarkerAlt className={styles.iconMini} /> {customer.address || '-'}
+            </span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Customer Category:</span>
+            <span className={styles.infoValue}>{customer.category || 'General Produce Buyer'}</span>
           </div>
           <div className={styles.infoRow}>
             <span className={styles.infoLabel}>Account Status:</span>
             <span className={styles.infoValue}>
+              <span className={customer.isActive !== false ? styles.activeBadge : styles.inactiveBadge}>
+                {customer.isActive !== false ? 'Active & Approved' : 'Inactive'}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        {/* Credit Rules & Terms */}
+        <div className={styles.detailsCard}>
+          <h3>Credit Policy & Rules</h3>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Credit Allowed:</span>
+            <strong className={styles.infoValue}>{creditLimit > 0 ? `Yes (Up to KES ${creditLimit.toLocaleString()})` : 'No (Strict Cash & Carry)'}</strong>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Standing Risk:</span>
+            <span className={styles.infoValue}>
               {isBlocked ? (
-                <span className={styles.statusBlocked}><FaBan /> CREDIT BLOCKED</span>
+                <span className={styles.blockedBadge}>Blocked from Credit</span>
               ) : debt > 0 ? (
-                <span className={styles.statusDebt}><FaExclamationTriangle /> HAS DEBT</span>
+                <span className={styles.hasDebtBadge}>Pending Settlement</span>
               ) : (
-                <span className={styles.statusGoodStanding}><FaCheckCircle /> ACTIVE</span>
+                <span className={styles.clearedBadge}>Clean & Zero Balance</span>
               )}
             </span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Settlement Term:</span>
+            <span className={styles.infoValue}>Net 14 Days</span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Customer ID:</span>
+            <span className={styles.infoValue} style={{ fontFamily: 'monospace' }}>{customer.id}</span>
           </div>
         </div>
       </div>
 
-      {/* ── Buyer Purchase History Table (Paginated, Size 10, Latest First) ── */}
-      <div className={styles.historyCard}>
-        <div className={styles.historyHeader}>
-          <div className={styles.historyHeaderLeft}>
-            <h3 className={styles.historyTitle}>
-              <FaHistory className={styles.sectionIcon} /> Buyer Order History
-            </h3>
-            <span className={styles.historySub}>
-              Farm produce purchases (latest first)
-            </span>
+      {/* Purchases & Invoices Ledger Table */}
+      <div className={styles.tableCard}>
+        <div className={styles.tableHeader}>
+          <div className={styles.tableHeaderLeft}>
+            <h2>
+              <FaShoppingBag /> Produce Invoices & Sales Ledger
+            </h2>
+            <span className={styles.historyCount}>{salesTotalElements} Recorded Sales</span>
           </div>
-          <span className={styles.countBadge}>
-            {salesTotalElements} {salesTotalElements === 1 ? 'Order' : 'Orders'}
-          </span>
         </div>
 
         {salesLoading ? (
-          <div className={styles.historySpinner}>
+          <div style={{ padding: '2rem 1rem', textAlign: 'center' }}>
             <Spinner label="Loading purchase history..." />
           </div>
         ) : sales.length === 0 ? (
-          <div className={styles.emptyHistory}>
+          <div className={styles.emptyState}>
             <FaShoppingBag className={styles.emptyIcon} />
-            <p>No purchase records found for this buyer yet.</p>
+            <p>No purchase records found for this customer.</p>
           </div>
         ) : (
           <>
             <div className={styles.tableWrapper}>
-              <table className={styles.historyTable}>
+              <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Date</th>
+                    <th style={{ minWidth: '105px' }}>Date & Ref</th>
                     <th>Produce Item</th>
                     <th>Qty & Rate</th>
-                    <th style={{ textAlign: 'right' }}>Total</th>
+                    <th style={{ textAlign: 'right' }}>Total Billed</th>
                     <th>Mode</th>
                     <th style={{ textAlign: 'right' }}>Paid / Due</th>
                     <th style={{ textAlign: 'center' }}>Status</th>
+                    <th style={{ textAlign: 'center' }}>Audit</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sales.map((sale) => {
                     const totalAmt = Number(sale.total_amount || 0);
-                    const paidAmt = Number(sale.amountPaid !== undefined ? sale.amountPaid : totalAmt);
+                    const paidAmt = Number(sale.amountPaid !== undefined ? sale.amountPaid : (sale.amount_paid !== undefined ? sale.amount_paid : totalAmt));
                     const dueAmt = Number(sale.balanceDue !== undefined ? sale.balanceDue : (totalAmt - paidAmt));
-                    const status = (sale.paymentStatus || (dueAmt > 0 ? 'PARTIAL' : 'PAID_IN_FULL')).toUpperCase();
                     const isFullyPaid = dueAmt <= 0;
+                    const status = sale.paymentStatus || (isFullyPaid ? 'PAID_IN_FULL' : paidAmt > 0 ? 'PARTIAL_PAYMENT' : 'CREDIT_UNPAID');
 
                     return (
-                      <tr key={sale.id} className={styles.historyRow}>
-                        {/* Date */}
+                      <tr key={sale.id}>
+                        {/* Date & Ref */}
                         <td>
                           <div className={styles.dateCell}>
-                            <span className={styles.dateText}>
+                            <span className={styles.dateMain}>
                               <FaCalendarAlt className={styles.miniIcon} /> {sale.added_on || '—'}
                             </span>
                             <span className={styles.receiptId}>
@@ -406,6 +578,18 @@ export function CustomerDetailsPage() {
                             </span>
                           )}
                         </td>
+
+                        {/* Audit / History Button */}
+                        <td style={{ textAlign: 'center' }}>
+                          <button
+                            type="button"
+                            className={styles.historyBtn}
+                            onClick={() => setSelectedSaleForHistory(sale)}
+                            title="View Installment Payment History"
+                          >
+                            <FaHistory /> Audit
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -413,7 +597,7 @@ export function CustomerDetailsPage() {
               </table>
             </div>
 
-            {/* Pagination Controls (Page size 10) */}
+            {/* Pagination Controls */}
             {salesTotalPages > 1 && (
               <div className={styles.paginationBar}>
                 <span className={styles.paginationInfo}>
@@ -449,6 +633,16 @@ export function CustomerDetailsPage() {
         )}
       </div>
 
+      {/* Modal: Sale Payment History Audit */}
+      {selectedSaleForHistory && (
+        <SaleHistoryModal
+          sale={selectedSaleForHistory}
+          customer={customer}
+          onClose={() => setSelectedSaleForHistory(null)}
+          onPaySale={(sale) => handleOpenPaymentModal(sale)}
+        />
+      )}
+
       {/* Modal: Record Payment */}
       {showPaymentModal && (
         <div className={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
@@ -458,7 +652,12 @@ export function CustomerDetailsPage() {
               <button className={styles.closeBtn} onClick={() => setShowPaymentModal(false)}><FaTimes /></button>
             </div>
             <p className={styles.customerSubText}>
-              Customer: <strong>{customer.name}</strong> | Outstanding: <strong className={styles.warningText}>KES {debt.toLocaleString()}</strong>
+              Customer: <strong>{customer.name}</strong> | Total Debt: <strong className={styles.warningText}>KES {debt.toLocaleString()}</strong>
+              {targetSaleForPayment && (
+                <span style={{ display: 'block', marginTop: '0.25rem', color: '#38bdf8' }}>
+                  Target Invoice: #{targetSaleForPayment.id?.slice(0, 8).toUpperCase()} ({targetSaleForPayment.item})
+                </span>
+              )}
             </p>
             <form onSubmit={handleRecordPayment} className={styles.form}>
               <div className={styles.formGroup}>
@@ -467,13 +666,47 @@ export function CustomerDetailsPage() {
                   type="number" 
                   required 
                   min="1" 
-                  max={debt} 
+                  max={targetSaleForPayment ? Number(targetSaleForPayment.balanceDue || debt) : debt} 
                   placeholder="e.g. 15000" 
-                  value={paymentAmount} 
-                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  value={paymentForm.amount} 
+                  onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
                 />
               </div>
-              <div className={styles.modalActions}>
+
+              <div className={styles.formGroup} style={{ marginTop: '0.75rem' }}>
+                <label>Payment Mode *</label>
+                <select 
+                  value={paymentForm.paymentMode} 
+                  onChange={(e) => setPaymentForm({ ...paymentForm, paymentMode: e.target.value })}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#edf6ff' }}
+                >
+                  <option value="MPESA">M-Pesa (Mobile Money)</option>
+                  <option value="CASH">Cash (Farm-Gate Handover)</option>
+                  <option value="BANK_TRANSFER">Bank Transfer / EFT / Cheque</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup} style={{ marginTop: '0.75rem' }}>
+                <label>Reference / Transaction Code <span style={{ color: 'var(--muted)', fontWeight: 'normal' }}>(Optional)</span></label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. QKJ8819201" 
+                  value={paymentForm.referenceNumber} 
+                  onChange={(e) => setPaymentForm({ ...paymentForm, referenceNumber: e.target.value })}
+                />
+              </div>
+
+              <div className={styles.formGroup} style={{ marginTop: '0.75rem' }}>
+                <label>Notes / Remarks</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Installment 1 of 3" 
+                  value={paymentForm.notes} 
+                  onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
+                />
+              </div>
+
+              <div className={styles.modalActions} style={{ marginTop: '1.25rem' }}>
                 <button type="button" className={styles.cancelBtn} onClick={() => setShowPaymentModal(false)}>Cancel</button>
                 <button type="submit" className={styles.submitBtn}>Record Payment</button>
               </div>

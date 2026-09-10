@@ -10,6 +10,7 @@ import { getInventoryItems } from '../../APIs/inventory';
 import { ActivityLaborModal } from '../../Components/Labor/ActivityLaborModal';
 import { notify, alertModal, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import useAuth from '../../useAuth';
 
 // Modular Sub-Components
@@ -67,6 +68,7 @@ export function ProjectDashboardPage() {
   const [customers, setCustomers] = useState([]);
   const [openCustomerList, setOpenCustomerList] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   // Privileges
   const canEditProject = isAdmin || (isManager && userPrivileges.includes('CAN_MANAGE_BUDGETS'));
@@ -144,52 +146,47 @@ export function ProjectDashboardPage() {
     }));
   }, [project?.harvest, project?.sales]);
 
+  const loadData = async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const [projectRes, customersRes] = await Promise.allSettled([
+        getProjectById(projectId),
+        requestAllCustomers(),
+      ]);
+
+      if (projectRes.status === 'fulfilled') {
+        setProject(unwrapResponse(projectRes.value));
+      } else {
+        setProject(null);
+        setLoadError(projectRes.reason);
+        const errMsg = projectRes.reason?.message || 'Failed to load project details';
+        if (
+          errMsg.toLowerCase().includes('access denied') ||
+          errMsg.toLowerCase().includes('not assigned')
+        ) {
+          alertModal(errMsg || 'Access Denied: You are not assigned to this project.', 'error');
+          navigate('/');
+          return;
+        }
+        notify(errMsg, 'error');
+      }
+
+      if (customersRes.status === 'fulfilled') {
+        const custData = unwrapResponse(customersRes.value);
+        setCustomers(Array.isArray(custData) ? custData : []);
+      } else {
+        setCustomers([]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load project and customer data
   useEffect(() => {
-    let isMounted = true;
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const [projectRes, customersRes] = await Promise.allSettled([
-          getProjectById(projectId),
-          requestAllCustomers(),
-        ]);
-
-        if (isMounted) {
-          if (projectRes.status === 'fulfilled') {
-            setProject(unwrapResponse(projectRes.value));
-          } else {
-            setProject(null);
-            const errMsg = projectRes.reason?.message || 'Failed to load project details';
-            if (
-              errMsg.toLowerCase().includes('access denied') ||
-              errMsg.toLowerCase().includes('not assigned')
-            ) {
-              alertModal(errMsg || 'Access Denied: You are not assigned to this project.', 'error');
-              navigate('/');
-              return;
-            }
-            notify(errMsg, 'error');
-          }
-
-          if (customersRes.status === 'fulfilled') {
-            const custData = unwrapResponse(customersRes.value);
-            setCustomers(Array.isArray(custData) ? custData : []);
-          } else {
-            setCustomers([]);
-          }
-        }
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
     if (projectId) loadData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [projectId, navigate]);
+  }, [projectId]);
 
   // Customer handlers
   const handleCustomerSave = (data) => {
@@ -464,24 +461,12 @@ export function ProjectDashboardPage() {
 
   if (!project) {
     return (
-      <div className={styles.page} style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-        <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '1.5rem' }}>
-          Project not found or access denied.
-        </p>
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            padding: '0.6rem 1.2rem',
-            borderRadius: '0.45rem',
-            backgroundColor: '#10b981',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-            fontWeight: 600,
-          }}
-        >
-          Return to Dashboard
-        </button>
+      <div className={styles.page}>
+        <ErrorState
+          error={loadError || 'Project not found or access denied.'}
+          title="Project Unavailable"
+          onRetry={loadData}
+        />
       </div>
     );
   }

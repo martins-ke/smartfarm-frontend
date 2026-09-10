@@ -44,9 +44,19 @@ export default function DonutChart({
       <div className={styles.donutSvgContainer} style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: 'block' }}>
           <g transform={`translate(${size / 2}, ${size / 2})`}>
+            {/* Background base track ring */}
+            <circle
+              r={radius}
+              cx={0}
+              cy={0}
+              fill="transparent"
+              stroke="var(--border, rgba(255, 255, 255, 0.08))"
+              strokeWidth={thickness}
+            />
+
             {segments.map((seg, idx) => {
               const value = Math.max(0, Number(seg.value) || 0);
-              const portion = value / total;
+              const portion = total > 0 ? value / total : 0;
               const dash = portion * circumference;
               const dashArray = `${dash} ${circumference - dash}`;
               const stroke = seg.color || ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'][idx % 4];
@@ -78,7 +88,7 @@ export default function DonutChart({
 
         <div className={styles.donutCenter}>
           <div className={styles.donutValue}>{displayTotal}</div>
-          <div className={styles.donutLabel}>{centerLabel}</div>
+          {centerLabel ? <div className={styles.donutLabel}>{centerLabel}</div> : null}
         </div>
       </div>
 

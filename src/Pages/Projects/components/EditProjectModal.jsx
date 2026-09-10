@@ -67,10 +67,7 @@ export function EditProjectModal({
                 }
               >
                 <option value="active">Active</option>
-                <option value="in_progress">In progress</option>
                 <option value="completed">Completed</option>
-                <option value="done">Done</option>
-                <option value="inactive">Inactive</option>
               </select>
             </label>
           </div>

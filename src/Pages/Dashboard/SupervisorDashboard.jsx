@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './SupervisorDashboard.module.css';
 import { getSupervisorProjects } from '../../APIs/user';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import { 
   FaHardHat, 
   FaLeaf, 
@@ -32,6 +33,7 @@ export default function SupervisorDashboard({ user }) {
   const searchInputRef = useRef(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
@@ -59,35 +61,27 @@ export default function SupervisorDashboard({ user }) {
     return 'Good evening';
   }, []);
 
+  const loadProjects = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const response = await getSupervisorProjects(user.id);
+      const data = normalizeArrayResponse(response);
+      setProjects(data);
+    } catch (err) {
+      setLoadError(err);
+      setProjects([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-
-    const loadProjects = async () => {
-      if (!user?.id) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const response = await getSupervisorProjects(user.id);
-        const data = normalizeArrayResponse(response);
-        if (isMounted) {
-          setProjects(data);
-        }
-      } catch (_err) {
-        if (isMounted) {
-          setProjects([]);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
     loadProjects();
-    return () => {
-      isMounted = false;
-    };
   }, [user?.id]);
 
   // Sector classification helper
@@ -163,10 +157,10 @@ export default function SupervisorDashboard({ user }) {
   // Summary Metrics
   const totalProjects = projects.length;
   const activeCount = projects.filter(
-    (p) => String(p.status || '').toLowerCase() === 'active' || String(p.status || '').toLowerCase() === 'in_progress'
+    (p) => String(p.status || '').toLowerCase() === 'active'
   ).length;
-  const planningCount = projects.filter(
-    (p) => String(p.status || '').toLowerCase() === 'planning' || String(p.status || '').toLowerCase() === 'pending'
+  const completedCount = projects.filter(
+    (p) => String(p.status || '').toLowerCase() === 'completed' || String(p.status || '').toLowerCase() === 'done'
   ).length;
 
   const handleOpenWorkspace = (project) => {
@@ -251,7 +245,7 @@ export default function SupervisorDashboard({ user }) {
                 <span className={styles.metricLabel}>Assigned Projects</span>
                 <p className={styles.metricValue}>{totalProjects}</p>
                 <span className={styles.metricSub}>
-                  {activeCount} active • {planningCount} planning
+                  {activeCount} active • {completedCount} completed
                 </span>
               </div>
             </article>
@@ -357,7 +351,14 @@ export default function SupervisorDashboard({ user }) {
             </h2>
           </section>
 
-          {filteredProjects.length === 0 ? (
+          {loadError && projects.length === 0 ? (
+            <ErrorState
+              error={loadError}
+              title="Could Not Load Field Projects"
+              onRetry={loadProjects}
+              variant="card"
+            />
+          ) : filteredProjects.length === 0 ? (
             /* Empty Filter Result */
             <div className={styles.zeroStateCard}>
               <div className={styles.zeroIconWrap}>

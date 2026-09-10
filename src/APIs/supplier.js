@@ -50,9 +50,36 @@ export const recordSupplierPurchase = async (purchaseData) => {
 };
 
 export const recordSupplierPayment = async (supplierId, paymentData) => {
+  const payload = typeof paymentData === 'object'
+    ? paymentData
+    : { amount: Number(paymentData) };
+
   const res = await apiClient(`/suppliers/${supplierId}/payments`, {
     method: 'POST',
-    body: JSON.stringify(paymentData),
+    body: JSON.stringify(payload),
   });
   return unwrap(res);
+};
+
+export const getSupplierPayments = async (supplierId) => {
+  try {
+    const res = await apiClient(`/suppliers/${supplierId}/payments`);
+    const data = unwrap(res);
+    return Array.isArray(data) ? data : [];
+  } catch (_err) {
+    return [];
+  }
+};
+
+export const getPurchasePaymentHistory = async (supplierId, purchaseId) => {
+  try {
+    const url = supplierId
+      ? `/suppliers/${supplierId}/purchases/${purchaseId}/payments`
+      : `/suppliers/purchases/${purchaseId}/payments`;
+    const res = await apiClient(url);
+    const data = unwrap(res);
+    return Array.isArray(data) ? data : [];
+  } catch (_err) {
+    return [];
+  }
 };

@@ -1,17 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Dashboard.module.css';
 import useAuth from '../../useAuth';
-import { requestDashboardSummary } from '../../APIs/dashboard';
+import { requestDashboardSummary, requestDashboardTransactions } from '../../APIs/dashboard';
 import DonutChart from './DonutChart';
 import LineChart from './LineChart';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import {
   FaMoneyBillWave, FaProjectDiagram, FaExclamationTriangle,
   FaUsers, FaArrowRight, FaChartLine, FaTractor, FaWallet,
   FaUserShield, FaChartPie, FaChartBar, FaCheckCircle, FaHandHoldingUsd,
   FaExchangeAlt, FaArrowUp, FaArrowDown, FaSearch
 } from 'react-icons/fa';
+
+const TX_PAGE_SIZE = 5;
 
 // Admin & Manager dashboard only. Supervisors use SupervisorDashboard.
 export function UnifiedDashboard() {
@@ -21,18 +24,105 @@ export function UnifiedDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
+
+  // Server-side paginated transactions state
   const [txFilter, setTxFilter] = useState('ALL'); // 'ALL' | 'SALES' | 'SUPPLIES'
   const [txSearch, setTxSearch] = useState('');
+  const [txPage, setTxPage] = useState(1);
+  const [txLoading, setTxLoading] = useState(false);
+  const [txData, setTxData] = useState({
+    content: [],
+    page: 1,
+    size: TX_PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+    totalSalesCount: 0,
+    totalSuppliesCount: 0,
+    totalSalesInflow: 0,
+    totalSuppliesOutflow: 0,
+  });
+
+  const fetchSummary = () => {
+    setLoading(true);
+    setFetchError(null);
+    requestDashboardSummary()
+      .then((res) => {
+        const payload = res?.body || res?.data || res;
+        if (payload && typeof payload === 'object') {
+          setData(payload);
+        } else {
+          setFetchError('No data payload returned from server.');
+        }
+      })
+      .catch((err) => {
+        console.error('Dashboard fetch failed:', err);
+        setFetchError(err.message || 'Could not connect to the backend server.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const fetchTransactions = (targetPage = txPage) => {
+    setTxLoading(true);
+    requestDashboardTransactions({
+      page: targetPage,
+      size: TX_PAGE_SIZE,
+      filter: txFilter,
+      search: txSearch,
+    })
+      .then((res) => {
+        const payload = res?.body || res?.data || res;
+        if (payload && payload.content) {
+          setTxData(payload);
+        }
+      })
+      .catch((err) => {
+        console.error('Transactions fetch failed:', err);
+      })
+      .finally(() => {
+        setTxLoading(false);
+      });
+  };
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    requestDashboardSummary()
-      .then(res => { if (mounted && res?.body) setData(res.body); })
-      .catch(err => console.error('Dashboard fetch failed:', err))
-      .finally(() => { if (mounted) setLoading(false); });
-    return () => { mounted = false; };
+    fetchSummary();
   }, []);
+
+  // Fetch transactions from backend whenever page, filter, or search changes
+  useEffect(() => {
+    fetchTransactions(txPage);
+  }, [txPage, txFilter, txSearch]);
+
+  // Reset page when filter or search changes
+  const handleFilterChange = (newFilter) => {
+    setTxFilter(newFilter);
+    setTxPage(1);
+  };
+
+  const handleSearchChange = (newSearch) => {
+    setTxSearch(newSearch);
+    setTxPage(1);
+  };
+
+  // Safe fallback to summary transactions if server pagination response hasn't populated yet
+  const displayTx = useMemo(() => {
+    if (txData.content && txData.content.length > 0) return txData.content;
+    if (txData.totalElements === 0 && (data?.tables?.recentTransactions || []).length > 0 && !txSearch && txFilter === 'ALL') {
+      return (data?.tables?.recentTransactions || []).slice(0, TX_PAGE_SIZE);
+    }
+    return txData.content || [];
+  }, [txData.content, txData.totalElements, data?.tables?.recentTransactions, txSearch, txFilter]);
+
+  const totalSalesInflow = Number(txData.totalSalesInflow || 0);
+  const totalSuppliesOutflow = Number(txData.totalSuppliesOutflow || 0);
+  const totalTxCount = Number(txData.totalElements || 0);
+  const totalTxPages = Math.max(1, Number(txData.totalPages || 1));
+  const salesCount = Number(txData.totalSalesCount || 0);
+  const suppliesCount = Number(txData.totalSuppliesCount || 0);
 
   if (loading) {
     return (
@@ -44,14 +134,14 @@ export function UnifiedDashboard() {
     );
   }
 
-  if (!data) {
+  if (!data || fetchError) {
     return (
       <div className={styles.container}>
-        <div className={styles.zeroStateCard}>
-          <div className={styles.zeroStateIconWrap}><FaChartBar /></div>
-          <h3 className={styles.zeroStateTitle}>Dashboard Unavailable</h3>
-          <p className={styles.zeroStateDesc}>Could not load summary data. Please try refreshing.</p>
-        </div>
+        <ErrorState
+          error={fetchError || 'Could not load summary data.'}
+          title="Dashboard Unavailable"
+          onRetry={fetchSummary}
+        />
       </div>
     );
   }
@@ -65,12 +155,11 @@ export function UnifiedDashboard() {
   }));
 
   const statusSegments = tables?.projectStatusSplit ? [
-    { label: 'Active',    value: tables.projectStatusSplit.active,    color: '#10b981' },
-    { label: 'Pending',   value: tables.projectStatusSplit.pending,   color: '#f59e0b' },
-    { label: 'Completed', value: tables.projectStatusSplit.completed, color: '#6366f1' },
+    { label: 'Active',    value: Number(tables.projectStatusSplit.active || 0),    color: '#10b981' },
+    { label: 'Completed', value: Number(tables.projectStatusSplit.completed || 0), color: '#3b82f6' },
   ] : [];
 
-  const salesTrendData = (charts?.salesTrend || []).map(t => ({
+  const salesTrendData = (charts?.salesTrend || []).map((t) => ({
     label: t.date,
     value: Number(t.amount) || 0,
   }));
@@ -79,29 +168,6 @@ export function UnifiedDashboard() {
   const total = Number(budget?.totalBudget || 1);
   const budgetPct = Math.min(100, (spent / total) * 100);
   const overBudget = spent > total;
-
-  const allTx = tables?.recentTransactions || [];
-  const salesCount = (tables?.recentSales || []).length;
-  const suppliesCount = (tables?.recentSupplies || []).length;
-
-  const totalSalesInflow = (tables?.recentSales || []).reduce((acc, s) => acc + (Number(s.totalAmount) || 0), 0);
-  const totalSuppliesOutflow = (tables?.recentSupplies || []).reduce((acc, s) => acc + (Number(s.invoiceAmount) || 0), 0);
-
-  const filteredTx = allTx.filter((tx) => {
-    if (txFilter === 'SALES' && tx.type !== 'SALE') return false;
-    if (txFilter === 'SUPPLIES' && tx.type !== 'SUPPLY') return false;
-
-    if (txSearch.trim()) {
-      const q = txSearch.toLowerCase().trim();
-      const party = (tx.partyName || '').toLowerCase();
-      const desc = (tx.description || '').toLowerCase();
-      const ref = (tx.reference || tx.id || '').toLowerCase();
-      const status = (tx.paymentStatus || '').toLowerCase();
-      const mode = (tx.paymentMode || '').toLowerCase();
-      return party.includes(q) || desc.includes(q) || ref.includes(q) || status.includes(q) || mode.includes(q);
-    }
-    return true;
-  });
 
   return (
     <div className={styles.container}>
@@ -142,14 +208,16 @@ export function UnifiedDashboard() {
           <div className={styles.kpiInfo}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
               <p className={styles.kpiLabel}>Customer Debts</p>
-              <button
-                type="button"
-                className={styles.cardViewBtn}
-                onClick={() => navigate('/customers')}
-                title="View Customer Ledger & Debts"
-              >
-                View <FaArrowRight size={8} />
-              </button>
+              {Number(kpis?.pendingDebt || 0) > 0 && (
+                <button
+                  type="button"
+                  className={styles.cardViewBtn}
+                  onClick={() => navigate('/customers')}
+                  title="View Customer Ledger & Debts"
+                >
+                  View <FaArrowRight size={8} />
+                </button>
+              )}
             </div>
             <p className={styles.kpiValue} style={{ color: Number(kpis?.pendingDebt || 0) > 0 ? '#f59e0b' : 'var(--text)' }}>
               <span className={styles.currencyPrefix}>KES</span>
@@ -183,7 +251,7 @@ export function UnifiedDashboard() {
             <p className={styles.kpiLabel}>Active Projects</p>
             <p className={styles.kpiValue}>{kpis?.activeProjects || 0}</p>
             <p className={styles.kpiSub}>
-              {(tables?.projectStatusSplit?.pending || 0)} pending · {(tables?.projectStatusSplit?.completed || 0)} completed
+              {(tables?.projectStatusSplit?.completed || 0)} completed projects
             </p>
           </div>
           <div className={styles.kpiIconWrap} style={{ background: 'rgba(59,130,246,0.12)', color: '#3b82f6' }}>
@@ -226,9 +294,19 @@ export function UnifiedDashboard() {
         {isAdmin ? (
           <div className={styles.kpiCard}>
             <div className={styles.kpiInfo}>
-              <p className={styles.kpiLabel}>Active Customers</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
+                <p className={styles.kpiLabel}>Active Customers</p>
+                <button
+                  type="button"
+                  className={styles.cardViewBtn}
+                  onClick={() => navigate('/customers')}
+                  title="View Customer Directory"
+                >
+                  View <FaArrowRight size={8} />
+                </button>
+              </div>
               <p className={styles.kpiValue}>{kpis?.customerCount || 0}</p>
-              <p className={styles.kpiSub}>{workforce?.totalSupervisors || 0} supervisors · {workforce?.totalManagers || 0} managers</p>
+              <p className={styles.kpiSub}>Registered produce buyers & offtakers</p>
             </div>
             <div className={styles.kpiIconWrap} style={{ background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}>
               <FaUsers size={18} />
@@ -256,7 +334,7 @@ export function UnifiedDashboard() {
         <div className={styles.chartCard}>
           <h3 className={styles.chartTitle}><FaChartPie /> Revenue By Sector</h3>
           {revenueSegments.length > 0
-            ? <DonutChart segments={revenueSegments} size={160} thickness={20} centerLabel="Sectors" />
+            ? <DonutChart segments={revenueSegments} size={160} thickness={20} centerLabel="" />
             : <p style={{ color: 'var(--muted)', textAlign: 'center', marginTop: '2rem', fontSize: '0.88rem' }}>No revenue data yet.</p>
           }
         </div>
@@ -324,21 +402,21 @@ export function UnifiedDashboard() {
               <button
                 type="button"
                 className={`${styles.txTabBtn} ${txFilter === 'ALL' ? styles.txTabBtnActive : ''}`}
-                onClick={() => setTxFilter('ALL')}
+                onClick={() => handleFilterChange('ALL')}
               >
-                All <span className={styles.txCountPill}>{allTx.length}</span>
+                All <span className={styles.txCountPill}>{totalTxCount}</span>
               </button>
               <button
                 type="button"
                 className={`${styles.txTabBtn} ${txFilter === 'SALES' ? styles.txTabBtnActive : ''}`}
-                onClick={() => setTxFilter('SALES')}
+                onClick={() => handleFilterChange('SALES')}
               >
                 <FaArrowUp size={9} style={{ color: '#10b981' }} /> Sales Inflows <span className={styles.txCountPill}>{salesCount}</span>
               </button>
               <button
                 type="button"
                 className={`${styles.txTabBtn} ${txFilter === 'SUPPLIES' ? styles.txTabBtnActive : ''}`}
-                onClick={() => setTxFilter('SUPPLIES')}
+                onClick={() => handleFilterChange('SUPPLIES')}
               >
                 <FaArrowDown size={9} style={{ color: '#f59e0b' }} /> Supplies Outflows <span className={styles.txCountPill}>{suppliesCount}</span>
               </button>
@@ -351,7 +429,7 @@ export function UnifiedDashboard() {
                 className={styles.txSearchInput}
                 placeholder="Search transactions..."
                 value={txSearch}
-                onChange={(e) => setTxSearch(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
           </div>
@@ -375,8 +453,8 @@ export function UnifiedDashboard() {
           </div>
         </div>
 
-        <div className={styles.tableScrollWrap}>
-          {filteredTx.length > 0 ? (
+        <div className={styles.tableScrollWrap} style={{ opacity: txLoading ? 0.6 : 1, transition: 'opacity 0.2s ease' }}>
+          {displayTx.length > 0 ? (
             <table className={styles.dashTable}>
               <thead>
                 <tr>
@@ -390,7 +468,7 @@ export function UnifiedDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filteredTx.map((tx, idx) => {
+                {displayTx.map((tx, idx) => {
                   const isSale = tx.type === 'SALE';
                   const bal = Number(tx.balanceDue || 0);
 
@@ -449,9 +527,9 @@ export function UnifiedDashboard() {
                         )}
                       </td>
                       <td>
-                        {tx.paymentStatus?.toUpperCase() === 'PAID' ? (
+                        {tx.paymentStatus?.toUpperCase() === 'PAID' || tx.paymentStatus?.toUpperCase() === 'PAID_IN_FULL' ? (
                           <span className={styles.badgePaid}>Paid</span>
-                        ) : tx.paymentStatus?.toUpperCase() === 'PARTIAL' ? (
+                        ) : tx.paymentStatus?.toUpperCase() === 'PARTIAL' || tx.paymentStatus?.toUpperCase() === 'PARTIAL_PAYMENT' ? (
                           <span className={styles.badgePartial}>Partial</span>
                         ) : (
                           <span className={styles.badgeUnpaid}>Unpaid</span>
@@ -485,6 +563,52 @@ export function UnifiedDashboard() {
             </p>
           )}
         </div>
+
+        {/* ── Transaction Pagination Controls ── */}
+        {totalTxCount > TX_PAGE_SIZE && (
+          <div className={styles.txPaginationWrap}>
+            <div className={styles.txPaginationInfo}>
+              Showing <strong>{(txPage - 1) * TX_PAGE_SIZE + 1}</strong> to{' '}
+              <strong>{Math.min(txPage * TX_PAGE_SIZE, totalTxCount)}</strong> of{' '}
+              <strong>{totalTxCount}</strong> transactions
+            </div>
+            <div className={styles.txPaginationControls}>
+              <button
+                type="button"
+                className={styles.txPageBtn}
+                onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+                disabled={txPage <= 1 || txLoading}
+                title="Previous Page (Fetches from backend)"
+              >
+                ← Prev
+              </button>
+
+              <div className={styles.txPagePills}>
+                {Array.from({ length: totalTxPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    className={`${styles.txPagePill} ${txPage === pageNum ? styles.txPagePillActive : ''}`}
+                    onClick={() => setTxPage(pageNum)}
+                    disabled={txLoading}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                className={styles.txPageBtn}
+                onClick={() => setTxPage((p) => Math.min(totalTxPages, p + 1))}
+                disabled={txPage >= totalTxPages || txLoading}
+                title="Next Page (Fetches from backend)"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ── Recent Field Harvests ── */}

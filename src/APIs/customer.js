@@ -25,12 +25,39 @@ export const createCustomer = async (customerData) => {
   return unwrap(res);
 };
 
-export const recordCustomerPayment = async (customerId, paymentAmount) => {
+export const recordCustomerPayment = async (customerId, paymentData) => {
+  const payload = typeof paymentData === 'object' 
+    ? paymentData 
+    : { amount: Number(paymentData) };
+
   const res = await apiClient(`/customers/${customerId}/payments`, {
     method: 'POST',
-    body: JSON.stringify({ amount: paymentAmount }),
+    body: JSON.stringify(payload),
   });
   return unwrap(res);
+};
+
+export const getCustomerPayments = async (customerId) => {
+  try {
+    const res = await apiClient(`/customers/${customerId}/payments`);
+    const data = unwrap(res);
+    return Array.isArray(data) ? data : [];
+  } catch (_err) {
+    return [];
+  }
+};
+
+export const getSalePaymentHistory = async (customerId, saleId) => {
+  try {
+    const url = customerId 
+      ? `/customers/${customerId}/sales/${saleId}/payments` 
+      : `/customers/sales/${saleId}/payments`;
+    const res = await apiClient(url);
+    const data = unwrap(res);
+    return Array.isArray(data) ? data : [];
+  } catch (_err) {
+    return [];
+  }
 };
 
 export const getCustomerSales = async (customerId, page = 0, size = 10, customerContact = null) => {

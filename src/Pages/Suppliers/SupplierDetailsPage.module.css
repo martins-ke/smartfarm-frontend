@@ -689,3 +689,140 @@
     padding: 1.2rem;
   }
 }
+
+/* ── Audit / History Button & Modal Styles ── */
+.historyBtn {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 6px;
+  padding: 0.32rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.historyBtn:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+.auditModalContent {
+  background: var(--modal-bg, var(--card-bg, #111827));
+  border: 1px solid var(--modal-border, var(--border, rgba(138, 180, 219, 0.25)));
+  border-radius: 12px;
+  width: 95%;
+  max-width: 720px;
+  padding: 1.3rem 1.5rem;
+  box-shadow: var(--modal-shadow, 0 12px 40px rgba(0, 0, 0, 0.3));
+  color: var(--text, #edf6ff);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.auditOverviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin: 0.85rem 0 1.25rem;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.auditMetaCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.auditMetaLabel {
+  font-size: 0.74rem;
+  color: var(--muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.auditMetaVal {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text, #edf6ff);
+}
+
+.auditHistoryWrapper {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  margin-bottom: 1.2rem;
+}
+
+.auditTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.auditTable th {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.55rem 0.75rem;
+  color: var(--muted, #94a3b8);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.auditTable td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text, #edf6ff);
+}
+
+.auditTable tr:last-child td {
+  border-bottom: none;
+}
+
+.modeBadge {
+  display: inline-block;
+  background: var(--surface-highlight, rgba(138, 180, 219, 0.12));
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
+  color: var(--text, #edf6ff);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.emptyAudit {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--muted, #94a3b8);
+  font-size: 0.88rem;
+}
+
+.payActionBtn {
+  background: var(--green-solid, #10b981);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.55rem 1.15rem;
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: opacity 0.15s ease;
+}
+
+.payActionBtn:hover {
+  opacity: 0.9;
+}

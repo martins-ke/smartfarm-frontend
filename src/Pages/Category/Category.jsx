@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Category.module.css';
 import { getCategories, updateCategory, deleteCategory } from '../../APIs/category';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import { notify, confirmModal } from '../../utils/notify';
 import { FaEdit, FaTrash, FaTimes, FaSave, FaFolderPlus } from 'react-icons/fa';
 import useAuth from '../../useAuth';
@@ -12,6 +13,7 @@ const icons = { crops: '🌾', livestock: '🐄', poultry: '🐔' };
 export function Category() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', description: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,11 +29,14 @@ export function Category() {
   const canEditOrDelete = isAdmin;
 
   const loadCategories = async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
       const request = await getCategories();
       const data = request.body;
       setCategories(Array.isArray(data) ? data : []);
-    } catch (_err) {
+    } catch (err) {
+      setLoadError(err);
       setCategories([]);
     } finally {
       setLoading(false);
@@ -153,6 +158,13 @@ export function Category() {
               </div>
             ))}
           </div>
+        ) : loadError && categories.length === 0 ? (
+          <ErrorState
+            error={loadError}
+            title="Could Not Load Categories"
+            onRetry={loadCategories}
+            variant="card"
+          />
         ) : (
           <div className={styles.empty}>
             <p style={{ fontSize: '1.05rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem' }}>

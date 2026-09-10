@@ -187,13 +187,20 @@
 
 /* ── Theme-aware status colour tokens ── */
 
-/* Dark theme (default) */
+/* Dark theme defaults */
 :global(.dark) .statusBtn.active,
 .statusBtn.active {
   --s-bg:     rgba(34, 197, 94, 0.22);
   --s-border: #22c55e;
   --s-color:  #86efac;
   --s-glow:   rgba(34, 197, 94, 0.28);
+}
+:global(.dark) .statusBtn.completed,
+.statusBtn.completed {
+  --s-bg:     rgba(59, 130, 246, 0.22);
+  --s-border: #3b82f6;
+  --s-color:  #93c5fd;
+  --s-glow:   rgba(59, 130, 246, 0.28);
 }
 :global(.dark) .statusBtn.done,
 .statusBtn.done {
@@ -224,6 +231,12 @@
   --s-color:  #15803d;
   --s-glow:   rgba(21, 128, 61, 0.18);
 }
+:global(.light) .statusBtn.completed {
+  --s-bg:     rgba(29, 78, 216, 0.1);
+  --s-border: #1d4ed8;
+  --s-color:  #1d4ed8;
+  --s-glow:   rgba(29, 78, 216, 0.18);
+}
 :global(.light) .statusBtn.done {
   --s-bg:     rgba(29, 78, 216, 0.1);
   --s-border: #1d4ed8;
@@ -245,6 +258,7 @@
 
 /* Apply the tokens */
 .statusBtn.active,
+.statusBtn.completed,
 .statusBtn.done,
 .statusBtn.in_progress,
 .statusBtn.inactive {

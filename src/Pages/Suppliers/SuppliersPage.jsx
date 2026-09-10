@@ -15,11 +15,13 @@ import {
   FaEnvelope
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 
 export function SuppliersPage() {
   const navigate = useNavigate();
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   // Modals & Views
   const [showAddSupplier, setShowAddSupplier] = useState(false);
@@ -37,10 +39,12 @@ export function SuppliersPage() {
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const supList = await getSuppliers();
       setSuppliers(Array.isArray(supList) ? supList : []);
-    } catch (_err) {
+    } catch (err) {
+      setLoadError(err);
       setSuppliers([]);
     } finally {
       setLoading(false);
@@ -161,7 +165,14 @@ export function SuppliersPage() {
           <h2>Supplier Directory & Ledger</h2>
         </div>
 
-        {suppliers.length === 0 ? (
+        {loadError && suppliers.length === 0 ? (
+          <ErrorState
+            error={loadError}
+            title="Could Not Load Suppliers"
+            onRetry={loadData}
+            variant="card"
+          />
+        ) : suppliers.length === 0 ? (
           <div className={styles.emptyState}>
             <FaTruck className={styles.emptyIcon} />
             <p>No farm suppliers registered yet.</p>

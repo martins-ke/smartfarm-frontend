@@ -11,6 +11,7 @@ import {
 } from '../../APIs/user';
 import { notify, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import useAuth from '../../useAuth';
 import { 
   FaUserShield, 
@@ -40,6 +41,7 @@ export function UserDetailsPage() {
   const [user, setUser] = useState(null);
   const [supervisedProjects, setSupervisedProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [privileges, setPrivileges] = useState([]);
   const [maxCapacity, setMaxCapacity] = useState(4);
@@ -66,6 +68,7 @@ export function UserDetailsPage() {
 
   const loadUserDetails = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await getUserById(userId);
       const userData = res?.body;
@@ -77,9 +80,9 @@ export function UserDetailsPage() {
         const projRes = await getSupervisorProjects(userId).catch(() => ({ body: [] }));
         setSupervisedProjects(projRes?.body || []);
       }
-    } catch (_err) {
+    } catch (err) {
+      setLoadError(err);
       notify('Failed to load user details', 'error');
-      navigate('/users');
     } finally {
       setLoading(false);
     }
@@ -170,11 +173,12 @@ export function UserDetailsPage() {
 
   if (!user) {
     return (
-      <div className={styles.page} style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-        <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '1.5rem' }}>User not found.</p>
-        <button onClick={() => navigate('/users')} className={styles.backBtn}>
-          <FaArrowLeft /> Return to Staff Management
-        </button>
+      <div className={styles.page}>
+        <ErrorState
+          error={loadError || 'User profile not found.'}
+          title="User Profile Unavailable"
+          onRetry={loadUserDetails}
+        />
       </div>
     );
   }

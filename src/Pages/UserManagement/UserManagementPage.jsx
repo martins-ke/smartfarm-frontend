@@ -25,6 +25,7 @@ import {
   FaFilter
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 
 export default function UserManagementPage() {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   // Search & Filters
@@ -51,6 +53,7 @@ export default function UserManagementPage() {
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       // If admin, load all users. If manager, load supervisors under this manager.
       const [usersRes, empList] = await Promise.all([
@@ -78,7 +81,8 @@ export default function UserManagementPage() {
 
       setUsers(usersList);
       setEmployees(Array.isArray(empList) ? empList : []);
-    } catch (_err) {
+    } catch (err) {
+      setLoadError(err);
       notify('Failed to load user management data', 'error');
     } finally {
       setLoading(false);
@@ -347,7 +351,14 @@ export default function UserManagementPage() {
       </div>
 
       <div className={styles.tableCard}>
-        {filteredUsers.length === 0 ? (
+        {loadError && users.length === 0 ? (
+          <ErrorState
+            error={loadError}
+            title="Could Not Load Staff Users"
+            onRetry={loadData}
+            variant="card"
+          />
+        ) : filteredUsers.length === 0 ? (
           <div className={styles.emptyState}>
             <FaUserTie className={styles.emptyIcon} />
             <h4>No Users Found</h4>

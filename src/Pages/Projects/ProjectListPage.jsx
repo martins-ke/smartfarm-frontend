@@ -5,12 +5,11 @@ import { getProjectsByCategory, updateProjectStatus } from '../../APIs/project';
 import useAuth from '../../useAuth';
 import { FaFolderOpen, FaMoneyBillWave, FaPlus, FaArrowRight, FaChevronDown, FaCheck } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 
 const STATUS_OPTIONS = [
-  { value: 'active',      label: 'Active',      color: '#22c55e' },
-  { value: 'done',        label: 'Done',         color: '#60a5fa' },
-  { value: 'in_progress', label: 'In Progress',  color: '#f59e0b' },
-  { value: 'inactive',    label: 'Inactive',     color: '#94a3b8' },
+  { value: 'active',    label: 'Active',    color: '#22c55e' },
+  { value: 'completed', label: 'Completed', color: '#3b82f6' },
 ];
 
 function StatusDot({ color }) {
@@ -104,6 +103,7 @@ export function ProjectListPage() {
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
 
   // Pagination state
@@ -118,13 +118,15 @@ export function ProjectListPage() {
 
   const loadProjects = async (currentPage = page) => {
     setLoading(true);
+    setLoadError(null);
     try {
       const request = await getProjectsByCategory(category_id, category, currentPage, PAGE_SIZE);
       const pageData = request.body;
       setProjects(pageData?.content || []);
       setTotalPages(pageData?.totalPages ?? 0);
       setTotalElements(pageData?.totalElements ?? 0);
-    } catch {
+    } catch (err) {
+      setLoadError(err);
       setProjects([]);
     } finally {
       setLoading(false);
@@ -200,6 +202,13 @@ export function ProjectListPage() {
 
       {loading ? (
         <Spinner fullPage label="Loading projects..." />
+      ) : loadError && projects.length === 0 ? (
+        <ErrorState
+          error={loadError}
+          title="Could Not Load Projects"
+          onRetry={() => loadProjects(page)}
+          variant="card"
+        />
       ) : projects.length === 0 ? (
         <div className={styles.emptyState}>
           <p>{isSupervisor ? 'No assigned projects found for you in this category.' : 'No projects found for this category.'}</p>

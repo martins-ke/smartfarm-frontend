@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './SupplierDetailsPage.module.css';
-import { getSupplierById, getSupplierPurchases, recordSupplierPurchase, recordSupplierPayment } from '../../APIs/supplier';
+import { 
+  getSupplierById, 
+  getSupplierPurchases, 
+  recordSupplierPurchase, 
+  recordSupplierPayment,
+  getPurchasePaymentHistory 
+} from '../../APIs/supplier';
 import { getInventoryItems } from '../../APIs/inventory';
 import { notify } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
+import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import {
   FaTruck,
   FaFileInvoiceDollar,
@@ -15,8 +22,142 @@ import {
   FaMapMarkerAlt,
   FaBoxes,
   FaTimes,
-  FaHistory
+  FaHistory,
+  FaHandHoldingUsd
 } from 'react-icons/fa';
+
+function PurchaseHistoryModal({ purchase, supplier, onClose, onPayPurchase }) {
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!purchase?.id) return;
+    let isMounted = true;
+    setLoading(true);
+    getPurchasePaymentHistory(supplier?.id, purchase.id)
+      .then((res) => {
+        if (isMounted) setPayments(Array.isArray(res) ? res : []);
+      })
+      .catch(() => {
+        if (isMounted) setPayments([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => { isMounted = false; };
+  }, [purchase?.id, supplier?.id]);
+
+  const totalBilled = Number(purchase.invoiceAmount || 0);
+  const totalPaid = Number(purchase.amountPaid || 0);
+  const balanceDue = Number(purchase.balanceDue || (totalBilled - totalPaid));
+  const isFullyPaid = balanceDue <= 0;
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.auditModalContent} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h3><FaHistory /> Purchase Payment & Settlement Audit</h3>
+          <button className={styles.closeBtn} onClick={onClose}><FaTimes /></button>
+        </div>
+
+        <p className={styles.supplierSubText}>
+          Supplier: <strong>{supplier?.name}</strong> | Invoice: <strong>{purchase.invoiceNumber || 'INV-Auto'}</strong> (#{purchase.id?.slice(0, 8).toUpperCase()})
+        </p>
+
+        {/* Overview Metric Grid */}
+        <div className={styles.auditOverviewGrid}>
+          <div className={styles.auditMetaCard}>
+            <span className={styles.auditMetaLabel}>Total Invoice</span>
+            <span className={styles.auditMetaVal}>KES {totalBilled.toLocaleString()}</span>
+          </div>
+          <div className={styles.auditMetaCard}>
+            <span className={styles.auditMetaLabel}>Total Paid</span>
+            <span className={`${styles.auditMetaVal} ${styles.successText}`}>KES {totalPaid.toLocaleString()}</span>
+          </div>
+          <div className={styles.auditMetaCard}>
+            <span className={styles.auditMetaLabel}>Balance Due (AP)</span>
+            <span className={`${styles.auditMetaVal} ${balanceDue > 0 ? styles.dangerText : styles.successText}`}>
+              KES {balanceDue.toLocaleString()}
+            </span>
+          </div>
+          <div className={styles.auditMetaCard}>
+            <span className={styles.auditMetaLabel}>Status</span>
+            <span className={isFullyPaid ? styles.clearBadge : styles.debtBadge}>
+              {isFullyPaid ? 'PAID IN FULL' : 'OUTSTANDING DEBT'}
+            </span>
+          </div>
+        </div>
+
+        {/* Installment History Table */}
+        <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text, #edf6ff)' }}>
+          Payment & Settlement Breakdown
+        </h4>
+
+        {loading ? (
+          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <Spinner label="Loading payment audit logs..." />
+          </div>
+        ) : payments.length === 0 ? (
+          <div className={styles.emptyAudit}>
+            <p>No separate payment records logged yet for this invoice.</p>
+            {balanceDue > 0 && (
+              <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>This balance can be settled using the button below.</p>
+            )}
+          </div>
+        ) : (
+          <div className={styles.auditHistoryWrapper}>
+            <table className={styles.auditTable}>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Mode</th>
+                  <th>Reference</th>
+                  <th style={{ textAlign: 'right' }}>Amount Remitted</th>
+                  <th style={{ textAlign: 'right' }}>Balance After</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.paymentDate || 'Recent'}</td>
+                    <td>
+                      <span className={styles.modeBadge}>{p.paymentMode || 'CASH'}</span>
+                    </td>
+                    <td><strong>{p.referenceNumber || '—'}</strong></td>
+                    <td style={{ textAlign: 'right', color: '#10b981', fontWeight: 600 }}>
+                      KES {Number(p.amount || 0).toLocaleString()}
+                    </td>
+                    <td style={{ textAlign: 'right', color: '#94a3b8' }}>
+                      KES {Number(p.balanceAfter || 0).toLocaleString()}
+                    </td>
+                    <td style={{ color: '#cbd5e1', fontSize: '0.78rem' }}>{p.notes || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className={styles.modalActions} style={{ justifyContent: 'space-between' }}>
+          <button type="button" className={styles.cancelBtn} onClick={onClose}>Close</button>
+          {!isFullyPaid && (
+            <button 
+              type="button" 
+              className={styles.payActionBtn}
+              onClick={() => {
+                onClose();
+                onPayPurchase(purchase);
+              }}
+            >
+              <FaHandHoldingUsd /> Settle This Invoice
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function SupplierDetailsPage() {
   const { supplierId } = useParams();
@@ -26,6 +167,10 @@ export function SupplierDetailsPage() {
   const [purchases, setPurchases] = useState([]);
   const [inventoryItems, setInventoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+
+  // Selected Purchase for Payment History Audit Modal
+  const [selectedPurchaseForHistory, setSelectedPurchaseForHistory] = useState(null);
 
   // Modals
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
@@ -39,6 +184,7 @@ export function SupplierDetailsPage() {
   });
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [targetPurchaseForPayment, setTargetPurchaseForPayment] = useState(null);
   const [paymentForm, setPaymentForm] = useState({
     amount: '',
     paymentMode: 'MPESA',
@@ -48,6 +194,7 @@ export function SupplierDetailsPage() {
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const [supRes, purRes, invRes] = await Promise.all([
         getSupplierById(supplierId),
@@ -60,6 +207,7 @@ export function SupplierDetailsPage() {
       const items = Array.isArray(invBody?.content) ? invBody.content : (Array.isArray(invBody) ? invBody : []);
       setInventoryItems(items);
     } catch (err) {
+      setLoadError(err);
       notify(err.message || 'Failed to load supplier details', 'error');
     } finally {
       setLoading(false);
@@ -122,21 +270,45 @@ export function SupplierDetailsPage() {
     }
   };
 
+  const openPayModalForPurchase = (purchase) => {
+    setTargetPurchaseForPayment(purchase);
+    setPaymentForm({
+      amount: String(purchase.balanceDue || ''),
+      paymentMode: 'MPESA',
+      referenceNumber: '',
+      notes: ''
+    });
+    setShowPaymentModal(true);
+  };
+
   const handleRecordPayment = async (e) => {
     e.preventDefault();
-    if (!paymentForm.amount || Number(paymentForm.amount) <= 0) {
-      notify('Please enter a valid payment amount', 'error');
+    const payAmt = Number(paymentForm.amount);
+    const maxPayable = targetPurchaseForPayment 
+      ? Number(targetPurchaseForPayment.balanceDue || 0) 
+      : debt;
+
+    if (!paymentForm.amount || isNaN(payAmt) || payAmt <= 0) {
+      notify('Please enter a valid payment amount greater than zero', 'error');
       return;
     }
+
+    if (maxPayable > 0 && payAmt > maxPayable) {
+      notify(`Payment amount cannot exceed the outstanding balance of KES ${maxPayable.toLocaleString()}`, 'error');
+      return;
+    }
+
     try {
       await recordSupplierPayment(supplier.id, {
-        amount: Number(paymentForm.amount),
+        amount: payAmt,
         paymentMode: paymentForm.paymentMode,
         referenceNumber: paymentForm.referenceNumber,
-        notes: paymentForm.notes
+        notes: paymentForm.notes,
+        purchaseId: targetPurchaseForPayment ? targetPurchaseForPayment.id : null
       });
-      notify('Supplier debt payment recorded successfully!', 'success');
+      notify('Supplier payment voucher recorded successfully!', 'success');
       setShowPaymentModal(false);
+      setTargetPurchaseForPayment(null);
       setPaymentForm({
         amount: '',
         paymentMode: 'MPESA',
@@ -159,7 +331,12 @@ export function SupplierDetailsPage() {
         <div className={styles.breadcrumbs}>
           <span className={styles.breadcrumbLink} onClick={() => navigate('/suppliers')}>Suppliers</span> / <strong>Not Found</strong>
         </div>
-        <p style={{ marginTop: '2rem', color: '#94a3b8' }}>Supplier not found or has been removed.</p>
+        <ErrorState
+          error={loadError || 'Supplier not found or has been removed.'}
+          title="Supplier Unavailable"
+          onRetry={loadData}
+          variant="card"
+        />
       </div>
     );
   }
@@ -194,7 +371,19 @@ export function SupplierDetailsPage() {
             <FaFileInvoiceDollar /> Record Invoice
           </button>
           {debt > 0 && (
-            <button className={styles.actionBtnPay} onClick={() => setShowPaymentModal(true)}>
+            <button 
+              className={styles.actionBtnPay} 
+              onClick={() => {
+                setTargetPurchaseForPayment(null);
+                setPaymentForm({
+                  amount: '',
+                  paymentMode: 'MPESA',
+                  referenceNumber: '',
+                  notes: ''
+                });
+                setShowPaymentModal(true);
+              }}
+            >
               <FaMoneyCheckAlt /> Settle Debt
             </button>
           )}
@@ -327,6 +516,7 @@ export function SupplierDetailsPage() {
                   <th>Balance Due</th>
                   <th>Status</th>
                   <th>Notes</th>
+                  <th style={{ textAlign: 'center' }}>Audit</th>
                 </tr>
               </thead>
               <tbody>
@@ -345,6 +535,16 @@ export function SupplierDetailsPage() {
                       </span>
                     </td>
                     <td className={styles.notesCell}>{p.notes || '-'}</td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button 
+                        type="button"
+                        className={styles.historyBtn}
+                        onClick={() => setSelectedPurchaseForHistory(p)}
+                        title="View chronological payments & settlement audit logs"
+                      >
+                        <FaHistory /> Audit
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -352,6 +552,16 @@ export function SupplierDetailsPage() {
           </div>
         )}
       </div>
+
+      {/* Audit History Modal */}
+      {selectedPurchaseForHistory && (
+        <PurchaseHistoryModal
+          purchase={selectedPurchaseForHistory}
+          supplier={supplier}
+          onClose={() => setSelectedPurchaseForHistory(null)}
+          onPayPurchase={(pur) => openPayModalForPurchase(pur)}
+        />
+      )}
 
       {/* Modal: Record Purchase Invoice */}
       {showPurchaseModal && (
@@ -472,14 +682,19 @@ export function SupplierDetailsPage() {
 
       {/* Modal: Settle Debt Payment */}
       {showPaymentModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowPaymentModal(false)}>
+        <div className={styles.modalOverlay} onClick={() => { setShowPaymentModal(false); setTargetPurchaseForPayment(null); }}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h3><FaMoneyCheckAlt /> Settle Supplier Debt</h3>
-              <button className={styles.closeBtn} onClick={() => setShowPaymentModal(false)}><FaTimes /></button>
+              <button className={styles.closeBtn} onClick={() => { setShowPaymentModal(false); setTargetPurchaseForPayment(null); }}><FaTimes /></button>
             </div>
             <p className={styles.supplierSubText}>
-              Supplier: <strong>{supplier.name}</strong> | Outstanding Debt: <strong className={styles.dangerText}>KES {debt.toLocaleString()}</strong>
+              Supplier: <strong>{supplier.name}</strong> |{' '}
+              {targetPurchaseForPayment ? (
+                <>Invoice <strong>{targetPurchaseForPayment.invoiceNumber || 'INV-Auto'}</strong> | Due: <strong className={styles.dangerText}>KES {Number(targetPurchaseForPayment.balanceDue || 0).toLocaleString()}</strong></>
+              ) : (
+                <>Outstanding Total Debt: <strong className={styles.dangerText}>KES {debt.toLocaleString()}</strong></>
+              )}
             </p>
             <form onSubmit={handleRecordPayment} className={styles.form}>
               <div className={styles.formRow}>
@@ -489,7 +704,7 @@ export function SupplierDetailsPage() {
                     type="number" 
                     required 
                     min="1" 
-                    max={debt} 
+                    max={targetPurchaseForPayment ? Number(targetPurchaseForPayment.balanceDue || 0) : debt} 
                     placeholder="e.g. 25000" 
                     value={paymentForm.amount} 
                     onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
@@ -517,8 +732,17 @@ export function SupplierDetailsPage() {
                   onChange={(e) => setPaymentForm({ ...paymentForm, referenceNumber: e.target.value })}
                 />
               </div>
+              <div className={styles.formGroup}>
+                <label>Payment Voucher Notes (Optional)</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Installment 1 of 3 cleared" 
+                  value={paymentForm.notes} 
+                  onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
+                />
+              </div>
               <div className={styles.modalActions}>
-                <button type="button" className={styles.cancelBtn} onClick={() => setShowPaymentModal(false)}>Cancel</button>
+                <button type="button" className={styles.cancelBtn} onClick={() => { setShowPaymentModal(false); setTargetPurchaseForPayment(null); }}>Cancel</button>
                 <button type="submit" className={styles.submitBtn}>Record Payment Voucher</button>
               </div>
             </form>
