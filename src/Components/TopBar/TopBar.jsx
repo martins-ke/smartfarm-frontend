@@ -228,9 +228,10 @@ export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, set
                        )}
                    </button>
 
-                   {/* ── Notification Dropdown Card ── */}
-                   {showNotifCard && (
-                       <div className={styles.notifDropdown} onClick={(e) => e.stopPropagation()}>
+                    {/* ── Notification Dropdown Card & Mobile Overlay ── */}
+                    {showNotifCard && <div className={styles.notifMobileOverlay} onClick={() => setShowNotifCard(false)} aria-hidden="true" />}
+                    {showNotifCard && (
+                        <div className={styles.notifDropdown} onClick={(e) => e.stopPropagation()}>
                            <div className={styles.notifHeader}>
                                <div className={styles.notifTitle}>
                                    <FaBell style={{ color: 'var(--accent, #38bdf8)' }} />

@@ -414,7 +414,16 @@
   overflow-x: auto;
   scrollbar-width: thin;
 }
-
+.tableCard{
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.85rem;
+  overflow: auto;
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
+  padding: 0.4rem 0.6rem;
+}
 .historyTable {
   width: 100%;
   border-collapse: collapse;
@@ -596,17 +605,52 @@
   align-items: center;
 }
 
-.emptyHistory {
-  padding: 2rem 1rem;
+.emptyHistory,
+.emptyState {
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   color: var(--muted, #8bb4d9);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.emptyState p,
+.emptyHistory p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--muted, #8bb4d9);
+  text-align: center;
 }
 
 .emptyIcon {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   color: var(--muted, #8bb4d9);
-  margin-bottom: 0.4rem;
-  opacity: 0.6;
+  margin-bottom: 0.25rem;
+  opacity: 0.65;
+}
+
+.tableCard {
+  composes: historyCard;
+}
+
+.tableHeader {
+  composes: historyHeader;
+}
+
+.tableHeaderLeft {
+  composes: historyHeaderLeft;
+}
+
+.historyCount {
+  composes: countBadge;
+}
+.emptyState{
+  text-align: center;
 }
 
 /* ── Pagination Bar ── */

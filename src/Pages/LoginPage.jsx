@@ -52,12 +52,8 @@ const LoginPage = () => {
       <div className={styles.card}>
 
         {/* Brand */}
-        <div className={styles.brandHeader}>
-          <div style={{ marginBottom: '0.65rem' }}>
-            <AgroSyncLogo size={48} iconOnly variant="badge" />
-          </div>
-          <h1 className={styles.brandName}>AgroSync</h1>
-          <p className={styles.brandTagline}>Smart Farm Management & Operations</p>
+        <div className={styles.brandHeader} style={{ marginBottom: '0.85rem' }}>
+          <AgroSyncLogo size={130} fullLogo variant="full" />
         </div>
 
         <h2 className={styles.formTitle}>Log In</h2>
