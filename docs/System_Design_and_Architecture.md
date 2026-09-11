@@ -1,6 +1,6 @@
 # System Design and Architecture Document
 ## AgroSync Farm Management System
-**Document Version:** 3.0  
+**Document Version:** 4.0  
 **SDLC Stage:** Technical Architecture & Production Blueprint  
 **Status:** Approved  
 
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary & Architectural Overview
 
-**AgroSync** is built on a decoupled, cloud-native architecture combining a high-performance **Spring Boot 4 (Java 25)** micro-monolith backend with a reactive **React 19 (Vite)** single-page web client.
+**AgroSync** is built on a decoupled, cloud-native architecture combining a high-performance **Spring Boot 4 (Java 25)** micro-monolith backend with a reactive **React 19 (Vite)** single-page web client and MySQL relational database.
 
 ```mermaid
 graph TD
@@ -20,7 +20,7 @@ graph TD
     Client["💻 React 19 Frontend Client<br/>(AgroSync PWA / Desktop Web)"]:::client
     API["⚡ Spring Boot 4 REST API<br/>(Port 8001 / Spring Security)"]:::server
     DB[("🗄️ MySQL Database<br/>(InnoDB Engine / smartfarm_db)")]:::db
-    EmailService["✉️ Resend HTTP Mail API<br/>(Transaction Emails & Password Resets)"]:::ext
+    EmailService["✉️ Resend HTTP Mail API<br/>(Port 443 HTTPS / Password Resets)"]:::ext
 
     Client -->|HTTPS / JSON REST API| API
     Client -->|45s Background Polling| API
@@ -39,9 +39,9 @@ C4Container
     Person(user, "Farm User", "Admin, Manager, or Field Supervisor")
 
     Container_Boundary(c1, "AgroSync Web Platform") {
-        Container(spa, "Single-Page Application", "React 19, Vite, Zustand", "Provides modern UI, real-time TopBar notifications, task scheduling presets, AP/AR dashboards, and paginated transaction history")
-        Container(api, "API Application", "Java 25, Spring Boot 4, Spring Security", "Provides business logic, RBAC/PBAC access control, financial math, and notification aggregation")
-        ContainerDb(database, "Relational Database", "MySQL 8.0+", "Stores users, categories, projects, activities, sales, expenses, inventory, suppliers, and labor records")
+        Container(spa, "Single-Page Application", "React 19, Vite, CSS Modules", "Provides modern UI, real-time TopBar notifications, task scheduling presets, 2-status project lifecycle, AP/AR installment audit modals, and paginated transaction history")
+        Container(api, "API Application", "Java 25, Spring Boot 4, Spring Security", "Provides business logic, RBAC/PBAC access control, financial math, FIFO debt allocation, stock-controlled selling, and notification aggregation")
+        ContainerDb(database, "Relational Database", "MySQL 8.0+", "Stores users, categories, projects, activities, sales, expenses, inventory, suppliers, customers, payments, and labor records")
     }
 
     System_Ext(email, "Resend Email Service", "Delivers password reset tokens and security alerts via HTTPS API")
@@ -54,20 +54,37 @@ C4Container
 
 ---
 
-## 3. Entity-Relationship Data Model (ERD)
+## 3. Comprehensive Entity-Relationship Data Model (ERD)
 
 ```mermaid
 erDiagram
-    USERS ||--o{ CATEGORIES : manages
+    USERS ||--o{ USER_CATEGORIES : assigned_to
+    CATEGORIES ||--o{ USER_CATEGORIES : includes
     CATEGORIES ||--o{ PROJECTS : contains
-    PROJECTS ||--o{ ACTIVITIES : logs
+    USERS ||--o{ PROJECTS : manages
+    USERS ||--o{ PROJECTS : supervises
+    
+    PROJECTS ||--o{ ACTIVITIES : schedules
     PROJECTS ||--o{ EXPENSES : incurs
     PROJECTS ||--o{ HARVEST : produces
     PROJECTS ||--o{ SALES : generates
+    PROJECTS ||--o{ INVENTORY_USAGE : consumes
+    
     CUSTOMERS ||--o{ SALES : purchases
-    SUPPLIERS ||--o{ SUPPLIER_PURCHASES : supplies
+    CUSTOMERS ||--o{ CUSTOMER_PAYMENTS : remits
+    SALES ||--o{ CUSTOMER_PAYMENTS : settled_by
+    
+    SUPPLIERS ||--o{ SUPPLIER_PURCHASES : bills
+    SUPPLIERS ||--o{ SUPPLIER_PAYMENTS : paid_by
+    SUPPLIER_PURCHASES ||--o{ SUPPLIER_PAYMENTS : settled_by
+    
+    INVENTORY_ITEMS ||--o{ INVENTORY_USAGE : items_used
+    INVENTORY_ITEMS ||--o{ SUPPLIER_PURCHASES : restocked_by
+    
     ACTIVITIES ||--o{ ACTIVITY_LABOR : allocates
-    USERS ||--o{ ACTIVITY_LABOR : assigned_as_worker
+    EMPLOYEES ||--o{ ACTIVITY_LABOR : assigned_worker
+    
+    USERS ||--o{ PASSWORD_RESET_TOKENS : requests
 
     USERS {
         string id PK
@@ -76,178 +93,278 @@ erDiagram
         string password
         string role
         string status
+        int max_project_capacity
         string privileges
-        date created_at
+    }
+
+    CATEGORIES {
+        string id PK
+        string name UK
+        string description
     }
 
     PROJECTS {
         string id PK
-        string name
+        string name UK
         string season
-        date startDate
-        date endDate
-        decimal budget
         string status
+        date start_date
+        date end_date
+        decimal budget
+        string description
         string category_id FK
+        string manager_id FK
         string supervisor_id FK
+    }
+
+    SALES {
+        string id PK
+        string item
+        float quantity
+        decimal unit_price
+        date added_on
+        decimal total_amount
+        decimal amount_paid
+        decimal balance_due
+        string payment_mode
+        string payment_status
+        string project_id FK
+        string customer_id FK
+    }
+
+    CUSTOMERS {
+        string id PK
+        string name
+        string contact UK
+        string id_number UK
+        string address
+        decimal credit_limit
+        decimal total_purchases
+        decimal total_paid
+        decimal outstanding_debt
+        string credit_status
+        string category
+    }
+
+    CUSTOMER_PAYMENTS {
+        string id PK
+        string customer_id FK
+        string sale_id FK
+        decimal amount
+        date payment_date
+        string payment_mode
+        string reference_number
+        decimal balance_after
+        string notes
+    }
+
+    SUPPLIERS {
+        string id PK
+        string name UK
+        string contact_person
+        string phone_number
+        string email
+        string id_or_tax_number
+        string address
+        string category
+        decimal total_billed
+        decimal total_paid
+        decimal balance_owed
+    }
+
+    SUPPLIER_PURCHASES {
+        string id PK
+        string supplier_id FK
+        string invoice_number
+        decimal invoice_amount
+        decimal amount_paid
+        decimal balance_due
+        string payment_status
+        string inventory_item_id FK
+        decimal restock_quantity
+        date purchase_date
+        string notes
+    }
+
+    SUPPLIER_PAYMENTS {
+        string id PK
+        string supplier_id FK
+        string purchase_id FK
+        decimal amount
+        date payment_date
+        string payment_mode
+        string reference_number
+        decimal balance_after
+        string notes
+    }
+
+    INVENTORY_ITEMS {
+        string id PK
+        string name UK
+        string category
+        string unit
+        decimal quantity_in_stock
+        decimal unit_price
+        decimal min_stock_level
+    }
+
+    INVENTORY_USAGE {
+        string id PK
+        string inventory_item_id FK
+        string project_id FK
+        decimal quantity_used
+        date usage_date
+        string notes
+    }
+
+    HARVEST {
+        string id PK
+        string item
+        float quantity
+        string units
+        string notes
+        date added_on
+        string project_id FK
     }
 
     ACTIVITIES {
         string id PK
         string title
         string type
-        date scheduledDate
-        date dueDate
-        string priority
-        string status
-        date added_on
-        date completedOn
         string notes
+        date scheduled_date
+        date due_date
+        string status
+        string priority
+        date completed_on
         string project_id FK
     }
 
-    SALES {
-        string id PK
-        string item
-        decimal quantity
-        decimal unit_price
-        decimal total_amount
-        decimal amount_paid
-        decimal balance_due
-        string payment_mode
-        date date
-        string customer_id FK
-        string project_id FK
-    }
-
-    SUPPLIERS {
+    EMPLOYEES {
         string id PK
         string name
-        string contactPerson
-        string phone
-        string email
-        string category
-        decimal totalPurchases
-        decimal outstandingDebt
+        string id_number UK
+        string phone_number
+        date date_of_birth
+        string role
+        decimal default_hourly_rate
     }
 
-    SUPPLIER_PURCHASES {
-        string id PK
-        string itemPurchased
-        decimal quantity
-        decimal unitPrice
-        decimal totalAmount
-        decimal amountPaid
-        decimal balanceDue
-        string paymentStatus
-        date purchaseDate
-        string supplier_id FK
-    }
-
-    CUSTOMERS {
-        string id PK
-        string name
-        string phone
-        string email
-        decimal totalPurchases
-        decimal outstandingDebt
-    }
-
-    INVENTORY {
-        string id PK
-        string name
-        string category
-        decimal quantityInStock
-        decimal minStockLevel
-        decimal unitCost
-        string unit
+    ACTIVITY_LABOR {
+        bigint id PK
+        string activity_id FK
+        string employee_id FK
+        date assignment_date
+        double hours_worked
+        decimal wage_payable
+        string notes
     }
 ```
 
 ---
 
-## 4. REST API Endpoint Catalog
+## 4. Financial & Business Logic Engine
 
-### 4.1 Notifications & Real-Time Alerts
-| Method | Endpoint | Role Guard | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/notifications` | All Authenticated | Returns real-time pending approvals, low stock, upcoming/overdue tasks, and debt alerts |
+### 4.1 Cash Received vs Booked Revenue
+The financial engine computes ground-truth liquid cash vs total booked revenue:
+$$\text{Total Booked Sales} = \sum_{s \in \text{Sales}} s.\text{total\_amount}$$
+$$\text{Pending Customer Debt (AR)} = \sum_{c \in \text{Customers}} c.\text{outstanding\_debt}$$
+$$\text{Cash Received (In Account)} = \text{Total Booked Sales} - \text{Pending Customer Debt}$$
 
-### 4.2 Activities & Task Scheduler
-| Method | Endpoint | Role Guard | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/activities/record` | Admin, Manager, Supervisor (`CAN_LOG_ACTIVITIES`) | Creates a new farm task / activity with scheduled date and priority |
-| `PUT` | `/activities/{id}` | Admin, Manager | Updates task details, scheduled date, due date, priority, and status |
-| `PATCH` | `/activities/{id}/status?status=COMPLETED` | Admin, Manager, Supervisor | Toggles task status between `SCHEDULED` and `COMPLETED` |
-| `DELETE` | `/activities/{id}` | Admin, Manager | Deletes activity record |
-| `GET` | `/activities/{id}/labor` | All Authenticated | Retrieves labor roster and wage allocations for this task |
-| `POST` | `/activities/{id}/labor` | Admin, Manager, Supervisor | Assigns verified workers with wages to this activity |
+### 4.2 Accounts Receivable (AR) & Credit Rules
+For any customer $C$:
+$$C.\text{outstanding\_debt} = C.\text{total\_purchases} - C.\text{total\_paid}$$
+$$\text{Credit Status} = \begin{cases} \text{CLEAR}, & \text{if } C.\text{outstanding\_debt} = 0 \\ \text{BLOCKED}, & \text{if } C.\text{credit\_limit} > 0 \text{ and } C.\text{outstanding\_debt} > C.\text{credit\_limit} \\ \text{HAS\_DEBT}, & \text{otherwise} \end{cases}$$
 
-### 4.3 Dashboard & Financial Ledger
-| Method | Endpoint | Role Guard | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/dashboard/summary` | All Authenticated (Scoped by Role) | Returns executive KPIs (Revenue Received, Customer Debt, Supplier Debt, Net Value, Sales Trends, Recent Transactions) |
+### 4.3 Accounts Payable (AP) & Supplier Liabilities
+For any supplier $S$:
+$$S.\text{balance\_owed} = S.\text{total\_billed} - S.\text{total\_paid}$$
 
-### 4.4 Suppliers (Accounts Payable)
-| Method | Endpoint | Role Guard | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/suppliers` | Admin, Manager | Lists all suppliers and total purchase liabilities |
-| `POST` | `/suppliers` | Admin, Manager | Registers a new supplier |
-| `POST` | `/suppliers/purchases` | Admin, Manager | Records supply purchase with AP ledger tracking |
+### 4.4 Stock-Controlled Selling Validation
+When a sale request $R$ is initiated for crop item $I$ in project $P$:
+$$\text{Total Harvested} = \sum_{h \in P.\text{Harvest}, h.\text{item} = I} h.\text{quantity}$$
+$$\text{Total Sold} = \sum_{s \in P.\text{Sales}, s.\text{item} = I} s.\text{quantity}$$
+$$\text{Available Stock} = \max(0, \text{Total Harvested} - \text{Total Sold})$$
+$$\text{Validation Rule: If } R.\text{quantity} > \text{Available Stock} \implies \text{Reject Sale (HTTP 400)}$$
 
-### 4.5 Customers (Accounts Receivable)
-| Method | Endpoint | Role Guard | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/customers` | Admin, Manager | Lists all customers with outstanding debt balances |
-| `POST` | `/customers` | Admin, Manager, Supervisor | Registers customer / credit profile |
+### 4.5 FIFO Installment Payment Settlement Algorithm
+When an unallocated general debt payment $A$ is submitted for customer $C$ (or supplier $S$):
+```text
+1. Fetch all unpaid/partial sales of customer sorted by added_on ASC (Oldest First).
+2. Remaining Payment R = A
+3. FOR EACH sale S IN unpaid_sales:
+     IF R <= 0 THEN BREAK
+     Available To Settle = S.balance_due
+     Payment Allocated P = MIN(R, Available To Settle)
+     S.amount_paid += P
+     S.balance_due -= P
+     IF S.balance_due == 0 THEN S.payment_status = "PAID_IN_FULL"
+     ELSE S.payment_status = "PARTIAL_PAYMENT"
+     Save S
+     Log CustomerPayment Record (amount = P, balance_after = S.balance_due)
+     R -= P
+4. C.total_paid += A
+5. C.outstanding_debt = C.total_purchases - C.total_paid
+6. Update customer credit status (CLEAR / HAS_DEBT / BLOCKED)
+```
 
 ---
 
-## 5. Unified Dashboard & Transaction History Data Architecture
+## 5. Complete REST API Catalog
 
-### 5.1 Transaction Consolidation & Ingestion
-The dashboard consolidates incoming revenue operations (Produce Sales) and outgoing input procurement (Supplier Purchases) into a singular, normalized data stream:
-```javascript
+| Module | Method | Endpoint | Access Role | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Auth** | `POST` | `/auth/register` | Public | Registers users (Auto-promotes 1st user to ADMIN). |
+| | `POST` | `/auth/login` | Public | Authenticates credentials and returns user payload. |
+| | `POST` | `/auth/forgot-password` | Public | Generates 15-min token and sends email via Resend API. |
+| | `POST` | `/auth/reset-password` | Public | Validates token and resets user password. |
+| **Projects** | `POST` | `/projects/create` | Admin / Manager | Creates new project with status `active` or `completed`. |
+| | `GET` | `/projects/{category_id}/{category}` | All | Returns paginated projects scoped by user portfolio. |
+| | `GET` | `/projects/{projectId}` | All | Returns full project details, tabs, and financial records. |
+| | `PUT` | `/projects/{id}` | Admin / Manager | Updates project configuration, season, dates, and budget. |
+| | `PATCH`| `/projects/{id}/status` | Admin / Manager / Sup | Toggles project status between `active` and `completed`. |
+| **Activities**| `POST` | `/activities/record` | Admin / Mgr / Sup | Creates activity with agronomic preset or custom dates. |
+| | `PATCH`| `/activities/{id}/status` | Admin / Mgr / Sup | Updates activity lifecycle status (`SCHEDULED`, `COMPLETED`, etc.). |
+| | `POST` | `/activities/{id}/labor` | Admin / Mgr / Sup | Assigns verified employee labor and logs wage payables. |
+| **Harvest** | `POST` | `/harvest/record` | Admin / Mgr / Sup | Logs crop or livestock yield volume. |
+| **Sales** | `POST` | `/sales/record` | Admin / Mgr / Sup | Records farm-gate sale with stock verification & down-payment. |
+| **Customers**| `GET` | `/customers` | All | Lists all customers with cumulative AR balances. |
+| | `GET` | `/customers/{id}` | All | Returns customer profile and Accounts Receivable ledger. |
+| | `GET` | `/customers/{id}/sales` | All | Returns paginated sales history for this customer. |
+| | `GET` | `/customers/sales/{saleId}/payments`| All | Returns chronological installment audit trail for a sale. |
+| | `POST` | `/customers/{id}/payments` | Admin / Mgr / Sup | Records installment payment (direct sale or FIFO). |
+| **Suppliers**| `GET` | `/suppliers` | Admin / Manager | Lists suppliers with cumulative Accounts Payable balances. |
+| | `GET` | `/suppliers/{id}` | Admin / Manager | Returns supplier profile and Accounts Payable ledger. |
+| | `GET` | `/suppliers/{id}/purchases` | Admin / Manager | Returns purchase invoice and delivery audit trail. |
+| | `GET` | `/suppliers/purchases/{purchaseId}/payments`| Admin / Manager | Returns chronological voucher payment audit trail. |
+| | `POST` | `/suppliers/purchases` | Admin / Manager | Records purchase invoice with optional auto-restock. |
+| | `POST` | `/suppliers/{id}/payments` | Admin / Manager | Records debt payment voucher (direct invoice or FIFO). |
+| **Inventory**| `GET` | `/inventory` | All | Lists warehouse items with quantities and unit prices. |
+| | `POST` | `/inventory/{id}/use` | Admin / Mgr / Sup | Deducts supplies consumed directly by a farm project. |
+| **Dashboard**| `GET` | `/dashboard/summary` | Admin / Manager | Aggregates KPIs, Sector Donut, Project Donut, and charts. |
+| | `GET` | `/dashboard/transactions`| Admin / Manager | Returns paginated unified transaction feed (5 per page). |
+| | `GET` | `/supervisor/projects/{userId}`| Supervisor | Returns scoped supervisor field workspace. |
+| **Notifs** | `GET` | `/notifications` | All | Aggregates real-time alerts across 4 categories. |
+
+---
+
+## 6. Security Architecture & Exception Handling
+
+### 6.1 Stateless Header Authentication
+- Requests transmit `X-User-Id` and `X-User-Role`.
+- Spring Security filter chain validates credentials against database records on every request.
+- Passwords stored as BCrypt hashes with salt.
+
+### 6.2 Serialization Protection
+- Bidirectional JPA relationships (`Sale` $\leftrightarrow$ `Project`, `Activity` $\leftrightarrow$ `Project`, `Harvest` $\leftrightarrow$ `Project`, `InventoryUsage` $\leftrightarrow$ `Project`, `ActivityLaborAssignment` $\leftrightarrow$ `Activity`) are annotated with `@JsonIgnore` on both fields and getters to prevent Jackson circular recursion and StackOverflow errors.
+
+### 6.3 Global Error Handling
+- `GlobalExceptionHandler` intercepts exceptions and formats unified HTTP JSON responses:
+```json
 {
-  id: String,
-  type: 'SALE' | 'SUPPLY',
-  date: 'YYYY-MM-DD',
-  partyName: String, // Customer name or Supplier name
-  item: String,      // Crop/produce sold or input purchased
-  amount: Number,    // Total value
-  paid: Number,      // Inflow or Outflow amount settled
-  balance: Number,   // Remaining debt balance
-  paymentStatus: 'PAID' | 'PARTIAL' | 'UNPAID',
-  paymentMode: String
+  "body": null,
+  "message": "Descriptive error message",
+  "success": false,
+  "time": "2026-09-11T08:45:00Z"
 }
 ```
-
-### 5.2 Deterministic Ordering & Pagination State Machine
-1. **Filtering**: Applies search string against `partyName`, `item`, `id`, and payment mode, combined with type filter (`ALL`, `SALES`, `SUPPLIES`).
-2. **Latest-First Sorting**:
-   ```javascript
-   const sorted = filtered.sort((a, b) => {
-     const dateA = a.date || '';
-     const dateB = b.date || '';
-     const dateDiff = dateB.localeCompare(dateA);
-     if (dateDiff !== 0) return dateDiff;
-     return String(b.id || '').localeCompare(String(a.id || ''));
-   });
-   ```
-3. **Fixed-Size Slicing (`TX_PAGE_SIZE = 5`)**:
-   - `totalTxPages = Math.ceil(sorted.length / 5)`
-   - `paginatedTx = sorted.slice((page - 1) * 5, page * 5)`
-   - Auto-reset hook resets `page -> 1` whenever search or category filter updates.
-
----
-
-## 6. Security & Access Control Architecture
-
-1. **Stateless Header-Based Verification**:
-   - `X-User-Id`: Identifies the authenticated actor.
-   - `X-User-Role`: Enforces `ADMIN`, `MANAGER`, or `SUPERVISOR` boundaries.
-2. **Supervisor Isolation**:
-   - Supervisor requests automatically filter to records where `supervisor_id = current_user.id`.
-   - Financial aggregate amounts (e.g. Total farm revenue, global debts) are completely hidden for supervisors without the `CAN_VIEW_FINANCIALS` privilege.
-3. **CORS & CSRF**:
-   - Configured in `SecurityConfig.java` to allow secure API requests from authorized frontend hosts while enforcing strict header policies.

@@ -2299,28 +2299,36 @@ Expecting `+Ze.join(", ")+", got '"+(this.terminals_[Ne]||Ne)+"'":Dt="Parse erro
 <body>
 <div class="header-cover"><span class="badge">Official AgroSync Technical Specification</span><h1>Software Requirements Specification (SRS)</h1>
 <div style="color: #94a3b8; font-size: 11pt; margin-top: 4px; font-weight: 600;">AgroSync Farm Management System</div>
-<div class="meta-grid"><div><strong>Version:</strong> 3.0</div>
-<div><strong>SDLC Stage:</strong> Production Baseline & Feature Expansion</div>
+<div class="meta-grid"><div><strong>Version:</strong> 4.0</div>
+<div><strong>SDLC Stage:</strong> Production Baseline & Comprehensive Feature Specification</div>
 <div><strong>Status:</strong> Approved</div></div></div>
 <h2>1. Introduction</h2>
 <h3>1.1 Purpose</h3>
-<p>This Software Requirements Specification (SRS) document details the complete functional, non-functional, security, and architectural requirements for <strong>AgroSync</strong> (formerly SmartFarm). It serves as the authoritative single source of truth for engineering, compliance testing, API integration, and operations.</p>
+<p>This Software Requirements Specification (SRS) document provides a complete, authoritative specification of the functional, non-functional, security, compliance, and architectural requirements for the <strong>AgroSync</strong> (formerly SmartFarm) Agricultural Enterprise Management Platform. It serves as the primary contract and blueprint for software engineering, quality assurance, system administration, and operational auditing.</p>
 <h3>1.2 Scope of the System</h3>
-<p><strong>AgroSync</strong> is an enterprise-grade cloud agricultural management platform designed for modern commercial farms and agribusinesses. The system integrates:</p>
-<li><strong>Governance & Financial Control</strong>: Executive oversight, multi-category budgeting, and comprehensive Accounts Payable / Accounts Receivable (AP/AR) ledgering for <strong>Farm Administrators</strong>.</li>
-<li><strong>Sector Planning & Procurement</strong>: Category-level crop/livestock cycle management, supplier procurement, and supervisor task delegation for <strong>Farm Managers</strong>.</li>
-<li><strong>Field Operations & Scheduling</strong>: Field activity scheduling with automated agronomic presets, harvest logging, input supply consumption, and verified labor task allocation for <strong>Field Supervisors</strong>.</li>
-<li><strong>Real-Time Notification Engine</strong>: Instant proactive alerts for pending user approvals, low inventory reorder levels, upcoming/overdue tasks, and financial debts.</li>
-<li><strong>Unified Transaction Ledger & Pagination</strong>: Comprehensive history of sales and supplies with search, type filtering, chronological descending sorting (latest first), and paginated viewing with page size of 5 records.</li>
-<li><strong>Labor Compliance & Wage Attribution</strong>: Strict validation of employee legal eligibility ($Age \ge 18$) and per-task wage calculation.</li>
-<h3>1.3 Definitions, Acronyms, and Abbreviations</h3>
-<li><strong>RBAC:</strong> Role-Based Access Control (<code>ADMIN</code>, <code>MANAGER</code>, <code>SUPERVISOR</code>).</li>
-<li><strong>PBAC:</strong> Privilege-Based Access Control (fine-grained supervisor privileges: <code>CAN_RECORD_EXPENSES</code>, <code>CAN_RECORD_SALES</code>, <code>CAN_RECORD_HARVEST</code>, <code>CAN_LOG_ACTIVITIES</code>, <code>CAN_USE_INVENTORY</code>, <code>CAN_VIEW_FINANCIALS</code>).</li>
-<li><strong>Accounts Payable (AP):</strong> Cumulative liabilities owed by the farm to input and feed suppliers.</li>
-<li><strong>Accounts Receivable (AR):</strong> Cumulative uncollected credit balances owed to the farm by produce buyers.</li>
-<li><strong>Task Presets:</strong> Automated agronomic date calculation offsets (e.g., Planting $+ 14$ days $\rightarrow$ Spraying, $+ 21$ days $\rightarrow$ Weeding, $+ 28$ days $\rightarrow$ Top-Dressing, $+ 60$ days $\rightarrow$ Harvesting).</li>
-<li><strong>Transaction Pagination:</strong> Fixed 5-record paging slicing with latest-first sorting by date descending and secondary ID tie-breaker.</li>
-<h2>2. Overall Description & System Context</h2>
+<p><strong>AgroSync</strong> is an end-to-end, multi-tenant agricultural enterprise resource planning (ERP) system designed for commercial farming enterprises, cooperative unions, and agricultural estates. The platform unifies:</p>
+<li><strong>Executive Governance & Multi-Category Financial Control</strong>: Global budgeting, sector delegation, and dual-ledger Accounts Payable (AP) and Accounts Receivable (AR) management for <strong>Farm Administrators</strong>.</li>
+<li><strong>Sector Planning & Procurement Management</strong>: Crop and livestock seasonal cycles, input supplier procurement, inventory replenishment, and field supervisor portfolio management for <strong>Farm Managers</strong>.</li>
+<li><strong>Field Operations, Agronomic Scheduling & Harvest Control</strong>: Field task scheduling with automated agronomic presets, harvest produce logging, farm supply consumption, and verified legal labor task allocation for <strong>Field Supervisors</strong>.</li>
+<li><strong>Produce Sales & Customer Credit Governance</strong>: Farm-gate sales validation ensuring sales cannot exceed harvested stocks, credit limit enforcement, partial down-payments, and chronological installment payment audit trails.</li>
+<li><strong>Supplier Accounts Payable & Warehouse Restocking</strong>: Purchase order logging, optional direct warehouse restocking, and voucher settlement audit trails.</li>
+<li><strong>Proactive Notification Engine</strong>: Real-time cross-cutting alerts for pending user approvals, critical low inventory thresholds, upcoming/overdue field activities, and outstanding trade balances.</li>
+<li><strong>Executive Analytics & Unified Ledger</strong>: Real-time KPI cards (Cash Received in Bank vs Uncollected Customer Debts vs Gross Booked Revenue), interactive Sector Revenue & 2-Status Project Donut Charts, and server-side paginated transaction feeds.</li>
+<h3>1.3 Target Audience & User Roles</h3>
+<p>1. <strong>Farm Administrator (<code>ADMIN</code>)</strong>: Supreme authority with global governance, user lifecycle approval, quota enforcement, sector creation, budget oversight, and complete financial visibility.</p>
+<p>2. <strong>Farm Manager (<code>MANAGER</code>)</strong>: Assigned to specific farm sectors/categories. Manages project creation, budget allocations, input procurement, supplier relations, and supervisor task assignment.</p>
+<p>3. <strong>Field Supervisor (<code>SUPERVISOR</code>)</strong>: Assigned to supervise specific field projects. Coordinates daily field tasks, schedules agronomic operations, logs harvests, records inventory usage, and allocates verified employee labor with a strict financial shield (cost amounts and company bank balances are hidden).</p>
+<p>4. <strong>Verified Farm Workers (<code>EMPLOYEES</code>)</strong>: Registered labor force members with national ID and age verification ($Age \ge 18$) allocated to field activities with computed wage entitlements.</p>
+<p>5. <strong>Produce Customers / Offtakers (<code>CUSTOMERS</code>)</strong>: Registered institutional buyers, wholesalers, and retailers purchasing farm produce on cash or credit terms.</p>
+<p>6. <strong>Input & Feed Suppliers (<code>SUPPLIERS</code>)</strong>: Commercial vendors supplying seeds, fertilizers, feeds, chemicals, veterinary drugs, and equipment.</p>
+<h3>1.4 Definitions, Acronyms, and Abbreviations</h3>
+<li><strong>AP (Accounts Payable):</strong> Cumulative financial liabilities owed by the farm to input suppliers.</li>
+<li><strong>AR (Accounts Receivable):</strong> Cumulative outstanding credit balances owed to the farm by produce buyers.</li>
+<li><strong>FIFO (First-In, First-Out):</strong> Debt settlement algorithm applying unallocated payments against the oldest outstanding invoices first.</li>
+<li><strong>PBAC (Privilege-Based Access Control):</strong> Granular permission flags assigned to managers and supervisors (<code>CAN_MANAGE_BUDGETS</code>, <code>CAN_RECORD_SALES</code>, <code>CAN_RECORD_EXPENSES</code>, <code>CAN_LOG_ACTIVITIES</code>, <code>CAN_RECORD_HARVEST</code>, <code>CAN_USE_INVENTORY</code>, <code>CAN_VIEW_FINANCIALS</code>).</li>
+<li><strong>RBAC (Role-Based Access Control):</strong> Role hierarchy enforcing <code>ADMIN</code> > <code>MANAGER</code> > <code>SUPERVISOR</code>.</li>
+<li><strong>Resend HTTP API:</strong> HTTPS RESTful email service (port 443) used for password recovery and system transactional communications.</li>
+<h2>2. System Architecture & Context</h2>
 <h3>2.1 System Context Diagram</h3>
 <div class="diagram-card"><div class="mermaid">
 flowchart TD
@@ -2328,89 +2336,168 @@ flowchart TD
     classDef managerNode fill:#0284c7,stroke:#0369a1,stroke-width:2px,color:#ffffff,font-weight:bold;
     classDef supervisorNode fill:#059669,stroke:#047857,stroke-width:2px,color:#ffffff,font-weight:bold;
     classDef extNode fill:#d97706,stroke:#b45309,stroke-width:2px,color:#ffffff,font-weight:bold;
+    classDef coreNode fill:#0f172a,stroke:#334155,stroke-width:2px,color:#ffffff,font-weight:bold;
 
-    Admin["👑 Farm Administrator<br/>(Global Governance, Quotas & Full Audit)"]:::adminNode
+    Admin["👑 Farm Administrator<br/>(Global Governance, Quotas & Audit)"]:::adminNode
     Manager["👔 Farm Manager<br/>(Sector Planning, Procurement & Budgets)"]:::managerNode
     Sup["👷 Field Supervisor<br/>(Field Work, Harvest & Task Execution)"]:::supervisorNode
     
     Workers["👥 Verified Adult Employees<br/>(National ID Verified, Age >= 18)"]:::extNode
-    Suppliers["🏢 Farm Input Suppliers<br/>(Accounts Payable / Debt Ledger)"]:::extNode
-    Customers["🛒 Produce Buyers / Customers<br/>(Accounts Receivable / Credit Ledger)"]:::extNode
-    NotifCenter["🔔 AgroSync Notification Center<br/>(Real-Time Polling & Alerts)"]:::adminNode
-    TxLedger["📊 Unified Transaction Ledger<br/>(Paginated 5/Page, Latest First)"]:::managerNode
+    Suppliers["🏢 Farm Input Suppliers<br/>(Accounts Payable & Restock)"]:::extNode
+    Customers["🛒 Produce Buyers / Offtakers<br/>(Accounts Receivable & Credit)"]:::extNode
+    
+    AgroSyncCore["⚡ AgroSync Core Platform<br/>(Spring Boot 4 / Java 25 / MySQL)"]:::coreNode
+    ResendAPI["✉️ Resend Cloud Mail Service<br/>(Password Reset via Port 443)"]:::extNode
 
-    Admin -->|Delegates Categories & Budgets| Manager
-    Admin -->|Full Financial & Debt Ledgering| Suppliers
-    Admin -->|Full Financial & Credit Ledgering| Customers
-    Admin -->|System-Wide Alerts| NotifCenter
-    Admin -->|Audits Sales & Supply Flows| TxLedger
-
-    Manager -->|Assigns Projects & Tasks| Sup
-    Manager -->|Procures Feeds & Supplies| Suppliers
-    Manager -->|Sector Alerts| NotifCenter
-    Manager -->|Monitors Transactions| TxLedger
-
-    Sup -->|Allocates Daily Wages & Labor| Workers
-    Sup -->|Logs Harvest & Consumes Stock| Sup
-    Sup -->|Task Countdown & Overdue Alerts| NotifCenter
+    Admin -->|Delegates Categories & User Approvals| AgroSyncCore
+    Manager -->|Manages Projects, Purchases & Budgets| AgroSyncCore
+    Sup -->|Logs Activities, Harvest & Labor| AgroSyncCore
+    
+    AgroSyncCore -->|Enforces Age >= 18 & Logs Wages| Workers
+    AgroSyncCore -->|Tracks Invoices, Vouchers & AP| Suppliers
+    AgroSyncCore -->|Enforces Stock Limits & AR Ledger| Customers
+    AgroSyncCore -->|Dispatches Secure Token Emails| ResendAPI
 </div></div>
-<h2>3. Functional Requirements</h2>
-<h3>3.1 Authentication & User Management (FR-AUTH)</h3>
-<li><strong>FR-AUTH-1 (Bootstrap First Admin):</strong> On an empty database ($0$ users), the registration system automatically provisions the first registrant as the <strong>Primary Farm Administrator</strong> with active status and full privileges.</li>
-<li><strong>FR-AUTH-2 (Approval Lifecycle):</strong> Subsequent registrations default to <code>PENDING_APPROVAL</code>. Users cannot access farm resources until approved by an Administrator or Manager.</li>
-<li><strong>FR-AUTH-3 (Role & Quota Governance):</strong></li>
-<p>  - Maximum <strong>2 Farm Managers</strong> across the system.</p>
-<p>  - Maximum <strong>10 Field Supervisors</strong> across the system.</p>
-<li><strong>FR-AUTH-4 (Self-Service Password Reset):</strong> Email-based token recovery via Resend HTTP API with a 15-minute token expiry window.</li>
-<h3>3.2 Real-Time Notification Center (FR-NOTIF)</h3>
-<li><strong>FR-NOTIF-1 (Proactive Aggregation):</strong> The system continuously evaluates:</li>
+<h2>3. Detailed Functional Requirements</h2>
+<h3>3.1 Authentication, User Governance & RBAC (FR-AUTH)</h3>
+<li><strong>FR-AUTH-1 (Zero-State Admin Bootstrap):</strong></li>
+<p>  When the database contains zero registered users ($Count = 0$), the registration workflow automatically provisions the first registrant as the <strong>Primary System Administrator</strong> with <code>ACTIVE</code> status and immediate administrative access.</p>
+<li><strong>FR-AUTH-2 (Approval Lifecycle):</strong></li>
+<p>  All subsequent user registrations default to <code>PENDING_APPROVAL</code>. Users cannot access protected farm resources until approved and assigned an operational role by an Administrator or authorized Manager.</p>
+<li><strong>FR-AUTH-3 (Role Quotas & Capacity Limits):</strong></li>
+<p>  - System enforces a strict maximum quota of <strong>2 Farm Managers</strong> system-wide.</p>
+<p>  - System enforces a strict maximum quota of <strong>10 Field Supervisors</strong> system-wide.</p>
+<p>  - Each Field Supervisor has a configurable maximum active project capacity (<code>maxProjectCapacity</code>, default $4$ projects).</p>
+<li><strong>FR-AUTH-4 (Granular Privilege Delegation - PBAC):</strong></li>
+<p>  Administrators can assign discrete privileges to Managers and Supervisors:</p>
+<p>  - <code>CAN_MANAGE_BUDGETS</code>: Authorizes editing project budgets and configurations.</p>
+<p>  - <code>CAN_RECORD_SALES</code>: Authorizes farm-gate sales recording.</p>
+<p>  - <code>CAN_RECORD_EXPENSES</code>: Authorizes logging operating expenses.</p>
+<p>  - <code>CAN_LOG_ACTIVITIES</code>: Authorizes scheduling and completing field tasks.</p>
+<p>  - <code>CAN_RECORD_HARVEST</code>: Authorizes logging crop and livestock harvests.</p>
+<p>  - <code>CAN_USE_INVENTORY</code>: Authorizes deducting supplies from warehouse stock.</p>
+<p>  - <code>CAN_VIEW_FINANCIALS</code>: Authorizes viewing monetary values, budget gauges, and cost figures.</p>
+<li><strong>FR-AUTH-5 (Self-Service Password Recovery via Resend):</strong></li>
+<p>  Users can initiate password resets via email. The system generates a cryptographic reset token valid for <strong>15 minutes</strong> and delivers the recovery link via Resend HTTP API (Port 443 HTTPS) with SMTP fallback.</p>
+<h3>3.2 Sector & Category Management (FR-SEC)</h3>
+<li><strong>FR-SEC-1 (Sector Hierarchy):</strong></li>
+<p>  The system organizes all farm production under Sectors/Categories (e.g., *Crops & Horticulture*, *Dairy Cattle*, *Poultry*, *Aquaculture*, *Livestock*).</p>
+<li><strong>FR-SEC-2 (Manager Sector Assignment):</strong></li>
+<p>  Farm Managers are assigned to one or more sectors (<code>assignedCategories</code>). Managers only have visibility and operational authority over projects within their assigned sectors.</p>
+<li><strong>FR-SEC-3 (Sector Financial & Operational Aggregation):</strong></li>
+<p>  Each sector aggregates cumulative budgets, expenses incurred, produce sales generated, harvests collected, and active projects in real-time.</p>
+<h3>3.3 Project Lifecycle Management (FR-PROJ)</h3>
+<li><strong>FR-PROJ-1 (Streamlined Two-Status Model):</strong></li>
+<p>  All farm projects strictly follow a two-state lifecycle:</p>
+<p>  1. <strong><code>Active</code></strong>: Currently ongoing field project accepting activity logs, expense records, harvest entries, supply usage, and sales.</p>
+<p>  2. <strong><code>Completed</code></strong>: Concluded project cycle preserved in historical archive with finalized financial net yield.</p>
+<p>  *(Legacy statuses like <code>in_progress</code>, <code>done</code>, <code>inactive</code>, or <code>pending</code> are automatically normalized into <code>active</code> or <code>completed</code>)*.</p>
+<li><strong>FR-PROJ-2 (Project Scoping & Supervisor Assignment):</strong></li>
+<p>  Each project is linked to a parent Sector/Category and assigned to a specific Field Supervisor. Supervisors can only view and manage projects in their portfolio.</p>
+<li><strong>FR-PROJ-3 (Supervisor Financial Shield):</strong></li>
+<p>  For Field Supervisors without the <code>CAN_VIEW_FINANCIALS</code> privilege, all monetary metrics (budget amount, expenses total, sales revenue, net value, unit prices) are masked to <code>$0.00</code> / hidden to protect farm commercial confidentiality.</p>
+<li><strong>FR-PROJ-4 (Project Dashboard Tabbed Records):</strong></li>
+<p>  The Project Dashboard provides structured tabs for:</p>
+<p>  - <strong>Expenses</strong>: Direct operational costs with title, unit price, quantity, amount, and notes.</p>
+<p>  - <strong>Activities</strong>: Scheduled agronomic operations with priority badges, status toggles, and labor assignments.</p>
+<p>  - <strong>Harvest</strong>: Produce volume logged with units of measurement.</p>
+<p>  - <strong>Sales</strong>: Farm-gate sales records linked to registered customers.</p>
+<p>  - <strong>Supplies</strong>: Warehouse inventory materials consumed directly by this project.</p>
+<h3>3.4 Field Operations, Agronomic Scheduling & Labor (FR-OPS)</h3>
+<li><strong>FR-OPS-1 (Agronomic Task Scheduling Presets):</strong></li>
+<p>  Field supervisors can schedule agronomic tasks with one-click automated date calculation presets:</p>
+<p>  - <code>+2 Wks (Spraying)</code>: Sets Scheduled Date = Today $+ 14$ days, Priority = <code>HIGH</code>, Type = <code>Field Care</code>.</p>
+<p>  - <code>+3 Wks (Weeding)</code>: Sets Scheduled Date = Today $+ 21$ days, Priority = <code>MEDIUM</code>, Type = <code>Field Care</code>.</p>
+<p>  - <code>+4 Wks (Top-Dressing)</code>: Sets Scheduled Date = Today $+ 28$ days, Priority = <code>HIGH</code>, Type = <code>Fertilization</code>.</p>
+<p>  - <code>+2 Mos (Harvesting)</code>: Sets Scheduled Date = Today $+ 60$ days, Priority = <code>URGENT</code>, Type = <code>Harvesting</code>.</p>
+<li><strong>FR-OPS-2 (Task Lifecycle & Countdown Badging):</strong></li>
+<p>  Tasks support statuses (<code>SCHEDULED</code>, <code>IN_PROGRESS</code>, <code>COMPLETED</code>, <code>CANCELLED</code>) and priorities (<code>LOW</code>, <code>MEDIUM</code>, <code>HIGH</code>, <code>URGENT</code>). Cards dynamically render status badges: <code>Due Today</code> *(Amber)*, <code>In X days</code> *(Blue)*, <code>Overdue by X days</code> *(Red)*, and <code>Completed</code> *(Green checkmark)*.</p>
+<li><strong>FR-OPS-3 (Labor Legal Compliance & Age Verification):</strong></li>
+<p>  All workers must be registered in the Employee Registry with full name, national ID, and date of birth. System strictly enforces legal working age:</p>
+<p>  $$\text{Age} = \text{Current Date} - \text{Date of Birth} \ge 18\text{ Years}$$</p>
+<li><strong>FR-OPS-4 (Activity Labor Assignment & Wage Calculation):</strong></li>
+<p>  Supervisors can assign multiple verified employees to any task, logging hours worked and wage payable amounts:</p>
+<p>  $$\text{Total Task Wage} = \sum (\text{Hours Worked} \times \text{Hourly Rate})$$</p>
+<h3>3.5 Harvest Produce & Stock-Controlled Sales (FR-SALE)</h3>
+<li><strong>FR-SALE-1 (Harvest Produce Intake):</strong></li>
+<p>  Supervisors log harvested yields specifying crop/produce item name, quantity harvested, and unit of measurement (kg, bags, crates, litres, tonnes).</p>
+<li><strong>FR-SALE-2 (Harvest Stock vs. Sales Validation Engine):</strong></li>
+<p>  The system strictly enforces the business rule that farm produce cannot be sold if insufficient harvest has been recorded for that project:</p>
+<p>  $$\text{Available Stock} = \sum \text{Harvest Quantity} - \sum \text{Sold Quantity} \ge \text{Requested Sale Quantity}$$</p>
+<p>  If requested quantity exceeds available harvest stock, the sale transaction is rejected with an explanatory HTTP 400 error.</p>
+<li><strong>FR-SALE-3 (Customer Credit & Down-Payment Allocation):</strong></li>
+<p>  - Sales can be paid in full or on credit terms.</p>
+<p>  - When $\text{Amount Paid} < \text{Total Amount}$, an existing registered customer <strong>must</strong> be attached to record the debt.</p>
+<p>  - Partial down-payments are automatically logged as the opening transaction in the customer payment audit trail.</p>
+<p>  - If a customer's outstanding debt exceeds their <code>creditLimit</code>, their status becomes <code>BLOCKED</code> and further credit purchases are prohibited.</p>
+<h3>3.6 Customer Accounts Receivable (AR) & Installment Audit (FR-AR)</h3>
+<li><strong>FR-AR-1 (Customer Accounts Receivable Ledger):</strong></li>
+<p>  Each registered customer maintains an ongoing financial ledger:</p>
+<p>  $$\text{Outstanding Debt (AR)} = \text{Total Purchases (Billed)} - \text{Total Payments (Remitted)}$$</p>
+<li><strong>FR-AR-2 (Dedicated Installment Payment Audit Modal):</strong></li>
+<p>  On <code>CustomerDetailsPage.jsx</code>, every sale record contains an <strong>Audit</strong> (<code><FaHistory /> Audit</code>) button opening the <code><SaleHistoryModal /></code>:</p>
+<p>  - Displays Invoice Total, Amount Paid, Balance Due, and Settlement Badge.</p>
+<p>  - Chronological table of all installment payments detailing Date, Payment Mode (<code>MPESA</code>, <code>CASH</code>, <code>BANK_TRANSFER</code>, <code>CHEQUE</code>), Reference Code, Amount Paid, Balance After, and Notes.</p>
+<p>  - Quick-action <strong>"Pay Towards This Sale"</strong> button.</p>
+<li><strong>FR-AR-3 (Targeted & FIFO Debt Allocation):</strong></li>
+<p>  - Operators can target installment payments directly to a specific sale invoice (<code>saleId</code>).</p>
+<p>  - If paying general account debt, the system applies payment across the customer's oldest unpaid sales in FIFO order, updating each sale's balance and payment status.</p>
+<h3>3.7 Supplier Accounts Payable (AP) & Inventory Restock (FR-AP)</h3>
+<li><strong>FR-AP-1 (Supplier Accounts Payable Ledger):</strong></li>
+<p>  Each supplier maintains an ongoing accounts payable ledger:</p>
+<p>  $$\text{Balance Owed (AP)} = \text{Total Purchases (Billed)} - \text{Total Payments (Remitted)}$$</p>
+<li><strong>FR-AP-2 (Purchase Invoices & Optional Auto-Restock):</strong></li>
+<p>  When logging a purchase invoice from a supplier, operators can optionally link a warehouse inventory item. The system automatically increments the warehouse stock level by <code>restockQuantity</code>.</p>
+<li><strong>FR-AP-3 (Dedicated Purchase Settlement Audit Modal):</strong></li>
+<p>  On <code>SupplierDetailsPage.jsx</code>, every purchase invoice features an <strong>Audit</strong> button opening the <code><PurchaseHistoryModal /></code>:</p>
+<p>  - Displays Total Billed, Total Paid, Balance Due (AP), and Payment Status.</p>
+<p>  - Chronological breakdown of all remitted vouchers with payment modes and reference codes.</p>
+<p>  - Quick-action <strong>"Settle This Invoice"</strong> button.</p>
+<li><strong>FR-AP-4 (Targeted & FIFO Voucher Settlement):</strong></li>
+<p>  Supports settling specific purchase invoices (<code>purchaseId</code>) or settling general account debt using FIFO allocation across the oldest unpaid supplier purchases.</p>
+<h3>3.8 Farm Warehouse Inventory Supplies (FR-INV)</h3>
+<li><strong>FR-INV-1 (Catalogue & Stock Tracking):</strong></li>
+<p>  Tracks inventory items across categories (*Seeds*, *Fertilizers*, *Feeds*, *Chemicals*, *Veterinary*, *Tools*) with unit measurement, unit purchase cost, and minimum reorder threshold (<code>minStockLevel</code>).</p>
+<li><strong>FR-INV-2 (Project Supply Consumption):</strong></li>
+<p>  Supervisors and managers can log direct supply usage against a project (<code>POST /inventory/{id}/use</code>), automatically deducting the quantity from warehouse stock and logging usage notes.</p>
+<li><strong>FR-INV-3 (Low Stock Alerting):</strong></li>
+<p>  Items where $\text{Quantity In Stock} \le \text{Min Stock Level}$ trigger warning badges on the dashboard and high-priority alerts in the Notification Center.</p>
+<h3>3.9 Executive Financial Dashboard & Analytics (FR-DASH)</h3>
+<li><strong>FR-DASH-1 (Ground-Truth Cash & Debt Metrics):</strong></li>
+<p>  The Command Center Dashboard computes ground-truth financial KPIs:</p>
+<p>  - <strong>Cash Received (In Account)</strong>: Actual liquid cash collected into farm accounts ($\text{Total Booked Sales} - \text{Uncollected Customer Debt}$).</p>
+<p>  - <strong>Customer Debts (Uncollected AR)</strong>: Total outstanding debt owed by buyers across the enterprise. Features a conditional <strong>"View $\rightarrow$"</strong> button that only appears when $\text{Debt} > 0$.</p>
+<p>  - <strong>Total Booked Sales</strong>: Gross volume of all recorded crop and livestock sales.</p>
+<p>  - <strong>Active Projects</strong>: Total ongoing projects with completed project count subtitle.</p>
+<li><strong>FR-DASH-2 (Interactive Donut Charts):</strong></li>
+<p>  - <strong>Revenue by Sector</strong>: Displays revenue share per agricultural sector with percentage hover tooltips.</p>
+<p>  - <strong>Project Status</strong>: Two-status distribution (<strong><code>Active</code></strong> in emerald green vs <strong><code>Completed</code></strong> in sky blue) with a background SVG base track ring for elegant zero-state presentation.</p>
+<li><strong>FR-DASH-3 (Server-Side Paginated Transactions Feed):</strong></li>
+<p>  Consolidates sales inflows and supply outflows into a server-side paginated ledger with search, type filters (<code>ALL</code>, <code>SALES</code>, <code>SUPPLIES</code>), and fixed 5-record pagination (<code>TX_PAGE_SIZE = 5</code>) sorted by date descending.</p>
+<li><strong>FR-DASH-4 (Supervisor Workspace Scoping):</strong></li>
+<p>  When accessed by a Field Supervisor, the dashboard switches to the scoped <strong>Supervisor Workspace</strong>, showing only their assigned projects, task countdowns, sector tags, and quick inventory shortcuts.</p>
+<h3>3.10 Real-Time Notification Center (FR-NOTIF)</h3>
+<li><strong>FR-NOTIF-1 (Proactive Aggregation Engine):</strong></li>
+<p>  Continuously monitors:</p>
 <p>  1. <code>USERS</code>: Pending user approval requests.</p>
-<p>  2. <code>INVENTORY</code>: Items where <code>quantityInStock <= minStockLevel</code>.</p>
-<p>  3. <code>TASKS</code>: Overdue farm activities ($Date < Today$) and upcoming activities due within 7 days.</p>
-<p>  4. <code>FINANCE</code>: Unpaid supplier purchase invoices (AP) and customer debts (AR).</p>
-<li><strong>FR-NOTIF-2 (TopBar Integration):</strong> Renders an interactive bell icon with a real-time badge count, pulse animation for new alerts, category filter tabs (<code>All</code>, <code>Tasks</code>, <code>Stock</code>, <code>Users</code>, <code>Finance</code>), and direct navigation links to resolving pages.</li>
-<li><strong>FR-NOTIF-3 (Polling Interval):</strong> Client refreshes notifications every 45 seconds and on active route transitions.</li>
-<h3>3.3 Farm Task Scheduling & Presets Engine (FR-SCHED)</h3>
-<li><strong>FR-SCHED-1 (Quick Agronomic Presets):</strong> One-click date and parameter calculation for standard crop cycles:</li>
-<p>  - <code>+2 Wks (Spraying)</code>: Sets scheduled date to $+14$ days, priority <code>HIGH</code>, type <code>Field Care</code>.</p>
-<p>  - <code>+3 Wks (Weeding)</code>: Sets scheduled date to $+21$ days, priority <code>MEDIUM</code>, type <code>Field Care</code>.</p>
-<p>  - <code>+4 Wks (Top-Dressing)</code>: Sets scheduled date to $+28$ days, priority <code>HIGH</code>, type <code>Fertilization</code>.</p>
-<p>  - <code>+2 Mos (Harvesting)</code>: Sets scheduled date to $+60$ days, priority <code>URGENT</code>, type <code>Harvesting</code>.</p>
-<li><strong>FR-SCHED-2 (Task Lifecycle):</strong> Tasks support statuses: <code>SCHEDULED</code>, <code>IN_PROGRESS</code>, <code>COMPLETED</code>, <code>CANCELLED</code> and priority tiers: <code>LOW</code>, <code>MEDIUM</code>, <code>HIGH</code>, <code>URGENT</code>.</li>
-<li><strong>FR-SCHED-3 (Countdown & Overdue Badges):</strong> Cards dynamically render badges: <code>Due Today</code> *(Amber)*, <code>In X days</code> *(Blue)*, <code>Overdue by X days</code> *(Red)*, <code>Completed</code> *(Green checkmark)*.</li>
-<li><strong>FR-SCHED-4 (One-Click Completion):</strong> Allows users to mark tasks as completed directly from the activity feed via <code>PATCH /activities/{id}/status</code>.</li>
-<h3>3.4 Production, Projects & Inventory Management (FR-PROD)</h3>
-<li><strong>FR-PROD-1 (Category & Project Hierarchy):</strong> Category (e.g. Dairy, Poultry, Horticulture) $\rightarrow$ Projects (e.g. Greenhouse 1, Broiler Batch A) $\rightarrow$ Records (Expenses, Activities, Harvest, Sales).</li>
-<li><strong>FR-PROD-2 (Inventory & Supply Consumption):</strong> Direct tracking of chemical, feed, fertilizer, and tool stocks with stock-deduction on farm usage (<code>POST /inventory/{id}/use</code>).</li>
-<li><strong>FR-PROD-3 (Harvest & Produce Stock Control):</strong> Sales cannot exceed harvested stock for any produce item.</li>
-<h3>3.5 Trade, Debt Ledgering & Financial Analytics (FR-FIN)</h3>
-<li><strong>FR-FIN-1 (Accounts Payable / Suppliers):</strong> Tracks external suppliers, purchase invoices, payment modes (<code>CASH</code>, <code>BANK</code>, <code>MPESA</code>, <code>CREDIT_LEDGER</code>), and outstanding liabilities.</li>
-<li><strong>FR-FIN-2 (Accounts Receivable / Customers):</strong> Tracks customer debt, invoice balances, payment histories, and credit limits.</li>
-<li><strong>FR-FIN-3 (Executive Dashboard Metrics):</strong> Multi-card auto-fit grid displaying:</li>
-<p>  - Total Revenue Collected</p>
-<p>  - Revenue Received (Cash In Bank)</p>
-<p>  - Cumulative Customer Debt (Uncollected AR)</p>
-<p>  - Unpaid Supplier Invoices (Pending AP)</p>
-<p>  - Total Expenses & Net Farm Value</p>
-<li><strong>FR-FIN-4 (Unified Transaction History & Pagination Engine):</strong></li>
-<p>  - Consolidates incoming crop/livestock sales and outgoing farm supply procurement records into a unified chronological ledger.</p>
-<p>  - <strong>Ordering:</strong> Guarantees strict <code>latest first</code> presentation by sorting on transaction date descending (<code>dateB.localeCompare(dateA)</code>), with a deterministic tie-breaker on ID descending.</p>
-<p>  - <strong>Pagination:</strong> Fixed page size of <strong>5 records per page</strong> (<code>TX_PAGE_SIZE = 5</code>). Provides intuitive pagination controls (Previous/Next buttons, active numeric page pills, and record count indicators <code>Showing X to Y of Z transactions</code>).</p>
-<p>  - <strong>Filtering & Search:</strong> Real-time text search across reference code, party name, and item description, combined with quick type filtering (<code>All</code>, <code>Sales Only</code>, <code>Supplies Only</code>). Page resets to 1 automatically upon filter or search change.</p>
-<h3>3.6 Labor Compliance & Wage Attribution (FR-LABOR)</h3>
-<li><strong>FR-LABOR-1 (National ID & Age Enforcement):</strong> Strict age validation ($Age \ge 18$) based on date of birth and verified government ID numbers.</li>
-<li><strong>FR-LABOR-2 (Task Rostering & Wage Calculation):</strong> Assignment of multiple verified employees to specific activities with custom wage amounts and payment status tracking.</li>
+<p>  2. <code>INVENTORY</code>: Items at or below minimum stock threshold.</p>
+<p>  3. <code>TASKS</code>: Overdue field tasks and upcoming activities due within 7 days.</p>
+<p>  4. <code>FINANCE</code>: Overdue supplier purchase invoices (AP) and customer debts (AR).</p>
+<li><strong>FR-NOTIF-2 (TopBar Interactive Dropdown):</strong></li>
+<p>  Renders an animated bell icon with live badge count, category filter tabs (<code>All</code>, <code>Tasks</code>, <code>Stock</code>, <code>Users</code>, <code>Finance</code>), and deep links to resolve each notification. Polling runs every 45 seconds and on route transitions.</p>
 <h2>4. Non-Functional Requirements (NFR)</h2>
-<h3>4.1 Performance & Scalability</h3>
-<li><strong>NFR-PERF-1:</strong> Sub-100ms average backend response time for dashboard aggregations and notification polling.</li>
-<li><strong>NFR-PERF-2:</strong> Database connection pool optimization with <code>spring.jpa.open-in-view=false</code>.</li>
-<li><strong>NFR-PERF-3:</strong> Frontend asset bundle optimization with code splitting, compressed SVG assets, and sub-3s production builds.</li>
-<h3>4.2 Security & Access Control</h3>
-<li><strong>NFR-SEC-1:</strong> Passwords encrypted using BCrypt (strength 10).</li>
-<li><strong>NFR-SEC-2:</strong> Stateless request validation with <code>X-User-Id</code> and <code>X-User-Role</code> verification.</li>
-<li><strong>NFR-SEC-3:</strong> Supervisor financial isolation (cost amounts, sales margins, and company cash balances are masked for non-authorized supervisors).</li>
-<h3>4.3 Reliability & Availability</h3>
-<li><strong>NFR-REL-1:</strong> Graceful zero-state handling when network disruptions occur.</li>
-<li><strong>NFR-REL-2:</strong> Automated database schema migration and validation on application startup.</li>
+<h3>4.1 Performance & Scalability (NFR-PERF)</h3>
+<li><strong>NFR-PERF-1:</strong> API endpoint response time under 100ms for 95th percentile under standard enterprise load.</li>
+<li><strong>NFR-PERF-2:</strong> Database connection pool optimized with <code>spring.jpa.open-in-view=false</code> and indexed foreign keys.</li>
+<li><strong>NFR-PERF-3:</strong> Vite frontend bundle size optimized with tree-shaking, CSS modules, and sub-3-second production builds.</li>
+<h3>4.2 Security & Data Integrity (NFR-SEC)</h3>
+<li><strong>NFR-SEC-1:</strong> Passwords hashed with BCrypt (strength 10).</li>
+<li><strong>NFR-SEC-2:</strong> Stateless session validation using <code>X-User-Id</code> and <code>X-User-Role</code> headers with Spring Security filters.</li>
+<li><strong>NFR-SEC-3:</strong> Supervisor financial masking at both API and UI presentation layers.</li>
+<li><strong>NFR-SEC-4:</strong> Prevention of infinite Jackson JSON serialization recursion using <code>@JsonIgnore</code> on all bidirectional entity relationships.</li>
+<h3>4.3 Reliability & Fault Tolerance (NFR-REL)</h3>
+<li><strong>NFR-REL-1:</strong> Email delivery resilience via Resend HTTPS API with SMTP fallback.</li>
+<li><strong>NFR-REL-2:</strong> Automatic database DDL update with zero destructive schema mutations.</li>
+<li><strong>NFR-REL-3:</strong> Comprehensive React Error Boundaries with graceful recovery buttons.</li>
 </body>
 </html>
