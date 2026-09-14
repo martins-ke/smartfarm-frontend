@@ -314,7 +314,7 @@ export function CustomersPage() {
                   <th>Contact & Location</th>
                   <th>Credit Ceiling</th>
                   <th style={{ textAlign: 'right' }}>Outstanding AR Debt</th>
-                  <th style={{ textAlign: 'center', width: '85px' }}>Ledger</th>
+                  <th style={{ textAlign: 'center' }}>Ledger</th>
                 </tr>
               </thead>
               <tbody>
@@ -415,7 +415,7 @@ export function CustomersPage() {
                               <span className={styles.debtAmountZero}>
                                 KES 0.00
                               </span>
-                              <span className={styles.debtSubZero}>No Balance</span>
+                              <span className={styles.debtSubZero}>Cleared</span>
                             </>
                           )}
                         </div>

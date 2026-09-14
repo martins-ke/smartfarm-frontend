@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './ProjectDashboardPage.module.css';
-import { getProjectById, updateProject } from '../../APIs/project';
+import { getProjectById, updateProject, deleteProject } from '../../APIs/project';
 import { createExpense, updateExpense, deleteExpense } from '../../APIs/expense';
 import { recordSale, updateSale, deleteSale, requestAllCustomers } from '../../APIs/sales';
 import { recordHarvest, updateHarvest, deleteHarvest } from '../../APIs/harvest';
@@ -145,6 +145,39 @@ export function ProjectDashboardPage() {
       available: Math.max(0, entry.harvested - entry.sold),
     }));
   }, [project?.harvest, project?.sales]);
+
+  // Project Deletion: Only allow if project has zero records referencing it
+  const [isDeletingProject, setIsDeletingProject] = useState(false);
+  const hasAnyRecords = useMemo(() => {
+    if (!project) return true;
+    const expCount = Array.isArray(project.expenses) ? project.expenses.length : 0;
+    const salesCount = Array.isArray(project.sales) ? project.sales.length : 0;
+    const harvestCount = Array.isArray(project.harvest) ? project.harvest.length : 0;
+    const actCount = Array.isArray(project.activities) ? project.activities.length : 0;
+    const backendHasRecords = project.hasRecords !== undefined ? project.hasRecords : false;
+    return expCount > 0 || salesCount > 0 || harvestCount > 0 || actCount > 0 || backendHasRecords;
+  }, [project]);
+
+  const canDeleteProject = canEditProject && !hasAnyRecords;
+
+  const handleDeleteProject = () => {
+    if (!canDeleteProject) return;
+    confirmModal(
+      `Are you sure you want to delete project "${project?.name || ''}"? This project has no active records and will be permanently removed.`,
+      async () => {
+        setIsDeletingProject(true);
+        try {
+          await deleteProject(projectId);
+          notify('Project deleted successfully ✅', 'success');
+          navigate(-1);
+        } catch (err) {
+          alertModal(err?.message || 'Failed to delete project.', 'error');
+        } finally {
+          setIsDeletingProject(false);
+        }
+      }
+    );
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -506,6 +539,9 @@ export function ProjectDashboardPage() {
         projectName={project.name}
         canEditProject={canEditProject}
         onOpenEditProject={handleOpenEditProject}
+        canDeleteProject={canDeleteProject}
+        onDeleteProject={handleDeleteProject}
+        isDeleting={isDeletingProject}
       />
 
       {/* 2. Financial Metrics Summary */}

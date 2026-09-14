@@ -847,6 +847,9 @@
     cursor: pointer;
     transition: transform 0.18s ease, opacity 0.18s ease;
     user-select: none;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+    min-width: 0;
 }
 
 .brandLogoWrap:hover {

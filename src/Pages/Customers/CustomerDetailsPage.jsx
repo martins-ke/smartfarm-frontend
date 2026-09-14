@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './CustomerDetailsPage.module.css';
 import { getCustomerById, recordCustomerPayment, getCustomerSales, getSalePaymentHistory } from '../../APIs/customer';
@@ -88,9 +88,12 @@ function SaleHistoryModal({ sale, customer, onClose, onPaySale }) {
         </div>
 
         {/* Installment History Table */}
-        <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text, #edf6ff)' }}>
-          Installment Payment Breakdown
-        </h4>
+        <div className={styles.auditSectionHeader}>
+          <h4>Installment Payment Breakdown</h4>
+          <span className={styles.historyCount}>
+            {payments.length} {payments.length === 1 ? 'Installment' : 'Installments'}
+          </span>
+        </div>
 
         {loading ? (
           <div style={{ padding: '1.5rem', textAlign: 'center' }}>
@@ -98,9 +101,10 @@ function SaleHistoryModal({ sale, customer, onClose, onPaySale }) {
           </div>
         ) : payments.length === 0 ? (
           <div className={styles.emptyAudit}>
+            <FaMoneyBillWave className={styles.emptyIcon} />
             <p>No separate installment payments logged yet for this sale.</p>
             {balanceDue > 0 && (
-              <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>This balance can be paid in installments using the button below.</p>
+              <span className={styles.emptyAuditSub}>This balance can be paid in installments using the button below.</span>
             )}
           </div>
         ) : (
@@ -108,8 +112,8 @@ function SaleHistoryModal({ sale, customer, onClose, onPaySale }) {
             <table className={styles.auditTable}>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Mode</th>
+                  <th style={{ minWidth: '95px' }}>Date & ID</th>
+                  <th style={{ textAlign: 'center' }}>Mode</th>
                   <th>Reference</th>
                   <th style={{ textAlign: 'right' }}>Amount Paid</th>
                   <th style={{ textAlign: 'right' }}>Balance After</th>
@@ -117,22 +121,55 @@ function SaleHistoryModal({ sale, customer, onClose, onPaySale }) {
                 </tr>
               </thead>
               <tbody>
-                {payments.map((p) => (
-                  <tr key={p.id}>
-                    <td>{p.paymentDate || 'Recent'}</td>
-                    <td>
-                      <span className={styles.modeBadge}>{p.paymentMode || 'CASH'}</span>
-                    </td>
-                    <td><strong>{p.referenceNumber || '—'}</strong></td>
-                    <td style={{ textAlign: 'right', color: '#10b981', fontWeight: 600 }}>
-                      KES {Number(p.amount || 0).toLocaleString()}
-                    </td>
-                    <td style={{ textAlign: 'right', color: '#94a3b8' }}>
-                      KES {Number(p.balanceAfter || 0).toLocaleString()}
-                    </td>
-                    <td style={{ color: '#cbd5e1', fontSize: '0.78rem' }}>{p.notes || '—'}</td>
-                  </tr>
-                ))}
+                {payments.map((p) => {
+                  const balAfter = Number(p.balanceAfter !== undefined ? p.balanceAfter : (p.balance_after !== undefined ? p.balance_after : 0));
+                  return (
+                    <tr key={p.id} className={styles.auditTableRow}>
+                      {/* Date & Ref ID */}
+                      <td>
+                        <div className={styles.dateCell}>
+                          <span className={styles.dateMain}>
+                            <FaCalendarAlt className={styles.miniIcon} /> {p.paymentDate || p.date || p.payment_date || 'Recent'}
+                          </span>
+                          <span className={styles.receiptId}>
+                            #{p.id ? p.id.slice(0, 8).toUpperCase() : 'PAY'}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Mode */}
+                      <td style={{ textAlign: 'center' }}>
+                        <span className={styles.modeBadge}>{p.paymentMode ? p.paymentMode.replace('_', ' ') : 'CASH'}</span>
+                      </td>
+
+                      {/* Reference */}
+                      <td>
+                        <strong className={styles.refText}>{p.referenceNumber || '—'}</strong>
+                      </td>
+
+                      {/* Amount Paid */}
+                      <td style={{ textAlign: 'right' }}>
+                        <strong className={styles.paidText}>
+                          KES {Number(p.amount || 0).toLocaleString()}
+                        </strong>
+                      </td>
+
+                      {/* Balance After */}
+                      <td style={{ textAlign: 'right' }}>
+                        <span className={balAfter > 0 ? styles.dueText : styles.clearedText}>
+                          {balAfter > 0 ? `KES ${balAfter.toLocaleString()}` : 'Cleared'}
+                        </span>
+                      </td>
+
+                      {/* Notes */}
+                      <td>
+                        <span className={styles.notesText} title={p.notes || ''}>
+                          {p.notes || '—'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -228,14 +265,26 @@ export function CustomerDetailsPage() {
     }
   }, [customerId, salesPage, customer?.contact]);
 
+  const unpaidSales = useMemo(() => {
+    return sales.filter((s) => {
+      const billed = Number(s.total_amount || 0);
+      const paid = Number(s.amountPaid || (s.amount_paid !== undefined ? s.amount_paid : 0));
+      const due = Number(s.balanceDue !== undefined ? s.balanceDue : (billed - paid));
+      return due > 0 || (s.paymentStatus && s.paymentStatus !== 'PAID_IN_FULL');
+    });
+  }, [sales]);
+
   const handleOpenPaymentModal = (sale = null) => {
-    setTargetSaleForPayment(sale);
-    const maxDue = sale ? Number(sale.balanceDue || (sale.total_amount - (sale.amountPaid || 0))) : Number(customer?.outstandingDebt || 0);
+    const activeSale = sale || (unpaidSales.length > 0 ? unpaidSales[0] : (sales.length > 0 ? sales[0] : null));
+    setTargetSaleForPayment(activeSale);
+    const maxDue = activeSale
+      ? Number(activeSale.balanceDue !== undefined ? activeSale.balanceDue : (Number(activeSale.total_amount || 0) - Number(activeSale.amountPaid || 0)))
+      : Number(customer?.outstandingDebt || 0);
     setPaymentForm({
       amount: maxDue > 0 ? String(maxDue) : '',
       paymentMode: 'MPESA',
       referenceNumber: '',
-      notes: sale ? `Installment payment for ${sale.item}` : 'General debt settlement'
+      notes: activeSale ? `Installment payment for ${activeSale.item}` : 'Debt settlement'
     });
     setShowPaymentModal(true);
   };
@@ -247,12 +296,16 @@ export function CustomerDetailsPage() {
       notify('Please enter a valid payment amount', 'error');
       return;
     }
+    if (!targetSaleForPayment?.id) {
+      notify('Please select a sale invoice to apply this payment to', 'error');
+      return;
+    }
     try {
       await recordCustomerPayment(customer.id, {
         amount: amt,
         paymentMode: paymentForm.paymentMode,
         referenceNumber: paymentForm.referenceNumber,
-        saleId: targetSaleForPayment?.id || null,
+        saleId: targetSaleForPayment.id,
         notes: paymentForm.notes
       });
       notify('Payment recorded successfully ✅', 'success');
@@ -486,11 +539,11 @@ export function CustomerDetailsPage() {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th style={{ minWidth: '105px' }}>Date & Ref</th>
+                    <th style={{ minWidth: '95px' }}>Date & Ref</th>
                     <th>Produce Item</th>
                     <th>Qty & Rate</th>
                     <th style={{ textAlign: 'right' }}>Total Billed</th>
-                    <th>Mode</th>
+                    <th style={{ textAlign: 'center' }}>Mode</th>
                     <th style={{ textAlign: 'right' }}>Paid / Due</th>
                     <th style={{ textAlign: 'center' }}>Status</th>
                     <th style={{ textAlign: 'center' }}>Audit</th>
@@ -505,12 +558,12 @@ export function CustomerDetailsPage() {
                     const status = sale.paymentStatus || (isFullyPaid ? 'PAID_IN_FULL' : paidAmt > 0 ? 'PARTIAL_PAYMENT' : 'CREDIT_UNPAID');
 
                     return (
-                      <tr key={sale.id}>
+                      <tr key={sale.id} className={styles.tableRow}>
                         {/* Date & Ref */}
                         <td>
                           <div className={styles.dateCell}>
                             <span className={styles.dateMain}>
-                              <FaCalendarAlt className={styles.miniIcon} /> {sale.added_on || '—'}
+                              <FaCalendarAlt className={styles.miniIcon} /> {sale.added_on || sale.date || '—'}
                             </span>
                             <span className={styles.receiptId}>
                               #{sale.id ? sale.id.slice(0, 8).toUpperCase() : 'SAL'}
@@ -533,7 +586,7 @@ export function CustomerDetailsPage() {
                         {/* Quantity & Unit Price */}
                         <td>
                           <div className={styles.qtyCell}>
-                            <span>{sale.quantity} units</span>
+                            <span className={styles.qtyText}>{sale.quantity} units</span>
                             <span className={styles.rateSub}>@ KES {Number(sale.unit_price || 0).toLocaleString()}</span>
                           </div>
                         </td>
@@ -546,7 +599,7 @@ export function CustomerDetailsPage() {
                         </td>
 
                         {/* Payment Mode */}
-                        <td>
+                        <td style={{ textAlign: 'center' }}>
                           <span className={styles.modeBadge}>
                             {sale.paymentMode ? sale.paymentMode.replace('_', ' ') : 'CASH'}
                           </span>
@@ -555,10 +608,16 @@ export function CustomerDetailsPage() {
                         {/* Amount Paid vs Due */}
                         <td style={{ textAlign: 'right' }}>
                           <div className={styles.settleCell}>
-                            <span className={styles.paidText}>Paid: KES {paidAmt.toLocaleString()}</span>
-                            {dueAmt > 0 ? (
+                            {isFullyPaid ? (
+                              <span className={styles.paidText}>KES {paidAmt.toLocaleString()}</span>
+                            ) : paidAmt === 0 ? (
                               <span className={styles.dueText}>Due: KES {dueAmt.toLocaleString()}</span>
-                            ) : null}
+                            ) : (
+                              <>
+                                <span className={styles.paidText}>Paid: KES {paidAmt.toLocaleString()}</span>
+                                <span className={styles.dueText}>Due: KES {dueAmt.toLocaleString()}</span>
+                              </>
+                            )}
                           </div>
                         </td>
 
@@ -653,32 +712,61 @@ export function CustomerDetailsPage() {
             </div>
             <p className={styles.customerSubText}>
               Customer: <strong>{customer.name}</strong> | Total Debt: <strong className={styles.warningText}>KES {debt.toLocaleString()}</strong>
-              {targetSaleForPayment && (
-                <span style={{ display: 'block', marginTop: '0.25rem', color: '#38bdf8' }}>
-                  Target Invoice: #{targetSaleForPayment.id?.slice(0, 8).toUpperCase()} ({targetSaleForPayment.item})
-                </span>
-              )}
             </p>
             <form onSubmit={handleRecordPayment} className={styles.form}>
+              <div className={styles.formGroup}>
+                <label>Target Sale Invoice *</label>
+                <select
+                  value={targetSaleForPayment?.id || ''}
+                  onChange={(e) => {
+                    const selectedId = e.target.value;
+                    const matched = sales.find((s) => String(s.id) === String(selectedId)) || null;
+                    setTargetSaleForPayment(matched);
+                    if (matched) {
+                      const billed = Number(matched.total_amount || 0);
+                      const paid = Number(matched.amountPaid || (matched.amount_paid !== undefined ? matched.amount_paid : 0));
+                      const due = Number(matched.balanceDue !== undefined ? matched.balanceDue : (billed - paid));
+                      setPaymentForm((prev) => ({
+                        ...prev,
+                        amount: due > 0 ? String(due) : prev.amount,
+                        notes: `Installment payment for ${matched.item}`
+                      }));
+                    }
+                  }}
+                  required
+                >
+                  <option value="" disabled>-- Select Sale Invoice --</option>
+                  {(unpaidSales.length > 0 ? unpaidSales : sales).map((s) => {
+                    const billed = Number(s.total_amount || 0);
+                    const paid = Number(s.amountPaid || (s.amount_paid !== undefined ? s.amount_paid : 0));
+                    const due = Number(s.balanceDue !== undefined ? s.balanceDue : (billed - paid));
+                    return (
+                      <option key={s.id} value={s.id}>
+                        #{s.id?.slice(0, 8).toUpperCase()} - {s.item} | Due: KES {due.toLocaleString()} (Total: KES {billed.toLocaleString()})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
               <div className={styles.formGroup}>
                 <label>Payment Amount (KES) *</label>
                 <input 
                   type="number" 
                   required 
                   min="1" 
-                  max={targetSaleForPayment ? Number(targetSaleForPayment.balanceDue || debt) : debt} 
+                  max={targetSaleForPayment ? (Number(targetSaleForPayment.balanceDue !== undefined ? targetSaleForPayment.balanceDue : (Number(targetSaleForPayment.total_amount || 0) - Number(targetSaleForPayment.amountPaid || 0))) || debt) : debt} 
                   placeholder="e.g. 15000" 
                   value={paymentForm.amount} 
                   onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
                 />
               </div>
 
-              <div className={styles.formGroup} style={{ marginTop: '0.75rem' }}>
+              <div className={styles.formGroup}>
                 <label>Payment Mode *</label>
                 <select 
                   value={paymentForm.paymentMode} 
                   onChange={(e) => setPaymentForm({ ...paymentForm, paymentMode: e.target.value })}
-                  style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#edf6ff' }}
                 >
                   <option value="MPESA">M-Pesa (Mobile Money)</option>
                   <option value="CASH">Cash (Farm-Gate Handover)</option>
@@ -686,7 +774,7 @@ export function CustomerDetailsPage() {
                 </select>
               </div>
 
-              <div className={styles.formGroup} style={{ marginTop: '0.75rem' }}>
+              <div className={styles.formGroup}>
                 <label>Reference / Transaction Code <span style={{ color: 'var(--muted)', fontWeight: 'normal' }}>(Optional)</span></label>
                 <input 
                   type="text" 
@@ -696,7 +784,7 @@ export function CustomerDetailsPage() {
                 />
               </div>
 
-              <div className={styles.formGroup} style={{ marginTop: '0.75rem' }}>
+              <div className={styles.formGroup}>
                 <label>Notes / Remarks</label>
                 <input 
                   type="text" 

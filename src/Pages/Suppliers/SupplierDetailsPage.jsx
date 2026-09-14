@@ -23,7 +23,12 @@ import {
   FaBoxes,
   FaTimes,
   FaHistory,
-  FaHandHoldingUsd
+  FaHandHoldingUsd,
+  FaCalendarAlt,
+  FaMoneyBillWave,
+  FaCheckCircle,
+  FaBan,
+  FaExclamationTriangle
 } from 'react-icons/fa';
 
 function PurchaseHistoryModal({ purchase, supplier, onClose, onPayPurchase }) {
@@ -89,9 +94,12 @@ function PurchaseHistoryModal({ purchase, supplier, onClose, onPayPurchase }) {
         </div>
 
         {/* Installment History Table */}
-        <h4 style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: 'var(--text, #edf6ff)' }}>
-          Payment & Settlement Breakdown
-        </h4>
+        <div className={styles.auditSectionHeader}>
+          <h4>Payment & Settlement Breakdown</h4>
+          <span className={styles.historyCount}>
+            {payments.length} {payments.length === 1 ? 'Record' : 'Records'}
+          </span>
+        </div>
 
         {loading ? (
           <div style={{ padding: '1.5rem', textAlign: 'center' }}>
@@ -99,9 +107,10 @@ function PurchaseHistoryModal({ purchase, supplier, onClose, onPayPurchase }) {
           </div>
         ) : payments.length === 0 ? (
           <div className={styles.emptyAudit}>
+            <FaMoneyBillWave className={styles.emptyIcon} />
             <p>No separate payment records logged yet for this invoice.</p>
             {balanceDue > 0 && (
-              <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>This balance can be settled using the button below.</p>
+              <span className={styles.emptyAuditSub}>This balance can be settled using the button below.</span>
             )}
           </div>
         ) : (
@@ -109,8 +118,8 @@ function PurchaseHistoryModal({ purchase, supplier, onClose, onPayPurchase }) {
             <table className={styles.auditTable}>
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Mode</th>
+                  <th style={{ minWidth: '95px' }}>Date & ID</th>
+                  <th style={{ textAlign: 'center' }}>Mode</th>
                   <th>Reference</th>
                   <th style={{ textAlign: 'right' }}>Amount Remitted</th>
                   <th style={{ textAlign: 'right' }}>Balance After</th>
@@ -118,22 +127,55 @@ function PurchaseHistoryModal({ purchase, supplier, onClose, onPayPurchase }) {
                 </tr>
               </thead>
               <tbody>
-                {payments.map((p) => (
-                  <tr key={p.id}>
-                    <td>{p.paymentDate || 'Recent'}</td>
-                    <td>
-                      <span className={styles.modeBadge}>{p.paymentMode || 'CASH'}</span>
-                    </td>
-                    <td><strong>{p.referenceNumber || '—'}</strong></td>
-                    <td style={{ textAlign: 'right', color: '#10b981', fontWeight: 600 }}>
-                      KES {Number(p.amount || 0).toLocaleString()}
-                    </td>
-                    <td style={{ textAlign: 'right', color: '#94a3b8' }}>
-                      KES {Number(p.balanceAfter || 0).toLocaleString()}
-                    </td>
-                    <td style={{ color: '#cbd5e1', fontSize: '0.78rem' }}>{p.notes || '—'}</td>
-                  </tr>
-                ))}
+                {payments.map((p) => {
+                  const balAfter = Number(p.balanceAfter !== undefined ? p.balanceAfter : (p.balance_after !== undefined ? p.balance_after : 0));
+                  return (
+                    <tr key={p.id} className={styles.auditTableRow}>
+                      {/* Date & Ref ID */}
+                      <td>
+                        <div className={styles.dateCell}>
+                          <span className={styles.dateMain}>
+                            <FaCalendarAlt className={styles.miniIcon} /> {p.paymentDate || p.date || p.payment_date || 'Recent'}
+                          </span>
+                          <span className={styles.receiptId}>
+                            #{p.id ? p.id.slice(0, 8).toUpperCase() : 'PAY'}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Mode */}
+                      <td style={{ textAlign: 'center' }}>
+                        <span className={styles.modeBadge}>{p.paymentMode ? p.paymentMode.replace('_', ' ') : 'CASH'}</span>
+                      </td>
+
+                      {/* Reference */}
+                      <td>
+                        <strong className={styles.refText}>{p.referenceNumber || '—'}</strong>
+                      </td>
+
+                      {/* Amount Remitted */}
+                      <td style={{ textAlign: 'right' }}>
+                        <strong className={styles.paidText}>
+                          KES {Number(p.amount || 0).toLocaleString()}
+                        </strong>
+                      </td>
+
+                      {/* Balance After */}
+                      <td style={{ textAlign: 'right' }}>
+                        <span className={balAfter > 0 ? styles.dueText : styles.clearedText}>
+                          {balAfter > 0 ? `KES ${balAfter.toLocaleString()}` : 'Cleared'}
+                        </span>
+                      </td>
+
+                      {/* Notes */}
+                      <td>
+                        <span className={styles.notesText} title={p.notes || ''}>
+                          {p.notes || '—'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -159,6 +201,13 @@ function PurchaseHistoryModal({ purchase, supplier, onClose, onPayPurchase }) {
   );
 }
 
+const getInitials = (name) => {
+  if (!name) return 'SU';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
 export function SupplierDetailsPage() {
   const { supplierId } = useParams();
   const navigate = useNavigate();
@@ -178,6 +227,8 @@ export function SupplierDetailsPage() {
     invoiceNumber: '',
     invoiceAmount: '',
     amountPaid: '',
+    purchaseDate: new Date().toISOString().split('T')[0],
+    dueDate: '',
     inventoryItemId: '',
     restockQuantity: '',
     notes: ''
@@ -199,67 +250,53 @@ export function SupplierDetailsPage() {
       const [supRes, purRes, invRes] = await Promise.all([
         getSupplierById(supplierId),
         getSupplierPurchases(supplierId),
-        getInventoryItems(0, 1000).catch(() => ({ body: [] }))
+        getInventoryItems()
       ]);
       setSupplier(supRes);
       setPurchases(Array.isArray(purRes) ? purRes : []);
-      const invBody = invRes?.body || invRes;
-      const items = Array.isArray(invBody?.content) ? invBody.content : (Array.isArray(invBody) ? invBody : []);
-      setInventoryItems(items);
+      setInventoryItems(Array.isArray(invRes) ? invRes : []);
     } catch (err) {
       setLoadError(err);
-      notify(err.message || 'Failed to load supplier details', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (supplierId) {
-      loadData();
-    }
+    loadData();
   }, [supplierId]);
 
   const handleRecordPurchase = async (e) => {
     e.preventDefault();
-    const invAmt = Number(purchaseForm.invoiceAmount);
-    if (!purchaseForm.invoiceAmount || isNaN(invAmt) || invAmt <= 0) {
-      notify('Total invoice amount must be provided and greater than zero', 'error');
+    if (!purchaseForm.invoiceAmount || Number(purchaseForm.invoiceAmount) <= 0) {
+      notify('Please enter a valid invoice amount greater than zero', 'error');
       return;
     }
-
-    const paidAmt = Number(purchaseForm.amountPaid !== '' ? purchaseForm.amountPaid : 0);
-    if (isNaN(paidAmt) || paidAmt < 0) {
-      notify('Amount paid now cannot be negative', 'error');
-      return;
-    }
-
-    if (paidAmt > invAmt) {
-      notify('Amount paid now cannot exceed the total invoice amount', 'error');
-      return;
-    }
-
     if (!purchaseForm.notes || !purchaseForm.notes.trim()) {
-      notify('Delivery notes / items description must be provided for clarity', 'error');
+      notify('Delivery notes / items description must be provided', 'error');
       return;
     }
 
     try {
       await recordSupplierPurchase({
         supplierId: supplier.id,
-        invoiceNumber: purchaseForm.invoiceNumber?.trim() || null,
-        invoiceAmount: invAmt,
-        amountPaid: paidAmt,
+        invoiceNumber: purchaseForm.invoiceNumber ? purchaseForm.invoiceNumber.trim() : null,
+        invoiceAmount: Number(purchaseForm.invoiceAmount),
+        amountPaid: Number(purchaseForm.amountPaid || 0),
+        purchaseDate: purchaseForm.purchaseDate || new Date().toISOString().split('T')[0],
+        dueDate: purchaseForm.dueDate || null,
         inventoryItemId: purchaseForm.inventoryItemId || null,
         restockQuantity: purchaseForm.restockQuantity ? Number(purchaseForm.restockQuantity) : null,
         notes: purchaseForm.notes.trim()
       });
-      notify('Purchase invoice recorded & Accounts Payable updated ✅', 'success');
+      notify('Purchase invoice recorded successfully!', 'success');
       setShowPurchaseModal(false);
       setPurchaseForm({
         invoiceNumber: '',
         invoiceAmount: '',
         amountPaid: '',
+        purchaseDate: new Date().toISOString().split('T')[0],
+        dueDate: '',
         inventoryItemId: '',
         restockQuantity: '',
         notes: ''
@@ -342,6 +379,7 @@ export function SupplierDetailsPage() {
   }
 
   const debt = Number(supplier.balanceOwed || 0);
+  const initials = getInitials(supplier.name);
 
   return (
     <div className={styles.container}>
@@ -356,12 +394,15 @@ export function SupplierDetailsPage() {
       <div className={styles.profileHeaderCard}>
         <div className={styles.headerLeft}>
           <div className={styles.vendorAvatar}>
-            <FaTruck />
+            {initials}
           </div>
           <div className={styles.headerInfo}>
             <h1 className={styles.supplierTitle}>{supplier.name}</h1>
-            <div>
+            <div className={styles.badgeRow}>
               <span className={styles.badgeCategory}>{supplier.category || 'General Farm Inputs'}</span>
+              <span className={debt > 0 ? styles.statusDebt : styles.statusGoodStanding}>
+                {debt > 0 ? 'Outstanding AP Debt' : 'Clean & Settled ✅'}
+              </span>
             </div>
           </div>
         </div>
@@ -481,10 +522,14 @@ export function SupplierDetailsPage() {
           <div className={styles.infoRow}>
             <span className={styles.infoLabel}>Account Status:</span>
             <span className={styles.infoValue}>
-              <span className={debt > 0 ? styles.debtBadge : styles.clearBadge}>
+              <span className={debt > 0 ? styles.statusDebt : styles.statusGoodStanding}>
                 {debt > 0 ? 'LIABILITY OWED' : 'CLEARED & GOOD STANDING ✅'}
               </span>
             </span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.infoLabel}>Supplier ID:</span>
+            <span className={styles.infoValue} style={{ fontFamily: 'monospace' }}>{supplier.id}</span>
           </div>
         </div>
       </div>
@@ -492,8 +537,12 @@ export function SupplierDetailsPage() {
       {/* Invoices History Table */}
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>
-          <h2><FaHistory /> Purchase Invoices & Order Audit Trail</h2>
-          <span className={styles.historyCount}>{purchases.length} Records</span>
+          <div className={styles.tableHeaderLeft}>
+            <h2>
+              <FaFileInvoiceDollar /> Purchase Invoices & Order Audit Trail
+            </h2>
+            <span className={styles.historyCount}>{purchases.length} Recorded Invoices</span>
+          </div>
         </div>
 
         {purchases.length === 0 ? (
@@ -509,44 +558,110 @@ export function SupplierDetailsPage() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Invoice No</th>
-                  <th>Date</th>
-                  <th>Billed Amount</th>
-                  <th>Paid Amount</th>
-                  <th>Balance Due</th>
-                  <th>Status</th>
+                  <th style={{ minWidth: '95px' }}>Date & Ref</th>
+                  <th>Invoice / Items</th>
+                  <th style={{ textAlign: 'right' }}>Billed Amount</th>
+                  <th style={{ textAlign: 'right' }}>Paid / Due</th>
+                  <th style={{ textAlign: 'center' }}>Status</th>
                   <th>Notes</th>
                   <th style={{ textAlign: 'center' }}>Audit</th>
                 </tr>
               </thead>
               <tbody>
-                {purchases.map((p) => (
-                  <tr key={p.id}>
-                    <td><strong>{p.invoiceNumber || 'INV-Auto'}</strong></td>
-                    <td>{p.purchaseDate ? new Date(p.purchaseDate).toLocaleDateString() : 'Recent'}</td>
-                    <td>KES {Number(p.invoiceAmount || 0).toLocaleString()}</td>
-                    <td className={styles.paidCell}>KES {Number(p.amountPaid || 0).toLocaleString()}</td>
-                    <td className={Number(p.balanceDue || 0) > 0 ? styles.dangerText : styles.successText}>
-                      KES {Number(p.balanceDue || 0).toLocaleString()}
-                    </td>
-                    <td>
-                      <span className={p.paymentStatus === 'PAID' ? styles.clearBadge : styles.debtBadge}>
-                        {p.paymentStatus}
-                      </span>
-                    </td>
-                    <td className={styles.notesCell}>{p.notes || '-'}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <button 
-                        type="button"
-                        className={styles.historyBtn}
-                        onClick={() => setSelectedPurchaseForHistory(p)}
-                        title="View chronological payments & settlement audit logs"
-                      >
-                        <FaHistory /> Audit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {purchases.map((p) => {
+                  const totalAmt = Number(p.invoiceAmount || 0);
+                  const paidAmt = Number(p.amountPaid !== undefined ? p.amountPaid : 0);
+                  const dueAmt = Number(p.balanceDue !== undefined ? p.balanceDue : (totalAmt - paidAmt));
+                  const isFullyPaid = dueAmt <= 0;
+                  const status = p.paymentStatus || (isFullyPaid ? 'PAID' : paidAmt > 0 ? 'PARTIAL' : 'UNPAID');
+
+                  return (
+                    <tr key={p.id} className={styles.tableRow}>
+                      {/* Date & Ref */}
+                      <td>
+                        <div className={styles.dateCell}>
+                          <span className={styles.dateMain}>
+                            <FaCalendarAlt className={styles.miniIcon} /> {p.purchaseDate ? new Date(p.purchaseDate).toLocaleDateString() : (p.date || 'Recent')}
+                          </span>
+                          <span className={styles.receiptId}>
+                            #{p.invoiceNumber || (p.id ? p.id.slice(0, 8).toUpperCase() : 'INV')}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Invoice / Item */}
+                      <td>
+                        <div className={styles.itemCell}>
+                          <strong className={styles.itemName}>{p.invoiceNumber || 'INV-Auto'}</strong>
+                          {p.notes && (
+                            <span className={styles.itemProject} title={p.notes}>
+                              {p.notes}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Billed Amount */}
+                      <td style={{ textAlign: 'right' }}>
+                        <strong className={styles.totalAmountText}>
+                          KES {totalAmt.toLocaleString()}
+                        </strong>
+                      </td>
+
+                      {/* Paid vs Due */}
+                      <td style={{ textAlign: 'right' }}>
+                        <div className={styles.settleCell}>
+                          {isFullyPaid ? (
+                            <span className={styles.paidText}>KES {paidAmt.toLocaleString()}</span>
+                          ) : paidAmt === 0 ? (
+                            <span className={styles.dueText}>Due: KES {dueAmt.toLocaleString()}</span>
+                          ) : (
+                            <>
+                              <span className={styles.paidText}>Paid: KES {paidAmt.toLocaleString()}</span>
+                              <span className={styles.dueText}>Due: KES {dueAmt.toLocaleString()}</span>
+                            </>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td style={{ textAlign: 'center' }}>
+                        {isFullyPaid ? (
+                          <span className={styles.statusPaidBadge}>
+                            <FaCheckCircle className={styles.miniIcon} /> Paid
+                          </span>
+                        ) : status === 'UNPAID' ? (
+                          <span className={styles.statusUnpaidBadge}>
+                            <FaBan className={styles.miniIcon} /> Unpaid
+                          </span>
+                        ) : (
+                          <span className={styles.statusPartialBadge}>
+                            <FaExclamationTriangle className={styles.miniIcon} /> Due
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Notes */}
+                      <td>
+                        <span className={styles.notesText} title={p.notes || ''}>
+                          {p.notes || '—'}
+                        </span>
+                      </td>
+
+                      {/* Audit */}
+                      <td style={{ textAlign: 'center' }}>
+                        <button 
+                          type="button"
+                          className={styles.historyBtn}
+                          onClick={() => setSelectedPurchaseForHistory(p)}
+                          title="View chronological payments & settlement audit logs"
+                        >
+                          <FaHistory /> Audit
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -623,6 +738,25 @@ export function SupplierDetailsPage() {
                     disabled 
                     value={`KES ${Math.max(0, (Number(purchaseForm.invoiceAmount || 0) - Number(purchaseForm.amountPaid || 0))).toLocaleString()}`}
                     className={styles.readOnlyInput}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Invoice / Purchase Date</label>
+                  <input 
+                    type="date" 
+                    value={purchaseForm.purchaseDate} 
+                    onChange={(e) => setPurchaseForm({ ...purchaseForm, purchaseDate: e.target.value })}
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Payment Due Date <span style={{ color: 'var(--muted)', fontWeight: 'normal' }}>(Optional)</span></label>
+                  <input 
+                    type="date" 
+                    value={purchaseForm.dueDate} 
+                    onChange={(e) => setPurchaseForm({ ...purchaseForm, dueDate: e.target.value })}
                   />
                 </div>
               </div>

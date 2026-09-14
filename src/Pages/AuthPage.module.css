@@ -5,27 +5,90 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.76) 0%, rgba(2, 6, 23, 0.94) 100%),
-              url('/agrosync-logo.jpg') no-repeat center center fixed;
+  justify-content: flex-end;
+  background: url('/agrosync-backdrop.jpg') no-repeat center center fixed;
   background-size: cover;
-  padding: 1.5rem;
+  padding: 2rem 6vw 2rem 2rem;
   box-sizing: border-box;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 960px) {
+  .pageWrapper {
+    justify-content: center;
+    padding: 1.5rem;
+  }
+}
+
+/* ── Floating Theme Switcher for Auth Pages ── */
+.themeToggleBtn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s ease;
+}
+
+:global(html.light) .themeToggleBtn,
+[data-theme="light"] .themeToggleBtn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  color: #0f172a;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+}
+
+.themeToggleBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+.themeIcon {
+  font-size: 1rem;
+  color: #22c55e;
 }
 
 /* ── Card ── */
 .card {
-  background: rgba(15, 23, 42, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.86);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 20px;
   padding: 2.5rem 2.25rem;
   width: 100%;
   max-width: 440px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 30px rgba(2, 132, 199, 0.18);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 40px rgba(22, 163, 74, 0.25);
   box-sizing: border-box;
   color: #f8fafc;
+  position: relative;
+  z-index: 10;
+  transition: all 0.35s ease;
+}
+
+/* Light Mode Card */
+:global(html.light) .card,
+[data-theme="light"] .card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18), 0 0 35px rgba(22, 163, 74, 0.18);
+  color: #0f172a;
 }
 
 /* ── Brand Header ── */
@@ -58,12 +121,22 @@
   letter-spacing: -0.3px;
 }
 
+:global(html.light) .brandName,
+[data-theme="light"] .brandName {
+  color: #0f172a;
+}
+
 .brandTagline {
   font-size: 0.78rem;
   color: #94a3b8;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+:global(html.light) .brandTagline,
+[data-theme="light"] .brandTagline {
+  color: #64748b;
 }
 
 /* ── Form Heading ── */
@@ -73,6 +146,11 @@
   color: #f8fafc;
   margin: 0 0 1.2rem;
   text-align: center;
+}
+
+:global(html.light) .formTitle,
+[data-theme="light"] .formTitle {
+  color: #0f172a;
 }
 
 /* ── Error Banner ── */
@@ -85,6 +163,13 @@
   font-size: 0.85rem;
   margin-bottom: 1.2rem;
   text-align: center;
+}
+
+:global(html.light) .errorBanner,
+[data-theme="light"] .errorBanner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
 }
 
 /* ── Form Layout ── */
@@ -107,6 +192,11 @@
   letter-spacing: 0.2px;
 }
 
+:global(html.light) .label,
+[data-theme="light"] .label {
+  color: #334155;
+}
+
 /* ── Input ── */
 .input {
   width: 100%;
@@ -122,14 +212,33 @@
   min-height: 44px;
 }
 
+:global(html.light) .input,
+[data-theme="light"] .input {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #0f172a;
+}
+
 .input::placeholder {
   color: #64748b;
+}
+
+:global(html.light) .input::placeholder,
+[data-theme="light"] .input::placeholder {
+  color: #94a3b8;
 }
 
 .input:focus {
   border-color: #38bdf8;
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
   background: rgba(15, 23, 42, 0.9);
+}
+
+:global(html.light) .input:focus,
+[data-theme="light"] .input:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+  background: #ffffff;
 }
 
 /* ── Password Field (positional wrapper for eye icon) ── */

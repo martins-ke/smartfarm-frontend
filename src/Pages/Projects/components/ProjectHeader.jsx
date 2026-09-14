@@ -1,7 +1,15 @@
 import styles from '../ProjectDashboardPage.module.css';
-import { FaEdit } from 'react-icons/fa';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
-export function ProjectHeader({ categoryLabel, projectName, canEditProject, onOpenEditProject }) {
+export function ProjectHeader({
+  categoryLabel,
+  projectName,
+  canEditProject,
+  onOpenEditProject,
+  canDeleteProject,
+  onDeleteProject,
+  isDeleting,
+}) {
   return (
     <div className={styles.headerRow}>
       <div>
@@ -17,6 +25,19 @@ export function ProjectHeader({ categoryLabel, projectName, canEditProject, onOp
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
               <FaEdit /> Edit Project
+            </span>
+          </button>
+        )}
+        {canDeleteProject && (
+          <button
+            type="button"
+            className={styles.deleteProjectBtn}
+            onClick={onDeleteProject}
+            disabled={isDeleting}
+            title="Delete this empty project"
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+              <FaTrash /> {isDeleting ? 'Deleting...' : 'Delete Project'}
             </span>
           </button>
         )}

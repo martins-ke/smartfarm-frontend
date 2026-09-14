@@ -11,7 +11,7 @@ import {
   FaMoneyBillWave, FaProjectDiagram, FaExclamationTriangle,
   FaUsers, FaArrowRight, FaChartLine, FaTractor, FaWallet,
   FaUserShield, FaChartPie, FaChartBar, FaCheckCircle, FaHandHoldingUsd,
-  FaExchangeAlt, FaArrowUp, FaArrowDown, FaSearch
+  FaExchangeAlt, FaArrowUp, FaArrowDown, FaSearch, FaTruck
 } from 'react-icons/fa';
 
 const TX_PAGE_SIZE = 5;
@@ -175,7 +175,7 @@ export function UnifiedDashboard() {
       {/* ── Header ── */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <p className={styles.eyebrow}>Command Center</p>
+          <p className={styles.eyebrow}>Dashboard</p>
           <h1 className={styles.welcomeTitle}>
             Welcome back, <span className={styles.usernameText}>{currentUser?.username || 'User'}</span>
           </h1>
@@ -203,11 +203,11 @@ export function UnifiedDashboard() {
           </div>
         </div>
 
-        {/* 2. Cumulative Customer Debts (Uncollected) */}
+        {/* 2. Cumulative Customer Debts (Uncollected - Accounts Receivable) */}
         <div className={styles.kpiCard}>
           <div className={styles.kpiInfo}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
-              <p className={styles.kpiLabel}>Customer Debts</p>
+              <p className={styles.kpiLabel}>Customer Debts (AR)</p>
               {Number(kpis?.pendingDebt || 0) > 0 && (
                 <button
                   type="button"
@@ -227,6 +227,48 @@ export function UnifiedDashboard() {
           </div>
           <div className={styles.kpiIconWrap} style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}>
             <FaHandHoldingUsd size={18} />
+          </div>
+        </div>
+
+        {/* 3. Farm Debt to Suppliers (Accounts Payable) */}
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiInfo}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
+              <p className={styles.kpiLabel}>Supplier Debts (AP)</p>
+              {Number(kpis?.supplierDebt || 0) > 0 && (
+                <button
+                  type="button"
+                  className={styles.cardViewBtn}
+                  style={{
+                    background: 'rgba(239,68,68,0.12)',
+                    borderColor: 'rgba(239,68,68,0.35)',
+                    color: '#ef4444'
+                  }}
+                  onClick={() => navigate('/suppliers')}
+                  title="View Supplier Accounts Payable & Invoices"
+                >
+                  View <FaArrowRight size={8} />
+                </button>
+              )}
+            </div>
+            <p className={styles.kpiValue} style={{ color: Number(kpis?.supplierDebt || 0) > 0 ? '#ef4444' : '#10b981' }}>
+              <span className={styles.currencyPrefix}>KES</span>
+              <span>{Number(kpis?.supplierDebt || 0).toLocaleString()}</span>
+            </p>
+            <p className={styles.kpiSub}>
+              {Number(kpis?.supplierDebt || 0) > 0 
+                ? `Farm liability owed to ${kpis?.supplierDebtCount || 0} vendor${(kpis?.supplierDebtCount || 0) === 1 ? '' : 's'}`
+                : 'All supplier invoices cleared ✅'}
+            </p>
+          </div>
+          <div 
+            className={styles.kpiIconWrap} 
+            style={{ 
+              background: Number(kpis?.supplierDebt || 0) > 0 ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)', 
+              color: Number(kpis?.supplierDebt || 0) > 0 ? '#ef4444' : '#10b981' 
+            }}
+          >
+            <FaTruck size={18} />
           </div>
         </div>
 

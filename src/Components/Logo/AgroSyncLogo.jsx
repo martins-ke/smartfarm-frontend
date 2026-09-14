@@ -11,10 +11,11 @@ import agroFullLogoImg from '../../assets/agrosync-full-logo.png';
  * - "AgroSync" Brand with "FARM MANAGEMENT SUITE" Subtitle
  *
  * @param {Object} props
- * @param {number} [props.size=36] - Icon size in pixels (or width for full logo)
+ * @param {number|string} [props.size=36] - Icon size in pixels (or width for full logo)
  * @param {boolean} [props.iconOnly=false] - When true, only the icon emblem is rendered
  * @param {boolean} [props.fullLogo=false] - When true, renders the complete full brand graphic (emblem + name + suite)
- * @param {boolean} [props.withSubtitle=false] - Show 'FARM MANAGEMENT SUITE' subtitle in text mode
+ * @param {boolean} [props.withSubtitle=true] - Show 'FARM MANAGEMENT SUITE' subtitle in text mode
+ * @param {boolean} [props.responsive=false] - When true, dynamically scales emblem & typography with viewport width
  * @param {string} [props.className=''] - Custom CSS class
  * @param {Object} [props.style={}] - Inline style
  * @param {'default'|'badge'|'glow'|'full'} [props.variant='default'] - Visual style
@@ -23,7 +24,8 @@ export function AgroSyncLogo({
   size = 36,
   iconOnly = false,
   fullLogo = false,
-  withSubtitle = false,
+  withSubtitle = true,
+  responsive = false,
   className = '',
   style = {},
   variant = 'default',
@@ -69,12 +71,18 @@ export function AgroSyncLogo({
     );
   }
 
+  const iconDim = responsive
+    ? 'clamp(21px, 1.8vw + 12px, 32px)'
+    : size;
+
   const iconMarkup = (
     <div
       style={{
-        width: size,
-        height: size,
-        borderRadius: isBadge ? `${Math.max(10, Math.round(size * 0.24))}px` : '50%',
+        width: iconDim,
+        height: iconDim,
+        minWidth: iconDim,
+        minHeight: iconDim,
+        borderRadius: isBadge ? `${Math.max(10, Math.round((typeof size === 'number' ? size : 30) * 0.24))}px` : '50%',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
@@ -107,29 +115,45 @@ export function AgroSyncLogo({
     return iconMarkup;
   }
 
+  const titleFontSize = responsive
+    ? 'clamp(0.92rem, 0.9vw + 0.65rem, 1.25rem)'
+    : size > 40 ? '1.45rem' : size >= 28 ? '1.08rem' : size >= 24 ? '0.96rem' : '0.88rem';
+
+  const subtitleFontSize = responsive
+    ? 'clamp(0.40rem, 0.3vw + 0.30rem, 0.52rem)'
+    : size > 40 ? '0.58rem' : size >= 28 ? '0.48rem' : size >= 24 ? '0.42rem' : '0.38rem';
+
+  const logoGap = responsive
+    ? 'clamp(0.40rem, 0.45vw + 0.22rem, 0.65rem)'
+    : size > 40 ? '0.75rem' : size >= 28 ? '0.52rem' : '0.42rem';
+
   return (
     <div
       className={className}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: size > 40 ? '0.85rem' : '0.65rem',
+        gap: logoGap,
         textDecoration: 'none',
         userSelect: 'none',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+        minWidth: 0,
         ...style,
       }}
     >
       {iconMarkup}
-      <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.5, whiteSpace: 'nowrap', minWidth: 0, flexShrink: 0 }}>
         <span
           style={{
-            fontSize: size > 40 ? '1.55rem' : '1.22rem',
+            fontSize: titleFontSize,
             fontWeight: 800,
             letterSpacing: '-0.025em',
             color: 'inherit',
             fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif",
             display: 'flex',
             alignItems: 'baseline',
+            whiteSpace: 'nowrap',
           }}
         >
           <span>Agro</span>
@@ -140,6 +164,7 @@ export function AgroSyncLogo({
               WebkitTextFillColor: 'transparent',
               textShadow: '0 0 20px rgba(56, 189, 248, 0.25)',
               marginLeft: '1px',
+              whiteSpace: 'nowrap',
             }}
           >
             Sync
@@ -148,13 +173,14 @@ export function AgroSyncLogo({
         {withSubtitle && (
           <span
             style={{
-              fontSize: size > 40 ? '0.65rem' : '0.58rem',
+              fontSize: subtitleFontSize,
               fontWeight: 700,
               textTransform: 'uppercase',
-              letterSpacing: '0.12em',
+              letterSpacing: '0.08em',
               color: 'var(--muted, #64748b)',
-              marginTop: '0.2rem',
+              marginTop: '0.1rem',
               opacity: 0.9,
+              whiteSpace: 'nowrap',
             }}
           >
             Farm Management Suite
@@ -166,4 +192,3 @@ export function AgroSyncLogo({
 }
 
 export default AgroSyncLogo;
-

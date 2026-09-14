@@ -200,9 +200,9 @@ export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, set
                {/* overlay covering rest of the app to block interactions when menu is open */}
                {!hideMenu && <div className={styles.appOverlay} onClick={() => setHideMenu(true)} aria-hidden="true" />} 
 
-               <aside className={styles.brandLogoWrap} onClick={goToDashboard} title="AgroSync Dashboard">
-                   <AgroSyncLogo size={26} />
-               </aside>
+                <aside className={styles.brandLogoWrap} onClick={goToDashboard} title="AgroSync Dashboard">
+                    <AgroSyncLogo responsive={true} withSubtitle={true} />
+                </aside>
            </div>
 
            <div className={styles.rightControls}>

@@ -350,8 +350,8 @@
   flex-shrink: 0;
 }
 
-/* ── Buyer Purchase History Table & Pagination ── */
-.historyCard {
+/* ── Produce Invoices & Sales Ledger Table Card ── */
+.tableCard {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 0.85rem;
@@ -363,8 +363,8 @@
   flex-direction: column;
 }
 
-.historyHeader {
-  padding: 0.65rem 0.95rem;
+.tableHeader {
+  padding: 0.6rem 0.95rem;
   border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.15));
   display: flex;
   align-items: center;
@@ -373,14 +373,15 @@
   gap: 0.5rem;
 }
 
-.historyHeaderLeft {
+.tableHeaderLeft {
   display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
 }
 
-.historyTitle {
-  font-size: 0.95rem;
+.tableHeaderLeft h2 {
+  font-size: clamp(0.88rem, 1.05vw, 1rem);
   font-weight: 700;
   color: var(--text, #edf6ff);
   margin: 0;
@@ -389,83 +390,72 @@
   gap: 0.4rem;
 }
 
-.sectionIcon {
-  color: #10b981;
-  font-size: 0.9rem;
-  flex-shrink: 0;
-}
-
-.historySub {
-  font-size: 0.72rem;
-  color: var(--muted, #8bb4d9);
-}
-
-.countBadge {
+.historyCount {
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--muted, #8bb4d9);
   background: var(--surface-highlight, rgba(138, 180, 219, 0.1));
   border: 1px solid var(--border, rgba(138, 180, 219, 0.18));
-  padding: 0.15rem 0.55rem;
+  padding: 0.12rem 0.5rem;
   border-radius: 999px;
+  white-space: nowrap;
 }
 
 .tableWrapper {
   overflow-x: auto;
   scrollbar-width: thin;
+  width: 100%;
 }
-.tableCard{
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 0.85rem;
-  overflow: auto;
-  backdrop-filter: var(--card-blur);
-  -webkit-backdrop-filter: var(--card-blur);
-  box-shadow: var(--card-shadow);
-  padding: 0.4rem 0.6rem;
-}
-.historyTable {
+
+.table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.82rem;
+  font-size: clamp(0.74rem, 0.82vw, 0.82rem);
+  line-height: 1.25;
 }
 
-.historyTable th {
+.table th {
   background: var(--surface-highlight, rgba(138, 180, 219, 0.08));
   color: var(--muted, #8bb4d9);
   font-weight: 600;
-  font-size: 0.74rem;
+  font-size: clamp(0.66rem, 0.72vw, 0.72rem);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  padding: 0.55rem 0.85rem;
+  padding: clamp(0.45rem, 0.6vw, 0.55rem) clamp(0.45rem, 0.75vw, 0.75rem);
   border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.15));
   white-space: nowrap;
 }
 
-.historyTable td {
-  padding: 0.55rem 0.85rem;
+.table td {
+  padding: clamp(0.38rem, 0.55vw, 0.48rem) clamp(0.45rem, 0.75vw, 0.75rem);
   border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.08));
   color: var(--text, #edf6ff);
   vertical-align: middle;
 }
 
-.historyRow {
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.tableRow {
   transition: background 0.15s ease;
 }
 
-.historyRow:hover {
+.tableRow:hover {
   background: var(--surface-highlight, rgba(16, 185, 129, 0.04));
 }
 
+/* ── Date & Ref Cell ── */
 .dateCell {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.08rem;
+  line-height: 1.2;
 }
 
-.dateText {
-  font-size: 0.8rem;
+.dateMain {
+  font-size: clamp(0.74rem, 0.82vw, 0.8rem);
   font-weight: 600;
   color: var(--text, #edf6ff);
   display: flex;
@@ -476,59 +466,76 @@
 
 .receiptId {
   font-family: monospace;
-  font-size: 0.7rem;
+  font-size: clamp(0.64rem, 0.7vw, 0.69rem);
   color: var(--muted, #8bb4d9);
+  letter-spacing: 0.02em;
 }
 
+/* ── Produce Item Cell ── */
 .itemCell {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.08rem;
+  line-height: 1.2;
 }
 
 .itemName {
-  font-size: 0.85rem;
+  font-size: clamp(0.78rem, 0.88vw, 0.85rem);
   font-weight: 700;
   color: var(--text, #edf6ff);
+  white-space: nowrap;
 }
 
 .itemProject {
-  font-size: 0.72rem;
+  font-size: clamp(0.64rem, 0.7vw, 0.7rem);
   color: #10b981;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
+/* ── Qty Cell ── */
 .qtyCell {
   display: flex;
   flex-direction: column;
   gap: 0.05rem;
-  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.qtyText {
+  font-size: clamp(0.74rem, 0.82vw, 0.8rem);
   font-weight: 600;
   color: var(--text, #edf6ff);
+  white-space: nowrap;
 }
 
 .rateSub {
-  font-size: 0.7rem;
+  font-size: clamp(0.64rem, 0.7vw, 0.69rem);
   color: var(--muted, #8bb4d9);
-  font-weight: normal;
+  white-space: nowrap;
 }
 
+/* ── Financial Amount & Settle Cells ── */
 .totalAmountText {
-  font-size: 0.85rem;
+  font-size: clamp(0.78rem, 0.88vw, 0.86rem);
   font-weight: 700;
   color: var(--text, #edf6ff);
+  white-space: nowrap;
 }
 
 .modeBadge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--surface-highlight, rgba(138, 180, 219, 0.12));
   border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
   color: var(--text, #edf6ff);
-  font-size: 0.7rem;
+  font-size: clamp(0.62rem, 0.68vw, 0.68rem);
   font-weight: 600;
-  padding: 0.15rem 0.45rem;
+  padding: 0.12rem 0.4rem;
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .settleCell {
@@ -536,121 +543,100 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 0.05rem;
-  font-size: 0.76rem;
+  line-height: 1.2;
 }
 
 .paidText {
   color: #10b981;
   font-weight: 600;
+  font-size: clamp(0.68rem, 0.76vw, 0.75rem);
+  white-space: nowrap;
 }
 
 .dueText {
   color: #f59e0b;
   font-weight: 700;
+  font-size: clamp(0.68rem, 0.76vw, 0.75rem);
+  white-space: nowrap;
 }
 
-.paidSub {
-  color: #10b981;
-  font-size: 0.7rem;
-}
-
+/* ── Status Badges ── */
 .statusPaidBadge {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.22rem;
   background: rgba(16, 185, 129, 0.14);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 0.15rem 0.45rem;
+  padding: 0.12rem 0.42rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: clamp(0.62rem, 0.68vw, 0.68rem);
   font-weight: 700;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .statusPartialBadge {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.22rem;
   background: rgba(245, 158, 11, 0.14);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.3);
-  padding: 0.15rem 0.45rem;
+  padding: 0.12rem 0.42rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: clamp(0.62rem, 0.68vw, 0.68rem);
   font-weight: 700;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .statusUnpaidBadge {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.22rem;
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
   border: 1px solid rgba(239, 68, 68, 0.35);
-  padding: 0.15rem 0.45rem;
+  padding: 0.12rem 0.42rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: clamp(0.62rem, 0.68vw, 0.68rem);
   font-weight: 700;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .miniIcon {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   flex-shrink: 0;
 }
 
-.historySpinner {
-  padding: 2rem 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.emptyHistory,
+/* ── Empty State ── */
 .emptyState {
-  padding: 3rem 1.5rem;
+  padding: 2.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: var(--muted, #8bb4d9);
-  gap: 0.5rem;
+  gap: 0.4rem;
   width: 100%;
 }
 
-.emptyState p,
-.emptyHistory p {
+.emptyState p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   color: var(--muted, #8bb4d9);
   text-align: center;
 }
 
 .emptyIcon {
-  font-size: 2.2rem;
+  font-size: 2rem;
   color: var(--muted, #8bb4d9);
-  margin-bottom: 0.25rem;
-  opacity: 0.65;
-}
-
-.tableCard {
-  composes: historyCard;
-}
-
-.tableHeader {
-  composes: historyHeader;
-}
-
-.tableHeaderLeft {
-  composes: historyHeaderLeft;
-}
-
-.historyCount {
-  composes: countBadge;
-}
-.emptyState{
-  text-align: center;
+  margin-bottom: 0.2rem;
+  opacity: 0.6;
 }
 
 /* ── Pagination Bar ── */
@@ -798,7 +784,8 @@
   color: var(--text, #edf6ff);
 }
 
-.formGroup input {
+.formGroup input,
+.formGroup select {
   background: var(--surface-highlight, rgba(138, 180, 219, 0.08)) !important;
   border: 1px solid var(--border, rgba(138, 180, 219, 0.3));
   color: var(--text, #edf6ff);
@@ -808,7 +795,13 @@
   outline: none;
 }
 
-.formGroup input:focus {
+.formGroup select option {
+  background: #0f172a;
+  color: #edf6ff;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
   border-color: #10b981;
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
 }
@@ -844,6 +837,202 @@
 
 .submitBtn:hover {
   opacity: 0.92;
+}
+
+/* ── Audit / History Button & Modal Styles ── */
+.historyBtn {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 5px;
+  padding: 0.18rem 0.45rem;
+  font-size: clamp(0.65rem, 0.72vw, 0.72rem);
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  height: 24px;
+}
+
+.historyBtn:hover {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #10b981;
+  transform: translateY(-1px);
+}
+
+.auditModalContent {
+  composes: modalContent;
+  max-width: 720px;
+  width: 95%;
+}
+
+.auditOverviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin: 0.85rem 0 1.25rem;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.auditMetaCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.auditMetaLabel {
+  font-size: 0.74rem;
+  color: var(--muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.auditMetaVal {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text, #edf6ff);
+}
+
+.auditSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 0.55rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.auditSectionHeader h4 {
+  margin: 0;
+  font-size: clamp(0.82rem, 0.95vw, 0.92rem);
+  font-weight: 700;
+  color: var(--text, #edf6ff);
+}
+
+.auditHistoryWrapper {
+  max-height: 280px;
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  border: 1px solid var(--border, rgba(138, 180, 219, 0.15));
+  border-radius: 8px;
+  margin-bottom: 1.1rem;
+  background: var(--surface-highlight, rgba(138, 180, 219, 0.02));
+}
+
+.auditTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: clamp(0.74rem, 0.82vw, 0.82rem);
+  line-height: 1.25;
+}
+
+.auditTable th {
+  background: var(--surface-highlight, rgba(138, 180, 219, 0.08));
+  color: var(--muted, #8bb4d9);
+  font-weight: 600;
+  font-size: clamp(0.66rem, 0.72vw, 0.72rem);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: clamp(0.45rem, 0.6vw, 0.55rem) clamp(0.45rem, 0.75vw, 0.75rem);
+  border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.15));
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.auditTable td {
+  padding: clamp(0.38rem, 0.55vw, 0.48rem) clamp(0.45rem, 0.75vw, 0.75rem);
+  border-bottom: 1px solid var(--border, rgba(138, 180, 219, 0.08));
+  color: var(--text, #edf6ff);
+  vertical-align: middle;
+}
+
+.auditTable tr:last-child td {
+  border-bottom: none;
+}
+
+.auditTableRow {
+  transition: background 0.15s ease;
+}
+
+.auditTableRow:hover {
+  background: var(--surface-highlight, rgba(16, 185, 129, 0.04));
+}
+
+.refText {
+  font-family: monospace;
+  font-size: clamp(0.72rem, 0.78vw, 0.78rem);
+  font-weight: 600;
+  color: var(--text, #edf6ff);
+  white-space: nowrap;
+}
+
+.clearedText {
+  font-size: clamp(0.68rem, 0.74vw, 0.74rem);
+  font-weight: 700;
+  color: #10b981;
+  white-space: nowrap;
+}
+
+.notesText {
+  font-size: clamp(0.68rem, 0.74vw, 0.75rem);
+  color: var(--muted, #8bb4d9);
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.emptyAudit {
+  padding: 2.2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--muted, #8bb4d9);
+  gap: 0.35rem;
+}
+
+.emptyAudit p {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--muted, #8bb4d9);
+}
+
+.emptyAuditSub {
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+.payActionBtn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 1.15rem;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: opacity 0.15s ease;
+}
+
+.payActionBtn:hover {
+  opacity: 0.9;
 }
 
 /* ── Mobile Responsive ── */
@@ -890,128 +1079,58 @@
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
+
+  .table th,
+  .auditTable th {
+    padding: 0.38rem 0.45rem;
+    font-size: 0.65rem;
+  }
+
+  .table td,
+  .auditTable td {
+    padding: 0.32rem 0.45rem;
+  }
+
+  .historyBtn {
+    height: 22px;
+    padding: 0.15rem 0.35rem;
+    font-size: 0.65rem;
+  }
+
+  /* Horizontal placeholder + value row layout in audit modal on mobile */
+  .auditOverviewGrid {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+    padding: 0.55rem 0.75rem;
+    margin: 0.5rem 0 0.9rem;
+  }
+
+  .auditMetaCard {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .auditMetaCard:last-child {
+    border-bottom: none;
+  }
+
+  .auditMetaLabel {
+    font-size: 0.74rem;
+  }
+
+  .auditMetaVal {
+    font-size: 0.88rem;
+    text-align: right;
+  }
 }
 
 @media (max-width: 480px) {
   .metricsGrid {
     grid-template-columns: 1fr;
   }
-}
-
-/* ── Audit / History Button & Modal Styles ── */
-.historyBtn {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 6px;
-  padding: 0.32rem 0.65rem;
-  font-size: 0.76rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: all 0.15s ease;
-}
-
-.historyBtn:hover {
-  background: rgba(16, 185, 129, 0.22);
-  border-color: #10b981;
-  transform: translateY(-1px);
-}
-
-.auditModalContent {
-  composes: modalContent;
-  max-width: 720px;
-  width: 95%;
-}
-
-.auditOverviewGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.65rem;
-  margin: 0.85rem 0 1.25rem;
-  background: rgba(0, 0, 0, 0.22);
-  padding: 0.85rem;
-  border-radius: 8px;
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-}
-
-.auditMetaCard {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.auditMetaLabel {
-  font-size: 0.74rem;
-  color: var(--muted, #94a3b8);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.auditMetaVal {
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: var(--text, #edf6ff);
-}
-
-.auditHistoryWrapper {
-  max-height: 280px;
-  overflow-y: auto;
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-  border-radius: 8px;
-  margin-bottom: 1.2rem;
-}
-
-.auditTable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.82rem;
-  text-align: left;
-}
-
-.auditTable th {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.55rem 0.75rem;
-  color: var(--muted, #94a3b8);
-  font-weight: 600;
-  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-}
-
-.auditTable td {
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  color: var(--text, #edf6ff);
-}
-
-.auditTable tr:last-child td {
-  border-bottom: none;
-}
-
-.emptyAudit {
-  padding: 2rem 1rem;
-  text-align: center;
-  color: var(--muted, #94a3b8);
-  font-size: 0.88rem;
-}
-
-.payActionBtn {
-  background: #10b981;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.55rem 1.15rem;
-  font-weight: 600;
-  font-size: 0.84rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: opacity 0.15s ease;
-}
-
-.payActionBtn:hover {
-  opacity: 0.9;
 }
 

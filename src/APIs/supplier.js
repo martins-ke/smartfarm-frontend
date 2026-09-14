@@ -41,10 +41,20 @@ export const getAllSupplierPurchases = async () => {
   }
 };
 
-export const recordSupplierPurchase = async (purchaseData) => {
+export const recordSupplierPurchase = async (supplierIdOrData, maybeData) => {
+  let payload;
+  if (typeof supplierIdOrData === 'object' && supplierIdOrData !== null) {
+    payload = supplierIdOrData;
+  } else {
+    payload = {
+      supplierId: supplierIdOrData,
+      ...(maybeData || {}),
+    };
+  }
+
   const res = await apiClient('/suppliers/purchases', {
     method: 'POST',
-    body: JSON.stringify(purchaseData),
+    body: JSON.stringify(payload),
   });
   return unwrap(res);
 };
