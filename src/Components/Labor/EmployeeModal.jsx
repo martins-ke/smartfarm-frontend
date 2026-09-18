@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './EmployeeModal.module.css';
-import { registerEmployee } from '../../APIs/employee';
+import { registerEmployee, updateEmployee } from '../../APIs/employee';
 import { notify } from '../../utils/notify';
-import { FaUserCheck, FaTimes } from 'react-icons/fa';
+import { FaUserCheck, FaTimes, FaEdit } from 'react-icons/fa';
 
-export function EmployeeModal({ isOpen, onClose, onSuccess, currentUserId }) {
+export function EmployeeModal({ isOpen, onClose, onSuccess, currentUserId, employeeToEdit = null }) {
   const [form, setForm] = useState({
     fullName: '',
     idNumber: '',
@@ -13,6 +13,26 @@ export function EmployeeModal({ isOpen, onClose, onSuccess, currentUserId }) {
     dailyRate: ''
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (employeeToEdit) {
+      setForm({
+        fullName: employeeToEdit.fullName || '',
+        idNumber: employeeToEdit.idNumber || '',
+        phoneNumber: employeeToEdit.phoneNumber || '',
+        employmentType: employeeToEdit.employmentType || 'CASUAL',
+        dailyRate: employeeToEdit.dailyRate !== undefined && employeeToEdit.dailyRate !== null ? String(employeeToEdit.dailyRate) : ''
+      });
+    } else {
+      setForm({
+        fullName: '',
+        idNumber: '',
+        phoneNumber: '',
+        employmentType: 'CASUAL',
+        dailyRate: ''
+      });
+    }
+  }, [employeeToEdit, isOpen]);
 
   if (!isOpen) return null;
 
@@ -31,26 +51,32 @@ export function EmployeeModal({ isOpen, onClose, onSuccess, currentUserId }) {
 
     setLoading(true);
     try {
-      await registerEmployee({
-        fullName: form.fullName.trim(),
-        idNumber: cleanId,
-        phoneNumber: form.phoneNumber.trim(),
-        employmentType: form.employmentType,
-        dailyRate: Number(form.dailyRate || 0),
-        registeredById: currentUserId
-      });
-      notify('Employee registered & adult identity verified! ✅', 'success');
-      setForm({
-        fullName: '',
-        idNumber: '',
-        phoneNumber: '',
-        employmentType: 'CASUAL',
-        dailyRate: ''
-      });
+      if (employeeToEdit) {
+        await updateEmployee(employeeToEdit.id, {
+          fullName: form.fullName.trim(),
+          idNumber: cleanId,
+          phoneNumber: form.phoneNumber.trim(),
+          employmentType: form.employmentType,
+          dailyRate: Number(form.dailyRate || 0),
+          registeredById: employeeToEdit.registeredById || currentUserId,
+          status: employeeToEdit.status || 'ACTIVE'
+        });
+        notify('Employee details updated successfully! ✅', 'success');
+      } else {
+        await registerEmployee({
+          fullName: form.fullName.trim(),
+          idNumber: cleanId,
+          phoneNumber: form.phoneNumber.trim(),
+          employmentType: form.employmentType,
+          dailyRate: Number(form.dailyRate || 0),
+          registeredById: currentUserId
+        });
+        notify('Employee registered & adult identity verified! ✅', 'success');
+      }
       onSuccess?.();
       onClose();
     } catch (err) {
-      notify(err.message || 'Failed to register employee', 'error');
+      notify(err.message || 'Failed to save employee details', 'error');
     } finally {
       setLoading(false);
     }
@@ -60,7 +86,10 @@ export function EmployeeModal({ isOpen, onClose, onSuccess, currentUserId }) {
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
-          <h3><FaUserCheck className={styles.headerIcon} /> Register Farm Employee (Labor Compliance)</h3>
+          <h3>
+            {employeeToEdit ? <FaEdit className={styles.headerIcon} /> : <FaUserCheck className={styles.headerIcon} />}
+            {employeeToEdit ? ' Edit Farm Employee Details' : ' Register Farm Employee (Labor Compliance)'}
+          </h3>
           <button className={styles.closeBtn} onClick={onClose}><FaTimes /></button>
         </div>
         <p className={styles.complianceNote}>
@@ -123,7 +152,7 @@ export function EmployeeModal({ isOpen, onClose, onSuccess, currentUserId }) {
           <div className={styles.modalActions}>
             <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancel</button>
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? 'Verifying & Saving...' : 'Register Verified Worker'}
+              {loading ? 'Saving...' : (employeeToEdit ? 'Update Employee' : 'Register Verified Worker')}
             </button>
           </div>
         </form>

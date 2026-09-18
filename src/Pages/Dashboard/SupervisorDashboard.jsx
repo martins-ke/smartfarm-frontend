@@ -194,7 +194,7 @@ export default function SupervisorDashboard({ user }) {
             className={styles.headerActionBtn}
             onClick={() => navigate('/inventory')}
           >
-            <FaBoxes /> Inventory Supplies
+            <FaBoxes /> Inventory
           </button>
           <button
             type="button"

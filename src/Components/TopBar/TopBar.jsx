@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import styles from './TopBar.module.css'
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  FaBars, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt, FaLeaf,
+  FaBars, FaHome, FaMoon, FaSignOutAlt, FaSun, FaUserAlt,
   FaBoxes, FaUsersCog, FaUsers, FaUserEdit, FaChevronDown, FaTruck,
   FaHandHoldingUsd, FaBell, FaExclamationTriangle, FaUserPlus,
   FaCalendarCheck, FaMoneyBillWave, FaArrowRight, FaTimes, FaCheckCircle
@@ -13,6 +13,7 @@ import useAuth from '../../useAuth';
 import { getNotifications } from '../../APIs/notification';
 import EditProfileModal from '../EditProfileModal/EditProfileModal';
 import { AgroSyncLogo } from '../Logo/AgroSyncLogo';
+import { FaLayerGroup } from 'react-icons/fa6';
 
 export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, setHideMenu: externalSetHideMenu}){
     const [localHideMenu, setLocalHideMenu] = useState(true);
@@ -152,7 +153,7 @@ export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, set
                        </li>
                        <li className={`${isCategoryRoute ? styles.active : ''} ${styles.seasonsItem}`}>
                            <span className={styles.menuItemTrigger} onClick={handleSeasonClick}>
-                               <span className={styles.menuItemIcon}><FaLeaf /></span>
+                               <span className={styles.menuItemIcon}><FaLayerGroup /></span>
                                <span>Categories</span>
                            </span>
                        </li>

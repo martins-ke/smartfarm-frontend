@@ -4,7 +4,7 @@ import styles from './ProjectDashboardPage.module.css';
 import { getProjectById, updateProject, deleteProject } from '../../APIs/project';
 import { createExpense, updateExpense, deleteExpense } from '../../APIs/expense';
 import { recordSale, updateSale, deleteSale, requestAllCustomers } from '../../APIs/sales';
-import { recordHarvest, updateHarvest, deleteHarvest } from '../../APIs/harvest';
+import { recordHarvest, updateHarvest, deleteHarvest, getHarvestInventory } from '../../APIs/harvest';
 import { recordActivity, updateActivity, deleteActivity, updateActivityStatus } from '../../APIs/activity';
 import { getInventoryItems } from '../../APIs/inventory';
 import { ActivityLaborModal } from '../../Components/Labor/ActivityLaborModal';
@@ -12,6 +12,7 @@ import { notify, alertModal, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import useAuth from '../../useAuth';
+import { toBaseUnit, toCompoundDisplay, getUnit, isCustomUnit, formatHarvestStock } from '../../utils/units';
 
 // Modular Sub-Components
 import { ProjectHeader } from './components/ProjectHeader';
@@ -39,7 +40,7 @@ const initialForm = {
     status: 'SCHEDULED',
   },
   sales: { item: '', quantity: '', unit_price: '', amount_paid: '', payment_mode: 'CASH' },
-  harvest: { item: '', quantity: '', units: '', notes: '' },
+  harvest: { item: '', quantity: '', units: '', notes: '', customFactor: '' },
 };
 
 const unwrapResponse = (response) => {
@@ -90,6 +91,7 @@ export function ProjectDashboardPage() {
   // Inventory usage
   const [useSuppliesModalOpen, setUseSuppliesModalOpen] = useState(false);
   const [inventoryItems, setInventoryItems] = useState([]);
+  const [harvestInventoryStock, setHarvestInventoryStock] = useState([]);
 
   // Edit Record State
   const [editingRecord, setEditingRecord] = useState(null);
@@ -112,39 +114,24 @@ export function ProjectDashboardPage() {
     [category]
   );
 
-  // Available harvest produce for sales
+  // Available harvest produce for sales — sourced from the harvest_inventory table
   const harvestStock = useMemo(() => {
-    const harvests = Array.isArray(project?.harvest) ? project.harvest : [];
-    const sales = Array.isArray(project?.sales) ? project.sales : [];
-
-    const stockMap = {};
-    harvests.forEach((h) => {
-      if (!h.item) return;
-      const key = h.item.trim();
-      const lowerKey = key.toLowerCase();
-      if (!stockMap[lowerKey]) {
-        stockMap[lowerKey] = { displayName: key, harvested: 0, sold: 0, units: h.units || 'units' };
-      }
-      stockMap[lowerKey].harvested += Number(h.quantity || 0);
-      if (h.units) stockMap[lowerKey].units = h.units;
-    });
-
-    sales.forEach((s) => {
-      if (!s.item) return;
-      const lowerKey = s.item.trim().toLowerCase();
-      if (stockMap[lowerKey]) {
-        stockMap[lowerKey].sold += Number(s.quantity || 0);
-      }
-    });
-
-    return Object.values(stockMap).map((entry) => ({
-      item: entry.displayName,
-      units: entry.units,
-      harvested: entry.harvested,
-      sold: entry.sold,
-      available: Math.max(0, entry.harvested - entry.sold),
-    }));
-  }, [project?.harvest, project?.sales]);
+    if (!project) return [];
+    const projectName = project.name;
+    return harvestInventoryStock
+      .filter(entry => entry.projectName === projectName)
+      .map(entry => {
+        const item = entry.item_name || entry.itemName;
+        const units = entry.base_unit || entry.baseUnit || entry.units;
+        const available = Number(entry.available_quantity ?? entry.availableQuantity ?? 0);
+        return {
+          item,
+          units,
+          available,
+          displayAvailable: formatHarvestStock(entry),
+        };
+      });
+  }, [harvestInventoryStock, project]);
 
   // Project Deletion: Only allow if project has zero records referencing it
   const [isDeletingProject, setIsDeletingProject] = useState(false);
@@ -183,9 +170,10 @@ export function ProjectDashboardPage() {
     setLoading(true);
     setLoadError(null);
     try {
-      const [projectRes, customersRes] = await Promise.allSettled([
+      const [projectRes, customersRes, harvestStockRes] = await Promise.allSettled([
         getProjectById(projectId),
         requestAllCustomers(),
+        getHarvestInventory(),
       ]);
 
       if (projectRes.status === 'fulfilled') {
@@ -211,8 +199,23 @@ export function ProjectDashboardPage() {
       } else {
         setCustomers([]);
       }
+
+      if (harvestStockRes.status === 'fulfilled') {
+        setHarvestInventoryStock(harvestStockRes.value?.body || []);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshStock = async () => {
+    try {
+      const invRes = await getHarvestInventory();
+      if (invRes?.body) {
+        setHarvestInventoryStock(invRes.body);
+      }
+    } catch {
+      // non-blocking
     }
   };
 
@@ -264,6 +267,28 @@ export function ProjectDashboardPage() {
       ...form[activeTab],
       project_id: projectId,
     };
+
+    if (activeTab === 'harvest') {
+      const unitKey = form.harvest.units;
+      const rawQty = Number(form.harvest.quantity) || 0;
+      const customFactor = Number(form.harvest.customFactor) || null;
+      if (isCustomUnit(unitKey) && !customFactor) {
+        alertModal('Please enter the conversion factor for your custom unit.', 'warning');
+        setIsSubmitting(false);
+        return;
+      }
+      const baseQty = toBaseUnit(rawQty, unitKey, customFactor);
+      if (baseQty === null) {
+        alertModal('Could not convert quantity to base unit. Please check your unit selection.', 'error');
+        setIsSubmitting(false);
+        return;
+      }
+      payload.quantity = baseQty;
+      payload.base_unit = getUnit(unitKey)?.baseUnit || unitKey;
+      payload.display_unit = unitKey;
+      // Remove customFactor from payload (backend doesn't need it)
+      delete payload.customFactor;
+    }
 
     if (activeTab === 'sales') {
       const saleQty = Number(form.sales.quantity) || 0;
@@ -326,6 +351,10 @@ export function ProjectDashboardPage() {
       if (refreshedCustomers.status === 'fulfilled') {
         const cData = unwrapResponse(refreshedCustomers.value);
         setCustomers(Array.isArray(cData) ? cData : []);
+      }
+
+      if (activeTab === 'harvest' || activeTab === 'sales') {
+        refreshStock();
       }
 
       setForm(initialForm);
@@ -409,6 +438,9 @@ export function ProjectDashboardPage() {
 
       const refreshedProject = await getProjectById(projectId);
       if (refreshedProject) setProject(unwrapResponse(refreshedProject));
+      if (tab === 'harvest' || tab === 'sales') {
+        refreshStock();
+      }
     } catch (err) {
       notify(err.message || 'Failed to update record', 'error');
     } finally {
@@ -437,6 +469,9 @@ export function ProjectDashboardPage() {
       notify(res?.message || `${tab.slice(0, -1)} deleted successfully ✅`, 'success');
       const refreshedProject = await getProjectById(projectId);
       if (refreshedProject) setProject(unwrapResponse(refreshedProject));
+      if (tab === 'harvest' || tab === 'sales') {
+        refreshStock();
+      }
     } catch (err) {
       notify(err.message || 'Failed to delete record', 'error');
     }
@@ -565,7 +600,7 @@ export function ProjectDashboardPage() {
             }}
             showRecordForm={showRecordForm}
             onToggleRecordForm={() => {
-              if (activeTab === 'sales' && harvestList.length === 0) {
+              if (activeTab === 'sales' && harvestStock.length === 0) {
                 alertModal('You cannot record a sale because no harvest has been recorded yet.', 'error');
                 return;
               }
@@ -583,7 +618,7 @@ export function ProjectDashboardPage() {
               }
             }}
             canRecordInTab={canRecordInTab}
-            hasHarvestsForSale={harvestList.length > 0}
+            hasHarvestsForSale={harvestStock.length > 0}
           />
 
           {/* Active Tab View */}

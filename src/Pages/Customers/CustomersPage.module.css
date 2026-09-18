@@ -291,7 +291,7 @@
 
 .table th {
   background: var(--surface-highlight, rgba(138, 180, 219, 0.08));
-  color: var(--muted, #8bb4d9);
+  color: var(--th-color, #8bb4d9);
   font-weight: 600;
   font-size: clamp(0.66rem, 0.72vw, 0.72rem);
   text-transform: uppercase;

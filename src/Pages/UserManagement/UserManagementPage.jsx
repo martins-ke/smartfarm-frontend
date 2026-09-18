@@ -48,6 +48,7 @@ export default function UserManagementPage() {
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
+  const [selectedEmployeeForEdit, setSelectedEmployeeForEdit] = useState(null);
   const [targetRoleToCreate, setTargetRoleToCreate] = useState(isAdmin ? 'MANAGER' : 'SUPERVISOR');
   const [createForm, setCreateForm] = useState({ username: '', email: '', password: '', role: 'MANAGER' });
 
@@ -455,7 +456,10 @@ export default function UserManagementPage() {
           </div>
           <button 
             className={styles.primaryBtn}
-            onClick={() => setShowEmployeeModal(true)}
+            onClick={() => {
+              setSelectedEmployeeForEdit(null);
+              setShowEmployeeModal(true);
+            }}
           >
             <FaUserPlus /> Register Verified Worker
           </button>
@@ -506,13 +510,25 @@ export default function UserManagementPage() {
                       </span>
                     </td>
                     <td>
-                      <button
-                        className={styles.viewBtn}
-                        style={{ padding: '0.35rem 0.7rem', fontSize: '0.8rem' }}
-                        onClick={() => handleToggleEmployeeStatus(emp.id, emp.status)}
-                      >
-                        {emp.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <button
+                          className={styles.viewBtn}
+                          style={{ padding: '0.35rem 0.7rem', fontSize: '0.8rem' }}
+                          onClick={() => {
+                            setSelectedEmployeeForEdit(emp);
+                            setShowEmployeeModal(true);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className={styles.viewBtn}
+                          style={{ padding: '0.35rem 0.7rem', fontSize: '0.8rem' }}
+                          onClick={() => handleToggleEmployeeStatus(emp.id, emp.status)}
+                        >
+                          {emp.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -525,9 +541,13 @@ export default function UserManagementPage() {
       {/* Employee Modal */}
       <EmployeeModal 
         isOpen={showEmployeeModal}
-        onClose={() => setShowEmployeeModal(false)}
+        onClose={() => {
+          setShowEmployeeModal(false);
+          setSelectedEmployeeForEdit(null);
+        }}
         onSuccess={loadData}
         currentUserId={currentUser?.id}
+        employeeToEdit={selectedEmployeeForEdit}
       />
 
       {/* Create Staff Modal */}

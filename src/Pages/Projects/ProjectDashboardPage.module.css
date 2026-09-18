@@ -1123,6 +1123,7 @@ label {
 
   .tabs button {
     padding: 0.35rem 0.5rem;
+    font-size: smaller;
   }
 
   .recordItem,

@@ -6,6 +6,7 @@ import { notify, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import { useAuth } from '../../useAuth';
+import { HarvestInventory } from './HarvestInventory';
 
 function InventoryModal({ item, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -127,6 +128,8 @@ export function InventoryPage() {
   const [totalElements, setTotalElements] = useState(0);
   const PAGE_SIZE = 20;
 
+  const[activeTab, setActiveTab] = useState('inputs');
+
   const loadItems = async (currentPage = page) => {
     setLoading(true);
     setLoadError(null);
@@ -197,17 +200,24 @@ export function InventoryPage() {
         </button>
       </div>
 
-      <div className={styles.filterBar}>
-        {categories.map(cat => (
-          <button 
-            key={cat} 
-            className={`${styles.filterBtn} ${filterCategory === cat ? styles.filterActive : ''}`}
-            onClick={() => setFilterCategory(cat)}
-          >
-            {cat}
-          </button>
-        ))}
+      <div style={{display: 'flex', gap: '1rem'}}>
+        <button className={`${styles.tabBtn} ${activeTab === 'inputs'? styles.btnActive: ''}`} onClick={()=> setActiveTab("inputs")}>Inputs Inventory</button>
+        <button  className={`${styles.tabBtn} ${activeTab === 'harvest'? styles.btnActive: ''}`} onClick={()=> setActiveTab("harvest")}>Harvest Inventory</button>
       </div>
+
+      {activeTab === 'inputs' && (
+        <div className={styles.filterBar}>
+          {categories.map(cat => (
+            <button 
+              key={cat} 
+              className={`${styles.filterBtn} ${filterCategory === cat ? styles.filterActive : ''}`}
+              onClick={() => setFilterCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading ? (
         <Spinner fullPage label="Loading inventory..." />
@@ -217,9 +227,9 @@ export function InventoryPage() {
           title="Could Not Load Inventory" 
           onRetry={() => loadItems(page)} 
         />
-      ) : filteredItems.length === 0 ? (
+      ) : activeTab === 'inputs' && filteredItems.length === 0 ? (
         <div className={styles.loading}>No items found in inventory.</div>
-      ) : (
+      ) : activeTab === 'inputs' ?(
         <div className={styles.inventoryGrid}>
           {filteredItems.map(item => (
             <div key={item.id} className={styles.inventoryCard}>
@@ -264,7 +274,7 @@ export function InventoryPage() {
             </div>
           ))}
         </div>
-      )}
+      ) : <HarvestInventory />}
 
       {modalOpen && (
         <InventoryModal

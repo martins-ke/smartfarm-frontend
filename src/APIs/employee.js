@@ -17,6 +17,14 @@ export const registerEmployee = async (employeeData) => {
   return unwrap(res);
 };
 
+export const updateEmployee = async (employeeId, employeeData) => {
+  const res = await apiClient(`/employees/${employeeId}`, {
+    method: 'PUT',
+    body: JSON.stringify(employeeData),
+  });
+  return unwrap(res);
+};
+
 export const toggleEmployeeStatus = async (employeeId, status) => {
   const res = await apiClient(`/employees/${employeeId}/status`, {
     method: 'PATCH',
@@ -24,3 +32,4 @@ export const toggleEmployeeStatus = async (employeeId, status) => {
   });
   return unwrap(res);
 };
+

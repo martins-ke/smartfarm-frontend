@@ -45,20 +45,22 @@
 
 .userAvatarMini {
     position: relative;
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     background: transparent !important;
-    border: 1px solid var(--border, rgba(138, 180, 219, 0.3));
     color: var(--text);
     display: flex;
+    border: 1px solid var(--border);
     align-items: center;
     justify-content: center;
     font-size: 0.82rem;
     flex-shrink: 0;
     box-shadow: none;
 }
-
+.userAvatarMini:hover{
+    box-shadow: 0 4px 12px rgba(42, 161, 238, 0.2);
+}
 .miniOnlineDot {
     position: absolute;
     bottom: -1px;
@@ -120,8 +122,8 @@
         display: none;
     }
     .userAvatarMini {
-        width: 32px;
-        height: 32px;
+        width: 25px;
+        height: 25px;
     }
 }
 
@@ -489,12 +491,14 @@
     width: 0.75rem;
     height: 0.75rem;
     border-radius: 50%;
-    background-color: #eaf3ff;
+    background-color: #7590b5;
     transform: translateY(-50%);
     transition: transform 0.2s ease, background-color 0.2s ease;
 }
 .child.on{
     transform: translate(1.2rem, -50%);
+    background-color: #10b981;
+    box-shadow: inset 5px 10px 30px rgba(18, 242, 52, 0.7);
 }
 
 @media (max-width: 720px) {

@@ -7,18 +7,16 @@ import {
   updateUserStatus, 
   deleteUser, 
   updateUserPrivileges, 
-  adminResetPassword 
+  updateStaffDetails
 } from '../../APIs/user';
 import { notify, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import useAuth from '../../useAuth';
 import { 
-  FaUserShield, 
   FaCrown, 
   FaUserTie, 
   FaTags, 
-  FaFolder, 
   FaCheckCircle, 
   FaBan, 
   FaTrash, 
@@ -27,10 +25,14 @@ import {
   FaCheck, 
   FaShieldAlt, 
   FaSave,
-  FaKey,
-  FaLock,
   FaFolderOpen,
-  FaArrowLeft
+  FaArrowLeft,
+  FaEdit,
+  FaTimes,
+  FaEnvelope,
+  FaIdCard,
+  FaCircle,
+  FaCopy
 } from 'react-icons/fa';
 
 export function UserDetailsPage() {
@@ -47,9 +49,23 @@ export function UserDetailsPage() {
   const [maxCapacity, setMaxCapacity] = useState(4);
   const [privilegeSaving, setPrivilegeSaving] = useState(false);
 
-  // Password reset state
-  const [newPassword, setNewPassword] = useState('');
-  const [resettingPassword, setResettingPassword] = useState(false);
+  // Edit user profile state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    username: '',
+    email: '',
+    role: 'SUPERVISOR',
+    status: 'ACTIVE',
+    maxProjectCapacity: 4
+  });
+
+  const handleCopy = (text, label) => {
+    if (!text) return;
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(text);
+      notify(`${label} copied to clipboard! 📋`, 'info');
+    }
+  };
 
   const isAdmin = currentAdminUser?.role?.toUpperCase() === 'ADMIN';
   const isCurrentManager = currentAdminUser?.role?.toUpperCase() === 'MANAGER';
@@ -149,23 +165,32 @@ export function UserDetailsPage() {
     }
   };
 
-  const handleAdminResetPassword = async (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    if (!newPassword || newPassword.length < 6) {
-      notify('Password must be at least 6 characters', 'error');
+    if (!editForm.username || !editForm.username.trim()) {
+      notify('Username is required', 'error');
       return;
     }
-    setResettingPassword(true);
+    setActionLoading(true);
     try {
-      await adminResetPassword(userId, newPassword);
-      notify(`Password for "${user?.username}" successfully reset ✅`, 'success');
-      setNewPassword('');
+      await updateStaffDetails(userId, {
+        username: editForm.username.trim(),
+        email: editForm.email ? editForm.email.trim() : null,
+        role: isAdmin ? editForm.role : user.role,
+        status: editForm.status,
+        maxProjectCapacity: Number(editForm.maxProjectCapacity) || 4
+      });
+      notify('Staff details updated successfully! ✅', 'success');
+      setShowEditModal(false);
+      loadUserDetails();
     } catch (err) {
-      notify(err.message || 'Failed to reset password', 'error');
+      notify(err.message || 'Failed to update staff details', 'error');
     } finally {
-      setResettingPassword(false);
+      setActionLoading(false);
     }
   };
+
+
 
   if (loading) {
     return <Spinner fullPage label="Loading staff member details..." />;
@@ -199,309 +224,315 @@ export function UserDetailsPage() {
 
   return (
     <div className={styles.page}>
-      {/* Top Header Bar */}
-      <div className={styles.topBar}>
-        <div className={styles.pageHeaderInfo}>
-          <h1 className={styles.pageTitle}>
-            <FaIdBadge style={{ color: '#2aa1ee' }} /> User Profile & Authority
-          </h1>
-        </div>
-      </div>
 
-      {/* Top Section: Profile Overview, Account Actions, Password Reset */}
+      {/* Top Section: Pro Profile Overview Card (Identity on left, MetaList on right on Desktop) */}
       <div className={styles.topSection}>
-        {/* Profile Overview Card */}
         <div className={`${styles.card} ${styles.profileCard}`}>
-          <div className={styles.avatarContainer}>
-            <div className={styles.avatar}>
-              {user.username?.charAt(0).toUpperCase()}
-            </div>
-            {isUserAdmin && (
-              <div className={styles.crownBadge} title="Primary Farm Administrator">
-                👑
+          <div className={styles.profileIdentity}>
+            <div className={styles.identityHeaderRow}>
+              <div className={styles.avatarContainer}>
+                <div className={styles.avatar}>
+                  {user.username?.charAt(0).toUpperCase()}
+                </div>
+                {isUserAdmin && (
+                  <div className={styles.crownBadge} title="Primary Farm Administrator">
+                    👑
+                  </div>
+                )}
+                <span 
+                  className={`${styles.avatarStatusDot} ${
+                    user.status === 'ACTIVE' ? styles.avatarStatusActive : 
+                    user.status === 'PENDING_APPROVAL' ? styles.avatarStatusPending : 
+                    styles.avatarStatusDisabled
+                  }`}
+                  title={`Account Status: ${user.status}`}
+                />
               </div>
-            )}
-          </div>
 
-          <h2 className={styles.username}>{user.username}</h2>
+              <div className={styles.identityDetails}>
+                <h2 className={styles.username}>{user.username}</h2>
+                
+                <div className={styles.badges}>
+                  <span className={`${styles.roleBadge} ${roleBadgeClass}`}>
+                    <RoleIcon /> {user.role}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-          <div className={styles.badges}>
-            <span className={`${styles.roleBadge} ${roleBadgeClass}`}>
-              <RoleIcon /> {user.role}
-            </span>
+            <div className={styles.actions}>
+              <div className={styles.actionItem}>
+                <button 
+                  className={styles.iconBtn}
+                  title="Edit User Details"
+                  onClick={() => {
+                    setEditForm({
+                      username: user.username || '',
+                      email: user.email || '',
+                      role: user.role || 'SUPERVISOR',
+                      status: user.status || 'ACTIVE',
+                      maxProjectCapacity: user.maxProjectCapacity || 4
+                    });
+                    setShowEditModal(true);
+                  }}
+                >
+                  <FaEdit />
+                </button>
+                <span className={styles.actionLabel}>Edit</span>
+              </div>
+
+              {!isUserAdmin && user.status === 'PENDING_APPROVAL' && (isAdmin || (isCurrentManager && isUserSupervisor)) && (
+                <div className={styles.actionItem}>
+                  <button 
+                    className={styles.iconBtn}
+                    title="Approve & Activate Account"
+                    onClick={() => handleStatusChange('ACTIVE')}
+                    disabled={actionLoading}
+                  >
+                    <FaCheck />
+                  </button>
+                  <span className={styles.actionLabel}>Approve</span>
+                </div>
+              )}
+
+              {!isUserAdmin && user.status !== 'PENDING_APPROVAL' && (
+                <div className={styles.actionItem}>
+                  <button 
+                    className={styles.iconBtn}
+                    title={user.status === 'ACTIVE' ? 'Deactivate User' : 'Activate User'}
+                    onClick={() => handleStatusChange(user.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE')}
+                    disabled={actionLoading}
+                  >
+                    {user.status === 'ACTIVE' ? <FaBan /> : <FaCheck />}
+                  </button>
+                  <span className={styles.actionLabel}>
+                    {user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                  </span>
+                </div>
+              )}
+
+              {!isUserAdmin && (isAdmin || (isCurrentManager && isUserSupervisor)) && (
+                <div className={styles.actionItem}>
+                  <button 
+                    className={styles.iconBtn}
+                    title="Delete User Account"
+                    onClick={handleDelete}
+                    disabled={actionLoading}
+                  >
+                    <FaTrash />
+                  </button>
+                  <span className={styles.actionLabel}>Delete</span>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className={styles.metaList}>
             <div className={styles.metaItem}>
-              <span className={styles.metaLabel}>User ID</span>
-              <span className={styles.metaValue}>{user.id}</span>
+              <span className={styles.metaLabel}>
+                <FaIdCard className={styles.metaIcon} /> User ID
+              </span>
+              <span className={styles.metaValueMono}>{user.id}</span>
             </div>
             {user.email && (
               <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>Email</span>
+                <span className={styles.metaLabel}>
+                  <FaEnvelope className={styles.metaIcon} /> Email
+                </span>
                 <span className={styles.metaValue}>{user.email}</span>
               </div>
             )}
             <div className={styles.metaItem}>
-              <span className={styles.metaLabel}>Account Status</span>
-              <span className={styles.metaValue} style={{ textTransform: 'capitalize' }}>
+              <span className={styles.metaLabel}>
+                <FaShieldAlt className={styles.metaIcon} /> Account Status
+              </span>
+              <span className={styles.metaStatusValue}>
+                <span className={`${styles.statusDot} ${
+                  user.status === 'ACTIVE' ? styles.statusDotActive : 
+                  user.status === 'PENDING_APPROVAL' ? styles.statusDotPending : 
+                  styles.statusDotDisabled
+                }`} />
                 {user.status.replace('_', ' ').toLowerCase()}
               </span>
             </div>
           </div>
         </div>
-
-        {/* Vertical Stack for Account Actions & Password Reset */}
-        {!isUserAdmin && (isAdmin || (isCurrentManager && isUserSupervisor)) && (
-          <div className={styles.topRightCol}>
-            {/* Account Status Management Actions */}
-            <div className={`${styles.card} ${styles.actionsCard}`}>
-              <h3 className={styles.cardTitle}>Account Actions</h3>
-              
-              <div className={styles.actionButtonsCol}>
-                {user.status === 'PENDING_APPROVAL' && (
-                  <button 
-                    className={styles.approveBtn}
-                    onClick={() => handleStatusChange('ACTIVE')}
-                    disabled={actionLoading}
-                  >
-                    <FaCheck /> Approve & Activate Account
-                  </button>
-                )}
-
-                {user.status === 'ACTIVE' && (
-                  <button 
-                    className={styles.deactivateBtn}
-                    onClick={() => handleStatusChange('DISABLED')}
-                    disabled={actionLoading}
-                  >
-                    <FaBan /> Deactivate Account
-                  </button>
-                )}
-
-                {user.status === 'DISABLED' && (
-                  <button 
-                    className={styles.reactivateBtn}
-                    onClick={() => handleStatusChange('ACTIVE')}
-                    disabled={actionLoading}
-                  >
-                    <FaCheckCircle /> Reactivate Account
-                  </button>
-                )}
-
-                <button 
-                  className={styles.deleteBtn}
-                  onClick={handleDelete}
-                  disabled={actionLoading}
-                >
-                  <FaTrash /> Permanently Delete User
-                </button>
-              </div>
-            </div>
-
-            {/* Admin Password Reset Card */}
-            {isAdmin && (
-              <div className={`${styles.card} ${styles.securityCard}`}>
-                <h3 className={styles.cardTitle}>
-                  <FaKey style={{ color: '#eab308' }} /> Reset Password
-                </h3>
-                <form onSubmit={handleAdminResetPassword} className={styles.passwordForm}>
-                  <input
-                    type="password"
-                    placeholder="New password (min 6 chars)"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className={styles.passwordInput}
-                    required
-                    minLength={6}
-                  />
-                  <button
-                    type="submit"
-                    className={styles.resetSubmitBtn}
-                    disabled={resettingPassword}
-                  >
-                    {resettingPassword ? 'Updating Password...' : 'Update Password'}
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Bottom Section: Scopes, Projects & PBAC Privileges */}
       <div className={styles.bottomSection}>
-        {/* Administrator Scope Card */}
-        {isUserAdmin && (
-          <div className={styles.card}>
-            <h3 className={styles.sectionTitleMain}>
-              <FaCrown style={{ color: '#f59e0b' }} /> Primary Administrator Authority
-            </h3>
-            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text)', lineHeight: 1.6 }}>
-              Full system authority with unrestricted control across all farm categories, projects, livestock, crops, sales analytics, expense auditing, inventory records, and user provisioning.
-            </p>
-          </div>
-        )}
-
-        {/* Manager Assigned Categories */}
-        {isUserManager && (
-          <div className={styles.card}>
-            <div className={styles.sectionHeader}>
+          {/* Administrator Scope Card */}
+          {isUserAdmin && (
+            <div className={styles.card}>
               <h3 className={styles.sectionTitleMain}>
-                <FaTags style={{ color: '#2aa1ee' }} /> Assigned Categories ({(user.assignedCategories || []).length})
+                <FaCrown style={{ color: '#f59e0b' }} /> Primary Administrator Authority
               </h3>
-              {isAdmin && (
-                <button 
-                  className={styles.primaryActionBtn}
-                  onClick={() => navigate(`/users/${user.id}/categories`)}
-                >
-                  <FaExternalLinkAlt /> Edit Category Assignments
-                </button>
+              <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text)', lineHeight: 1.6 }}>
+                Full system authority with unrestricted control across all farm categories, projects, livestock, crops, sales analytics, expense auditing, inventory records, and user provisioning.
+              </p>
+            </div>
+          )}
+
+          {/* Manager Assigned Categories */}
+          {isUserManager && (
+            <div className={styles.card}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitleMain}>
+                  <FaTags style={{ color: '#2aa1ee' }} /> Assigned Categories ({(user.assignedCategories || []).length})
+                </h3>
+                {isAdmin && (
+                  <button 
+                    className={styles.primaryActionBtn}
+                    onClick={() => navigate(`/users/${user.id}/categories`)}
+                  >
+                    <FaExternalLinkAlt /> Edit Category Assignments
+                  </button>
+                )}
+              </div>
+
+              {(user.assignedCategories || []).length === 0 ? (
+                <div className={styles.emptyBox}>
+                  No categories assigned to this manager yet.
+                </div>
+              ) : (
+                <div className={styles.chipsContainer}>
+                  {user.assignedCategories.map((c) => (
+                    <span key={c.id} className={styles.chip}>
+                      🏷️ {c.name}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
+          )}
 
-            {(user.assignedCategories || []).length === 0 ? (
-              <div className={styles.emptyBox}>
-                No categories assigned to this manager yet.
+          {/* Supervisor Projects & Capacity */}
+          {isUserSupervisor && (
+            <div className={styles.card}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitleMain}>
+                  <FaFolderOpen style={{ color: '#10b981' }} /> Supervised Projects ({supervisedProjects.length})
+                </h3>
+                {(isAdmin || isCurrentManager) && (
+                  <button 
+                    className={styles.primaryActionBtn}
+                    onClick={() => navigate(`/users/${user.id}/projects`)}
+                  >
+                    <FaExternalLinkAlt /> Assign Projects
+                  </button>
+                )}
               </div>
-            ) : (
-              <div className={styles.chipsContainer}>
-                {user.assignedCategories.map((c) => (
-                  <span key={c.id} className={styles.chip}>
-                    🏷️ {c.name}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Supervisor Projects & Capacity */}
-        {isUserSupervisor && (
-          <div className={styles.card}>
-            <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitleMain}>
-                <FaFolderOpen style={{ color: '#10b981' }} /> Supervised Projects ({supervisedProjects.length})
-              </h3>
-              {(isAdmin || isCurrentManager) && (
-                <button 
-                  className={styles.primaryActionBtn}
-                  onClick={() => navigate(`/users/${user.id}/projects`)}
-                >
-                  <FaExternalLinkAlt /> Assign Projects
-                </button>
+              <div className={styles.capacityBox}>
+                <label style={{ fontWeight: 600 }}>Max Project Capacity:</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max="10" 
+                  value={maxCapacity} 
+                  onChange={(e) => setMaxCapacity(e.target.value)}
+                  className={styles.capacityInputMain}
+                />
+                <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
+                  (Currently assigned: {supervisedProjects.length} / {maxCapacity} projects)
+                </span>
+              </div>
+
+              {supervisedProjects.length === 0 ? (
+                <div className={styles.emptyBox}>
+                  No active projects assigned to this supervisor.
+                </div>
+              ) : (
+                <div className={styles.projectsList}>
+                  {supervisedProjects.map((p) => (
+                    <div key={p.id} className={styles.projectCardItem}>
+                      <span className={styles.projectCardName}>{p.name}</span>
+                      <span className={styles.projectCardSeason}>{p.season || 'No season set'}</span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
+          )}
 
-            <div className={styles.capacityBox}>
-              <label style={{ fontWeight: 600 }}>Max Project Capacity:</label>
-              <input 
-                type="number" 
-                min="1" 
-                max="10" 
-                value={maxCapacity} 
-                onChange={(e) => setMaxCapacity(e.target.value)}
-                className={styles.capacityInputMain}
-              />
-              <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
-                (Currently assigned: {supervisedProjects.length} / {maxCapacity} projects)
-              </span>
-            </div>
-
-            {supervisedProjects.length === 0 ? (
-              <div className={styles.emptyBox}>
-                No active projects assigned to this supervisor.
+          {/* Manager Privileges Delegation (PBAC) */}
+          {(isUserManager && isAdmin) && (
+            <div className={styles.card}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitleMain}>
+                  <FaShieldAlt style={{ color: '#2aa1ee' }} /> Manager Privileges & Authority
+                </h3>
               </div>
-            ) : (
-              <div className={styles.projectsList}>
-                {supervisedProjects.map((p) => (
-                  <div key={p.id} className={styles.projectCardItem}>
-                    <span className={styles.projectCardName}>{p.name}</span>
-                    <span className={styles.projectCardSeason}>{p.season || 'No season set'}</span>
-                  </div>
-                ))}
+
+              <div className={styles.privilegeListWide}>
+                {[
+                  { key: 'CAN_CREATE_CATEGORIES', label: 'Create Farm Categories / Sectors', desc: 'Allow manager to create and configure new categories.' },
+                  { key: 'CAN_CREATE_SUPERVISORS', label: 'Create & Provision Supervisors', desc: 'Allow manager to hire and register dedicated field supervisors.' },
+                  { key: 'CAN_ASSIGN_PRIVILEGES', label: 'Assign & Toggle Supervisor Privileges', desc: 'Allow manager to grant, customize, and toggle operational field privileges for their supervisors.' },
+                  { key: 'CAN_VIEW_FINANCIALS', label: 'View Sector Financials & Cash Flow', desc: 'Allow manager to view revenue and expense analytics for their sectors.' },
+                  { key: 'CAN_MANAGE_BUDGETS', label: 'Manage & Edit Project Budgets', desc: 'Allow manager to modify budget allocations on projects.' },
+                  { key: 'CAN_DELETE_INVENTORY', label: 'Delete Inventory Items', desc: 'Allow manager to permanently remove items from the inventory catalog.' },
+                ].map((item) => {
+                  const isGranted = privileges.includes(item.key);
+                  return (
+                    <div 
+                      key={item.key} 
+                      className={`${styles.privilegeItemWide} ${isGranted ? styles.privilegeItemActive : ''}`} 
+                      onClick={() => handleTogglePrivilege(item.key)}
+                    >
+                      <div className={styles.privilegeInfoWide}>
+                        <span className={styles.privilegeTitle}>{item.label}</span>
+                        <span className={styles.privilegeDescription}>{item.desc}</span>
+                      </div>
+                      <div className={`${styles.switchTrack} ${isGranted ? styles.switchTrackOn : ''}`} role="switch" aria-checked={isGranted}>
+                        <div className={`${styles.switchThumb} ${isGranted ? styles.switchThumbOn : ''}`} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Manager Privileges Delegation (PBAC) */}
-        {(isUserManager && isAdmin) && (
-          <div className={styles.card}>
-            <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitleMain}>
-                <FaShieldAlt style={{ color: '#2aa1ee' }} /> Manager Privileges & Authority
-              </h3>
             </div>
+          )}
 
-            <div className={styles.privilegeListWide}>
-              {[
-                { key: 'CAN_CREATE_CATEGORIES', label: 'Create Farm Categories / Sectors', desc: 'Allow manager to create and configure new categories.' },
-                { key: 'CAN_CREATE_SUPERVISORS', label: 'Create & Provision Supervisors', desc: 'Allow manager to hire and register dedicated field supervisors.' },
-                { key: 'CAN_ASSIGN_PRIVILEGES', label: 'Assign & Toggle Supervisor Privileges', desc: 'Allow manager to grant, customize, and toggle operational field privileges for their supervisors.' },
-                { key: 'CAN_VIEW_FINANCIALS', label: 'View Sector Financials & Cash Flow', desc: 'Allow manager to view revenue and expense analytics for their sectors.' },
-                { key: 'CAN_MANAGE_BUDGETS', label: 'Manage & Edit Project Budgets', desc: 'Allow manager to modify budget allocations on projects.' },
-                { key: 'CAN_DELETE_INVENTORY', label: 'Delete Inventory Items', desc: 'Allow manager to permanently remove items from the inventory catalog.' },
-              ].map((item) => {
-                const isGranted = privileges.includes(item.key);
-                return (
-                  <div 
-                    key={item.key} 
-                    className={`${styles.privilegeItemWide} ${isGranted ? styles.privilegeItemActive : ''}`} 
-                    onClick={() => handleTogglePrivilege(item.key)}
-                  >
-                    <div className={styles.privilegeInfoWide}>
-                      <span className={styles.privilegeTitle}>{item.label}</span>
-                      <span className={styles.privilegeDescription}>{item.desc}</span>
-                    </div>
-                    <div className={`${styles.switchTrack} ${isGranted ? styles.switchTrackOn : ''}`} role="switch" aria-checked={isGranted}>
-                      <div className={`${styles.switchThumb} ${isGranted ? styles.switchThumbOn : ''}`} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+          {/* Supervisor Privileges Delegation (PBAC) */}
+          {(isUserSupervisor && (isAdmin || (isCurrentManager && currentAdminUser?.privileges?.includes('CAN_ASSIGN_PRIVILEGES')))) && (
+            <div className={styles.card}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitleMain}>
+                  <FaShieldAlt style={{ color: '#10b981' }} /> Supervisor Privileges & Field Authority
+                </h3>
+              </div>
 
-        {/* Supervisor Privileges Delegation (PBAC) */}
-        {(isUserSupervisor && (isAdmin || (isCurrentManager && currentAdminUser?.privileges?.includes('CAN_ASSIGN_PRIVILEGES')))) && (
-          <div className={styles.card}>
-            <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitleMain}>
-                <FaShieldAlt style={{ color: '#10b981' }} /> Supervisor Privileges & Field Authority
-              </h3>
-            </div>
-
-            <div className={styles.privilegeListWide}>
-              {[
-                { key: 'CAN_RECORD_HARVEST', label: 'Record Harvest Yields', desc: 'Allow supervisor to submit harvest volumes and production logs.' },
-                { key: 'CAN_LOG_ACTIVITIES', label: 'Log Daily Field Activities', desc: 'Allow logging weeding, spraying, irrigation, and feeding tasks.' },
-                { key: 'CAN_USE_INVENTORY', label: 'Deduct Stock from Inventory', desc: 'Allow deducting fertilizer, feed, and seed quantities for assigned projects.' },
-                { key: 'CAN_RECORD_EXPENSES', label: 'Record Petty Field Expenses', desc: 'Allow logging cash expenses incurred in the field.' },
-                { key: 'CAN_RECORD_SALES', label: 'Record Farm-Gate Sales', desc: 'Allow recording direct sales from project harvest stock.' },
-              ].map((item) => {
-                const isGranted = privileges.includes(item.key);
-                return (
-                  <div 
-                    key={item.key} 
-                    className={`${styles.privilegeItemWide} ${isGranted ? styles.privilegeItemActive : ''}`} 
-                    onClick={() => handleTogglePrivilege(item.key)}
-                  >
-                    <div className={styles.privilegeInfoWide}>
-                      <span className={styles.privilegeTitle}>{item.label}</span>
-                      <span className={styles.privilegeDescription}>{item.desc}</span>
+              <div className={styles.privilegeListWide}>
+                {[
+                  { key: 'CAN_RECORD_HARVEST', label: 'Record Harvest Yields', desc: 'Allow supervisor to submit harvest volumes and production logs.' },
+                  { key: 'CAN_LOG_ACTIVITIES', label: 'Log Daily Field Activities', desc: 'Allow logging weeding, spraying, irrigation, and feeding tasks.' },
+                  { key: 'CAN_USE_INVENTORY', label: 'Deduct Stock from Inventory', desc: 'Allow deducting fertilizer, feed, and seed quantities for assigned projects.' },
+                  { key: 'CAN_RECORD_EXPENSES', label: 'Record Petty Field Expenses', desc: 'Allow logging cash expenses incurred in the field.' },
+                  { key: 'CAN_RECORD_SALES', label: 'Record Farm-Gate Sales', desc: 'Allow recording direct sales from project harvest stock.' },
+                ].map((item) => {
+                  const isGranted = privileges.includes(item.key);
+                  return (
+                    <div 
+                      key={item.key} 
+                      className={`${styles.privilegeItemWide} ${isGranted ? styles.privilegeItemActive : ''}`} 
+                      onClick={() => handleTogglePrivilege(item.key)}
+                    >
+                      <div className={styles.privilegeInfoWide}>
+                        <span className={styles.privilegeTitle}>{item.label}</span>
+                        <span className={styles.privilegeDescription}>{item.desc}</span>
+                      </div>
+                      <div className={`${styles.switchTrack} ${isGranted ? styles.switchTrackOn : ''}`} role="switch" aria-checked={isGranted}>
+                        <div className={`${styles.switchThumb} ${isGranted ? styles.switchThumbOn : ''}`} />
+                      </div>
                     </div>
-                    <div className={`${styles.switchTrack} ${isGranted ? styles.switchTrackOn : ''}`} role="switch" aria-checked={isGranted}>
-                      <div className={`${styles.switchThumb} ${isGranted ? styles.switchThumbOn : ''}`} />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      
 
       {/* Fixed Bottom Floating Save Bar */}
       <div className={`${styles.fixedSaveBar} ${hasUnsavedChanges ? styles.fixedSaveBarVisible : ''}`}>
@@ -532,6 +563,103 @@ export function UserDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit User Details Modal */}
+      {showEditModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowEditModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3><FaEdit /> Edit Staff User Details</h3>
+              <button className={styles.closeBtn} onClick={() => setShowEditModal(false)}>
+                <FaTimes />
+              </button>
+            </div>
+            <form onSubmit={handleEditSubmit}>
+              <div className={styles.formGroup}>
+                <label>Username *</label>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={editForm.username}
+                  onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  className={styles.input}
+                  placeholder="e.g. user@agrosync.com"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                />
+              </div>
+
+              {isAdmin && !isUserAdmin && (
+                <div className={styles.formGroup}>
+                  <label>Staff Role</label>
+                  <select
+                    className={styles.select}
+                    value={editForm.role}
+                    onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                  >
+                    <option value="MANAGER">Farm Manager</option>
+                    <option value="SUPERVISOR">Field Supervisor</option>
+                  </select>
+                </div>
+              )}
+
+              {!isUserAdmin && (
+                <div className={styles.formGroup}>
+                  <label>Account Status</label>
+                  <select
+                    className={styles.select}
+                    value={editForm.status}
+                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                  >
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="PENDING_APPROVAL">PENDING APPROVAL</option>
+                    <option value="DISABLED">DISABLED</option>
+                  </select>
+                </div>
+              )}
+
+              {isUserSupervisor && (
+                <div className={styles.formGroup}>
+                  <label>Max Assigned Project Capacity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    className={styles.input}
+                    value={editForm.maxProjectCapacity}
+                    onChange={(e) => setEditForm({ ...editForm, maxProjectCapacity: e.target.value })}
+                  />
+                </div>
+              )}
+
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className={styles.submitBtn}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? 'Saving...' : 'Save Details'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

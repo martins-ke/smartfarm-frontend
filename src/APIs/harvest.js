@@ -5,3 +5,4 @@ export const getHarvestByProjectId = async(projectId)=> apiClient(`/harvest/proj
 export const getHarvestById = async(id)=> apiClient(`/harvest/${id}`, {method: 'GET'});
 export const updateHarvest = async(id, data)=> apiClient(`/harvest/${id}`, {method: 'PUT', body:JSON.stringify(data)});
 export const deleteHarvest = async(id)=> apiClient(`/harvest/${id}`, {method: 'DELETE'});
+export const getHarvestInventory = async()=> apiClient('/harvest/inventory', {method: 'GET'});

@@ -103,9 +103,10 @@
 .headerQuickActions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
 }
-
 .headerActionBtn {
   display: inline-flex;
   align-items: center;
@@ -294,7 +295,7 @@
   border: 1px solid var(--border, rgba(42, 161, 238, 0.2));
   color: var(--muted, #49657a);
   padding: 0.35rem 0.7rem;
-  border-radius: 999px;
+  border-radius: 0.75rem;
   font-size: 0.74rem;
   font-weight: 600;
   cursor: pointer;
@@ -310,15 +311,14 @@
 }
 
 .tabBtnActive {
-  background: var(--accent, #2aa1ee);
-  border-color: var(--accent, #2aa1ee);
+  background: var(--card-bg, #2aa1ee);
+  border-color: var(--card-border, #2aa1ee);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(42, 161, 238, 0.3);
 }
 
 .tabBtnActive:hover {
-  background: var(--accent-strong, #1f7fc5);
+  background: var(--card-bg, #1f7fc5);
   color: #ffffff;
 }
 
@@ -844,7 +844,6 @@
 
   .headerQuickActions {
     width: 100%;
-    justify-content: flex-start;
   }
 
   .filterBar {
@@ -887,5 +886,20 @@
 
   .statChip {
     padding: 0.75rem;
+  }
+
+  .headerActionBtn{
+    font-size: 0.7rem;
+    max-width: 45%;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  .usernameText{
+    font-size: 0.75rem;
+  }
+  .tabBtn{
+    font-size: 0.7rem;
+    flex: 1;
   }
 }

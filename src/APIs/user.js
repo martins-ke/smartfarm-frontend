@@ -142,6 +142,15 @@ export const updateUserProfile = (id, data) =>
     body: JSON.stringify(data),
   });
 
+/**
+ * PUT /users/:id
+ */
+export const updateStaffDetails = (id, data) =>
+  apiClient(`/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
 export default {
   checkBootstrapStatus,
   signup,
@@ -157,6 +166,7 @@ export default {
   getSupervisorProjects,
   deleteUser,
   updateUserProfile,
+  updateStaffDetails,
   assignSupervisorToProject,
   adminResetPassword,
 };

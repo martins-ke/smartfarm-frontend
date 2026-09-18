@@ -61,7 +61,7 @@ export function SalesTab({
             <datalist id="harvest-produce-options">
               {harvestStock.map((hs) => (
                 <option key={hs.item} value={hs.item}>
-                  {hs.item} ({hs.available} {hs.units} in stock)
+                  {hs.item} ({hs.displayAvailable || `${hs.available} ${hs.units}`} in stock)
                 </option>
               ))}
             </datalist>
@@ -108,7 +108,7 @@ export function SalesTab({
                   >
                     <strong>{hs.item}</strong>
                     <span style={{ color: hs.available > 0 ? '#10b981' : '#f87171', fontSize: '0.72rem' }}>
-                      ({hs.available} {hs.units})
+                      ({hs.displayAvailable || `${hs.available} ${hs.units}`})
                     </span>
                   </button>
                 );
