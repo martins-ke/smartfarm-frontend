@@ -31,5 +31,5 @@ export const updateProject = (projectId, data) =>
 export const updateProjectStatus = (projectId, status) =>
   apiClient(`/projects/${projectId}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
 
-export const deleteProject = (projectId) =>
-  apiClient(`/projects/${projectId}`, { method: 'DELETE' });
+export const deleteProject = (id) =>
+  apiClient(`/projects/delete/${id}`, { method: 'DELETE' });

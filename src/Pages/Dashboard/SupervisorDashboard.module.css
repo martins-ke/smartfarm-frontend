@@ -313,13 +313,11 @@
 .tabBtnActive {
   background: var(--card-bg, #2aa1ee);
   border-color: var(--card-border, #2aa1ee);
-  color: #ffffff;
   font-weight: 700;
 }
 
 .tabBtnActive:hover {
   background: var(--card-bg, #1f7fc5);
-  color: #ffffff;
 }
 
 .tabCount {
@@ -332,7 +330,6 @@
 
 .tabBtnActive .tabCount {
   background: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
 }
 
 .viewGroup {

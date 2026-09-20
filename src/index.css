@@ -39,7 +39,7 @@
   --font-section-title: 1.05rem;
   --font-card-title: 0.95rem;
   --font-subheading: 0.88rem;
-  --font-body: 0.85rem;
+  --font-body: 0.9rem;
   --font-table-th: 0.78rem;
   --font-table-td: 0.82rem;
   --font-label: 0.8rem;
@@ -75,21 +75,21 @@ html {
 /* Tablets & Small Laptops */
 @media (max-width: 1024px) {
   html {
-    font-size: 14px;
+    font-size: 15px;
   }
 }
 
 /* Standard Mobile */
 @media (max-width: 768px) {
   html {
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
 /* Compact Mobile */
 @media (max-width: 480px) {
   html {
-    font-size: 12.5px;
+    font-size: 13px;
   }
 }
 

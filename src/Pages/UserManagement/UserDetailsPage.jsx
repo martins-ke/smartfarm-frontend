@@ -365,10 +365,10 @@ export function UserDetailsPage() {
           {isUserAdmin && (
             <div className={styles.card}>
               <h3 className={styles.sectionTitleMain}>
-                <FaCrown style={{ color: '#f59e0b' }} /> Primary Administrator Authority
+                <FaCrown style={{ color: '#f59e0b' }} /> Primary Administrator
               </h3>
               <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text)', lineHeight: 1.6 }}>
-                Full system authority with unrestricted control across all farm categories, projects, livestock, crops, sales analytics, expense auditing, inventory records, and user provisioning.
+                Full system authority with unrestricted control across all farm categories, projects,sales analytics, expense auditing, inventory records, and user provisioning.
               </p>
             </div>
           )}

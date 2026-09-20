@@ -65,6 +65,7 @@
      --th-color: #2aa1ee;
     --border: rgba(8, 129, 242, 0.2);
     --accent: #3b91cb;
+    --pro: #3ee5a2;
     --accent-strong: #218ada;
     --surface-highlight: rgba(43, 102, 174, 0.22);
     --green-text: #4ade80;
@@ -123,6 +124,7 @@
 
     --backdrop-filter: blur(1rem);
     --text: #102330;
+    --pro: #06ba72;
     --muted: #49657a;
     --th-color: #2aa1ee;
     --border: rgba(16, 151, 235, 0.7);

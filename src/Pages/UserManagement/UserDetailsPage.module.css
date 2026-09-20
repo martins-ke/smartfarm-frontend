@@ -276,6 +276,7 @@
 .metaItem {
   width: 100%;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
@@ -302,9 +303,10 @@
 
 .metaValue {
   font-weight: 700;
-  font-size: 0.88rem;
-  color: var(--text, #edf6ff);
+  font-size: var(--text-sm);  color: var(--text, #edf6ff);
   word-break: break-all;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .metaValueMono {
@@ -592,6 +594,7 @@
   color: var(--text, #edf6ff);
   margin: 0;
   display: flex;
+  white-space: nowrap;
   align-items: center;
   gap: 0.5rem;
 }

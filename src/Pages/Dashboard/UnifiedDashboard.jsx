@@ -204,8 +204,8 @@ export function UnifiedDashboard() {
         </div>
 
         {/* 2. Cumulative Customer Debts (Uncollected - Accounts Receivable) */}
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiInfo}>
+          {Number(kpis?.pendingDebt || 0) > 0 && <div className={styles.kpiCard}>
+         <div className={styles.kpiInfo}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
               <p className={styles.kpiLabel}>Customer Debts (AR)</p>
               {Number(kpis?.pendingDebt || 0) > 0 && (
@@ -229,9 +229,9 @@ export function UnifiedDashboard() {
             <FaHandHoldingUsd size={18} />
           </div>
         </div>
-
+        }
         {/* 3. Farm Debt to Suppliers (Accounts Payable) */}
-        <div className={styles.kpiCard}>
+        {Number(kpis?.supplierDebt || 0) > 0 && <div className={styles.kpiCard}>
           <div className={styles.kpiInfo}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
               <p className={styles.kpiLabel}>Supplier Debts (AP)</p>
@@ -271,7 +271,7 @@ export function UnifiedDashboard() {
             <FaTruck size={18} />
           </div>
         </div>
-
+        }
         {/* 3. Total Booked Sales */}
         <div className={styles.kpiCard}>
           <div className={styles.kpiInfo}>
