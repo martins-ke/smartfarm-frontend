@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CustomersPage.module.css';
-import { getCustomers, createCustomer } from '../../APIs/customer';
+import { getCustomers, createCustomer, deleteCustomer } from '../../APIs/customer';
 import useAuth from '../../useAuth';
-import { notify } from '../../utils/notify';
+import { notify, confirmModal, alertModal } from '../../utils/notify';
 import { 
   FaUsers, 
   FaUserPlus, 
@@ -11,13 +11,14 @@ import {
   FaPhone, 
   FaIdCard, 
   FaMapMarkerAlt, 
-  FaBan,
-  FaSearch,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaArrowRight,
-  FaCoins,
-  FaFilter
+  FaBan, 
+  FaSearch, 
+  FaCheckCircle, 
+  FaExclamationTriangle, 
+  FaArrowRight, 
+  FaCoins, 
+  FaFilter,
+  FaTrash
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
@@ -129,6 +130,25 @@ export function CustomersPage() {
       loadData();
     } catch (err) {
       notify(err.message || 'Failed to create customer', 'error');
+    }
+  };
+
+  const handleDeleteCustomer = async (cust, e) => {
+    if (e) e.stopPropagation();
+    const confirmed = await confirmModal({
+      title: 'Delete Customer',
+      message: `Are you sure you want to delete customer "${cust.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      await deleteCustomer(cust.id);
+      notify(`Customer "${cust.name}" deleted successfully ✅`, 'success');
+      loadData();
+    } catch (err) {
+      alertModal(err?.message || 'Failed to delete customer', 'error');
     }
   };
 
@@ -423,13 +443,35 @@ export function CustomersPage() {
 
                       {/* Actions */}
                       <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-                        <button 
-                          className={styles.actionBtnDetails} 
-                          onClick={() => handleOpenDetails(cust)}
-                          title="Open full ledger"
-                        >
-                          View <FaArrowRight className={styles.actionArrow} />
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                          <button 
+                            className={styles.actionBtnDetails} 
+                            onClick={() => handleOpenDetails(cust)}
+                            title="Open full ledger"
+                          >
+                            View <FaArrowRight className={styles.actionArrow} />
+                          </button>
+                          <button
+                            type="button"
+                            style={{
+                              background: 'transparent',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              color: '#ef4444',
+                              borderRadius: '6px',
+                              padding: '0.45rem 0.55rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.85rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onClick={(e) => handleDeleteCustomer(cust, e)}
+                            title="Delete customer"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

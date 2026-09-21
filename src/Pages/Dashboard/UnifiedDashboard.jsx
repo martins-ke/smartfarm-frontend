@@ -11,7 +11,8 @@ import {
   FaMoneyBillWave, FaProjectDiagram, FaExclamationTriangle,
   FaUsers, FaArrowRight, FaChartLine, FaTractor, FaWallet,
   FaUserShield, FaChartPie, FaChartBar, FaCheckCircle, FaHandHoldingUsd,
-  FaExchangeAlt, FaArrowUp, FaArrowDown, FaSearch, FaTruck
+  FaExchangeAlt, FaArrowUp, FaArrowDown, FaSearch, FaTruck,
+  FaCoins, FaBalanceScale
 } from 'react-icons/fa';
 
 const TX_PAGE_SIZE = 5;
@@ -203,12 +204,70 @@ export function UnifiedDashboard() {
           </div>
         </div>
 
-        {/* 2. Cumulative Customer Debts (Uncollected - Accounts Receivable) */}
-          {Number(kpis?.pendingDebt || 0) > 0 && <div className={styles.kpiCard}>
-         <div className={styles.kpiInfo}>
+        {/* 2. Estimated Net Farm Profit */}
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiInfo}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
-              <p className={styles.kpiLabel}>Customer Debts (AR)</p>
-              {Number(kpis?.pendingDebt || 0) > 0 && (
+              <p className={styles.kpiLabel}>Net Farm Profit</p>
+              <span className={Number(kpis?.netProfit || 0) >= 0 ? styles.marginBadgePositive : styles.marginBadgeNegative}>
+                {Number(kpis?.operatingMargin || 0) >= 0 ? '+' : ''}{kpis?.operatingMargin || 0}%
+              </span>
+            </div>
+            <p className={styles.kpiValue} style={{ color: Number(kpis?.netProfit || 0) >= 0 ? '#10b981' : '#ef4444' }}>
+              <span className={styles.currencyPrefix}>KES</span>
+              <span>{Number(kpis?.netProfit || 0).toLocaleString()}</span>
+            </p>
+            <p className={styles.kpiSub}>Cash collected minus all farm outflows</p>
+          </div>
+          <div 
+            className={styles.kpiIconWrap} 
+            style={{ 
+              background: Number(kpis?.netProfit || 0) >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)', 
+              color: Number(kpis?.netProfit || 0) >= 0 ? '#10b981' : '#ef4444' 
+            }}
+          >
+            <FaCoins size={18} />
+          </div>
+        </div>
+
+        {/* 3. Net Working Capital */}
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiInfo}>
+            <p className={styles.kpiLabel}>Net Working Capital</p>
+            <p className={styles.kpiValue} style={{ color: '#38bdf8' }}>
+              <span className={styles.currencyPrefix}>KES</span>
+              <span>{Number(kpis?.netWorkingCapital || 0).toLocaleString()}</span>
+            </p>
+            <p className={styles.kpiSub}>Cash in Account + AR − AP Liabilities</p>
+          </div>
+          <div className={styles.kpiIconWrap} style={{ background: 'rgba(56,189,248,0.12)', color: '#38bdf8' }}>
+            <FaBalanceScale size={18} />
+          </div>
+        </div>
+
+        {/* 4. Total Farm Outflows */}
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiInfo}>
+            <p className={styles.kpiLabel}>Total Outflows</p>
+            <p className={styles.kpiValue} style={{ color: '#f59e0b' }}>
+              <span className={styles.currencyPrefix}>KES</span>
+              <span>{Number(kpis?.totalOutflows || 0).toLocaleString()}</span>
+            </p>
+            <p className={styles.kpiSub} title={`OPEX: KES ${Number(kpis?.totalExpenses || 0).toLocaleString()} | Supplies: KES ${Number(kpis?.totalSuppliesCost || 0).toLocaleString()} | Wages: KES ${Number(kpis?.totalLaborWages || 0).toLocaleString()}`}>
+              OPEX KES {Number(kpis?.totalExpenses || 0).toLocaleString()} · Wages KES {Number(kpis?.totalLaborWages || 0).toLocaleString()}
+            </p>
+          </div>
+          <div className={styles.kpiIconWrap} style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}>
+            <FaArrowDown size={18} />
+          </div>
+        </div>
+
+        {/* 5. Cumulative Customer Debts (Uncollected - Accounts Receivable) */}
+        {Number(kpis?.pendingDebt || 0) > 0 && (
+          <div className={styles.kpiCard}>
+            <div className={styles.kpiInfo}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
+                <p className={styles.kpiLabel}>Customer Debts (AR)</p>
                 <button
                   type="button"
                   className={styles.cardViewBtn}
@@ -217,25 +276,25 @@ export function UnifiedDashboard() {
                 >
                   View <FaArrowRight size={8} />
                 </button>
-              )}
+              </div>
+              <p className={styles.kpiValue} style={{ color: '#f59e0b' }}>
+                <span className={styles.currencyPrefix}>KES</span>
+                <span>{Number(kpis?.pendingDebt || 0).toLocaleString()}</span>
+              </p>
+              <p className={styles.kpiSub}>Uncollected credit owed by buyers</p>
             </div>
-            <p className={styles.kpiValue} style={{ color: Number(kpis?.pendingDebt || 0) > 0 ? '#f59e0b' : 'var(--text)' }}>
-              <span className={styles.currencyPrefix}>KES</span>
-              <span>{Number(kpis?.pendingDebt || 0).toLocaleString()}</span>
-            </p>
-            <p className={styles.kpiSub}>Uncollected credit owed by buyers</p>
+            <div className={styles.kpiIconWrap} style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}>
+              <FaHandHoldingUsd size={18} />
+            </div>
           </div>
-          <div className={styles.kpiIconWrap} style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}>
-            <FaHandHoldingUsd size={18} />
-          </div>
-        </div>
-        }
-        {/* 3. Farm Debt to Suppliers (Accounts Payable) */}
-        {Number(kpis?.supplierDebt || 0) > 0 && <div className={styles.kpiCard}>
-          <div className={styles.kpiInfo}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
-              <p className={styles.kpiLabel}>Supplier Debts (AP)</p>
-              {Number(kpis?.supplierDebt || 0) > 0 && (
+        )}
+
+        {/* 6. Farm Debt to Suppliers (Accounts Payable) */}
+        {Number(kpis?.supplierDebt || 0) > 0 && (
+          <div className={styles.kpiCard}>
+            <div className={styles.kpiInfo}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
+                <p className={styles.kpiLabel}>Supplier Debts (AP)</p>
                 <button
                   type="button"
                   className={styles.cardViewBtn}
@@ -249,29 +308,26 @@ export function UnifiedDashboard() {
                 >
                   View <FaArrowRight size={8} />
                 </button>
-              )}
+              </div>
+              <p className={styles.kpiValue} style={{ color: '#ef4444' }}>
+                <span className={styles.currencyPrefix}>KES</span>
+                <span>{Number(kpis?.supplierDebt || 0).toLocaleString()}</span>
+              </p>
+              <p className={styles.kpiSub}>
+                {`Farm liability owed to ${kpis?.supplierDebtCount || 0} vendor${(kpis?.supplierDebtCount || 0) === 1 ? '' : 's'}`}
+              </p>
             </div>
-            <p className={styles.kpiValue} style={{ color: Number(kpis?.supplierDebt || 0) > 0 ? '#ef4444' : '#10b981' }}>
-              <span className={styles.currencyPrefix}>KES</span>
-              <span>{Number(kpis?.supplierDebt || 0).toLocaleString()}</span>
-            </p>
-            <p className={styles.kpiSub}>
-              {Number(kpis?.supplierDebt || 0) > 0 
-                ? `Farm liability owed to ${kpis?.supplierDebtCount || 0} vendor${(kpis?.supplierDebtCount || 0) === 1 ? '' : 's'}`
-                : 'All supplier invoices cleared ✅'}
-            </p>
+            <div 
+              className={styles.kpiIconWrap} 
+              style={{ 
+                background: 'rgba(239,68,68,0.12)', 
+                color: '#ef4444' 
+              }}
+            >
+              <FaTruck size={18} />
+            </div>
           </div>
-          <div 
-            className={styles.kpiIconWrap} 
-            style={{ 
-              background: Number(kpis?.supplierDebt || 0) > 0 ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)', 
-              color: Number(kpis?.supplierDebt || 0) > 0 ? '#ef4444' : '#10b981' 
-            }}
-          >
-            <FaTruck size={18} />
-          </div>
-        </div>
-        }
+        )}
         {/* 3. Total Booked Sales */}
         <div className={styles.kpiCard}>
           <div className={styles.kpiInfo}>
@@ -287,21 +343,7 @@ export function UnifiedDashboard() {
           </div>
         </div>
 
-        {/* 4. Active Projects */}
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiInfo}>
-            <p className={styles.kpiLabel}>Active Projects</p>
-            <p className={styles.kpiValue}>{kpis?.activeProjects || 0}</p>
-            <p className={styles.kpiSub}>
-              {(tables?.projectStatusSplit?.completed || 0)} completed projects
-            </p>
-          </div>
-          <div className={styles.kpiIconWrap} style={{ background: 'rgba(59,130,246,0.12)', color: '#3b82f6' }}>
-            <FaProjectDiagram size={18} />
-          </div>
-        </div>
-
-        {/* 5. Inventory Alerts (Only shown when there is low stock) */}
+        {/* Inventory Alerts (Only shown when there is low stock) */}
         {Number(kpis?.lowStockCount || 0) > 0 && (
           <div className={styles.kpiCard} style={{ borderColor: 'rgba(239,68,68,0.35)' }}>
             <div className={styles.kpiInfo}>
@@ -332,29 +374,8 @@ export function UnifiedDashboard() {
           </div>
         )}
 
-        {/* 6. Customers (Admin) or Supervisor Count (Manager) */}
-        {isAdmin ? (
-          <div className={styles.kpiCard}>
-            <div className={styles.kpiInfo}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
-                <p className={styles.kpiLabel}>Active Customers</p>
-                <button
-                  type="button"
-                  className={styles.cardViewBtn}
-                  onClick={() => navigate('/customers')}
-                  title="View Customer Directory"
-                >
-                  View <FaArrowRight size={8} />
-                </button>
-              </div>
-              <p className={styles.kpiValue}>{kpis?.customerCount || 0}</p>
-              <p className={styles.kpiSub}>Registered produce buyers & offtakers</p>
-            </div>
-            <div className={styles.kpiIconWrap} style={{ background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}>
-              <FaUsers size={18} />
-            </div>
-          </div>
-        ) : (
+        {/* Supervisor Count (Manager only) */}
+        {!isAdmin && (
           <div className={styles.kpiCard}>
             <div className={styles.kpiInfo}>
               <p className={styles.kpiLabel}>My Supervisors</p>
@@ -405,6 +426,14 @@ export function UnifiedDashboard() {
                 {spent.toLocaleString()}
               </strong>
             </div>
+            {Number(kpis?.totalLaborWages || 0) > 0 && (
+              <div className={styles.budgetRow} style={{ marginTop: '0.25rem', paddingTop: '0.25rem', borderTop: '1px dashed var(--border, rgba(255,255,255,0.08))' }}>
+                <span className={styles.budgetLabel} style={{ fontSize: '0.74rem' }}>Workforce Labor Wages</span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>
+                  KES {Number(kpis?.totalLaborWages || 0).toLocaleString()}
+                </span>
+              </div>
+            )}
             <div className={styles.budgetTrack}>
               <div
                 className={`${styles.budgetFill} ${overBudget ? styles.budgetFillDanger : ''}`}

@@ -6,10 +6,11 @@ import {
   getSupplierPurchases, 
   recordSupplierPurchase, 
   recordSupplierPayment,
-  getPurchasePaymentHistory 
+  getPurchasePaymentHistory,
+  deleteSupplier
 } from '../../APIs/supplier';
 import { getInventoryItems } from '../../APIs/inventory';
-import { notify } from '../../utils/notify';
+import { notify, confirmModal, alertModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import {
@@ -28,7 +29,8 @@ import {
   FaMoneyBillWave,
   FaCheckCircle,
   FaBan,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaTrash
 } from 'react-icons/fa';
 
 function PurchaseHistoryModal({ purchase, supplier, onClose, onPayPurchase }) {
@@ -358,6 +360,25 @@ export function SupplierDetailsPage() {
     }
   };
 
+  const handleDeleteSupplier = async () => {
+    if (!supplier) return;
+    const confirmed = await confirmModal({
+      title: 'Delete Supplier',
+      message: `Are you sure you want to delete supplier "${supplier.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      await deleteSupplier(supplier.id);
+      notify(`Supplier "${supplier.name}" deleted successfully ✅`, 'success');
+      navigate('/suppliers');
+    } catch (err) {
+      alertModal(err?.message || 'Failed to delete supplier', 'error');
+    }
+  };
+
   if (loading) {
     return <Spinner fullPage label="Loading supplier profile & ledger..." />;
   }
@@ -428,6 +449,27 @@ export function SupplierDetailsPage() {
               <FaMoneyCheckAlt /> Settle Debt
             </button>
           )}
+          <button
+            type="button"
+            style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#ef4444',
+              borderRadius: '8px',
+              padding: '0.45rem 0.95rem',
+              fontWeight: 600,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.15s ease'
+            }}
+            onClick={handleDeleteSupplier}
+            title="Delete Supplier Profile"
+          >
+            <FaTrash /> Delete Supplier
+          </button>
         </div>
       </div>
 
@@ -457,79 +499,55 @@ export function SupplierDetailsPage() {
         </div>
       </div>
 
-      {/* Two Column Layout: Profile & AP Ledger */}
+      {/* Vendor Profile Information */}
       <div className={styles.detailsGrid}>
         <div className={styles.detailsCard}>
           <h3>Vendor & Contact Information</h3>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Company / Trader:</span>
-            <strong className={styles.infoValue}>{supplier.name}</strong>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Contact Person:</span>
-            <span className={styles.infoValue}>{supplier.contactPerson || '-'}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Supply Category:</span>
-            <span className={styles.infoValue}>{supplier.category || 'General'}</span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Phone Number:</span>
-            <span className={styles.infoValue}>
-              {supplier.phoneNumber ? (
-                <a href={`tel:${supplier.phoneNumber}`} className={styles.contactLink}>
-                  <FaPhone className={styles.iconMini} /> {supplier.phoneNumber}
-                </a>
-              ) : '-'}
-            </span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Email Address:</span>
-            <span className={styles.infoValue}>
-              {supplier.email ? (
-                <a href={`mailto:${supplier.email}`} className={styles.contactLink}>
-                  <FaEnvelope className={styles.iconMini} /> {supplier.email}
-                </a>
-              ) : '-'}
-            </span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>KRA PIN / Tax ID:</span>
-            <strong className={styles.infoValue}>{supplier.idOrTaxNumber || '-'}</strong>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Physical Depot:</span>
-            <span className={styles.infoValue}>{supplier.address || '-'}</span>
-          </div>
-        </div>
-
-        <div className={styles.detailsCard}>
-          <h3>Accounts Payable (AP) Ledger</h3>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Cumulative Invoices Billed:</span>
-            <strong className={styles.infoValue}>KES {Number(supplier.totalBilled || 0).toLocaleString()}</strong>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Cumulative Payments Settled:</span>
-            <strong className={`${styles.infoValue} ${styles.successText}`}>KES {Number(supplier.totalPaid || 0).toLocaleString()}</strong>
-          </div>
-          <div className={`${styles.infoRow} ${styles.infoRowHighlight}`}>
-            <span className={styles.infoLabel}>Current Outstanding Debt:</span>
-            <strong className={`${styles.infoValue} ${debt > 0 ? styles.dangerText : styles.successText}`}>
-              KES {debt.toLocaleString()}
-            </strong>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Account Status:</span>
-            <span className={styles.infoValue}>
-              <span className={debt > 0 ? styles.statusDebt : styles.statusGoodStanding}>
-                {debt > 0 ? 'LIABILITY OWED' : 'CLEARED & GOOD STANDING ✅'}
+          <div className={styles.infoGrid}>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Company / Trader:</span>
+              <strong className={styles.infoValue}>{supplier.name}</strong>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Contact Person:</span>
+              <span className={styles.infoValue}>{supplier.contactPerson || '-'}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Supply Category:</span>
+              <span className={styles.infoValue}>{supplier.category || 'General'}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Supplier ID:</span>
+              <span className={styles.infoValue} style={{ fontFamily: 'monospace' }}>{supplier.id}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Phone Number:</span>
+              <span className={styles.infoValue}>
+                {supplier.phoneNumber ? (
+                  <a href={`tel:${supplier.phoneNumber}`} className={styles.contactLink}>
+                    <FaPhone className={styles.iconMini} /> {supplier.phoneNumber}
+                  </a>
+                ) : '-'}
               </span>
-            </span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Supplier ID:</span>
-            <span className={styles.infoValue} style={{ fontFamily: 'monospace' }}>{supplier.id}</span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Email Address:</span>
+              <span className={styles.infoValue}>
+                {supplier.email ? (
+                  <a href={`mailto:${supplier.email}`} className={styles.contactLink}>
+                    <FaEnvelope className={styles.iconMini} /> {supplier.email}
+                  </a>
+                ) : '-'}
+              </span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>KRA PIN / Tax ID:</span>
+              <strong className={styles.infoValue}>{supplier.idOrTaxNumber || '-'}</strong>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Physical Depot:</span>
+              <span className={styles.infoValue}>{supplier.address || '-'}</span>
+            </div>
           </div>
         </div>
       </div>

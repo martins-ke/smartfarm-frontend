@@ -8,10 +8,10 @@ import {
   deleteUser,
   getSupervisorProjects
 } from '../../APIs/user';
-import { getEmployees, toggleEmployeeStatus } from '../../APIs/employee';
+import { getEmployees, toggleEmployeeStatus, deleteEmployee } from '../../APIs/employee';
 import { EmployeeModal } from '../../Components/Labor/EmployeeModal';
 import useAuth from '../../useAuth';
-import { notify, confirmModal } from '../../utils/notify';
+import { notify, confirmModal, alertModal } from '../../utils/notify';
 import { 
   FaUserPlus, 
   FaUserTie, 
@@ -22,7 +22,8 @@ import {
   FaEye,
   FaIdCard,
   FaSearch,
-  FaFilter
+  FaFilter,
+  FaTrash
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
@@ -98,6 +99,24 @@ export default function UserManagementPage() {
       loadData();
     } catch (err) {
       notify(err.message || 'Failed to update employee status', 'error');
+    }
+  };
+
+  const handleDeleteEmployee = async (emp) => {
+    const confirmed = await confirmModal({
+      title: 'Delete Worker',
+      message: `Are you sure you want to delete worker "${emp.fullName}" (ID: ${emp.idNumber})? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      await deleteEmployee(emp.id);
+      notify(`Worker "${emp.fullName}" deleted successfully ✅`, 'success');
+      loadData();
+    } catch (err) {
+      alertModal(err?.message || 'Failed to delete worker', 'error');
     }
   };
 
@@ -528,6 +547,21 @@ export default function UserManagementPage() {
                         >
                           {emp.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
                         </button>
+                        {(isAdmin || isManager) && (
+                          <button
+                            className={styles.viewBtn}
+                            style={{ 
+                              padding: '0.35rem 0.6rem', 
+                              fontSize: '0.8rem', 
+                              color: '#ef4444', 
+                              borderColor: 'rgba(239, 68, 68, 0.3)' 
+                            }}
+                            onClick={() => handleDeleteEmployee(emp)}
+                            title="Delete worker"
+                          >
+                            <FaTrash />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

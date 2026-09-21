@@ -3,21 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import styles from './SuppliersPage.module.css';
 import { 
   getSuppliers, 
-  createSupplier 
+  createSupplier,
+  deleteSupplier
 } from '../../APIs/supplier';
 import useAuth from '../../useAuth';
-import { notify } from '../../utils/notify';
+import { notify, confirmModal, alertModal } from '../../utils/notify';
 import { 
   FaTruck, 
   FaPlus, 
   FaTimes, 
   FaPhone, 
-  FaEnvelope,
-  FaMapMarkerAlt,
-  FaIdCard,
-  FaSearch,
-  FaArrowRight,
-  FaFilter
+  FaEnvelope, 
+  FaMapMarkerAlt, 
+  FaIdCard, 
+  FaSearch, 
+  FaArrowRight, 
+  FaFilter,
+  FaTrash
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
@@ -128,6 +130,25 @@ export function SuppliersPage() {
       loadData();
     } catch (err) {
       notify(err.message || 'Failed to register supplier', 'error');
+    }
+  };
+
+  const handleDeleteSupplier = async (sup, e) => {
+    if (e) e.stopPropagation();
+    const confirmed = await confirmModal({
+      title: 'Delete Supplier',
+      message: `Are you sure you want to delete supplier "${sup.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      await deleteSupplier(sup.id);
+      notify(`Supplier "${sup.name}" deleted successfully ✅`, 'success');
+      loadData();
+    } catch (err) {
+      alertModal(err?.message || 'Failed to delete supplier', 'error');
     }
   };
 
@@ -433,13 +454,35 @@ export function SuppliersPage() {
 
                       {/* Action */}
                       <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-                        <button 
-                          className={styles.actionBtnDetails} 
-                          onClick={() => handleOpenDetails(sup)}
-                          title="Open full supplier profile & AP ledger"
-                        >
-                          View <FaArrowRight className={styles.actionArrow} />
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                          <button 
+                            className={styles.actionBtnDetails} 
+                            onClick={() => handleOpenDetails(sup)}
+                            title="Open full supplier profile & AP ledger"
+                          >
+                            View <FaArrowRight className={styles.actionArrow} />
+                          </button>
+                          <button
+                            type="button"
+                            style={{
+                              background: 'transparent',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              color: '#ef4444',
+                              borderRadius: '6px',
+                              padding: '0.45rem 0.55rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.85rem',
+                              transition: 'all 0.15s ease'
+                            }}
+                            onClick={(e) => handleDeleteSupplier(sup, e)}
+                            title="Delete supplier"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

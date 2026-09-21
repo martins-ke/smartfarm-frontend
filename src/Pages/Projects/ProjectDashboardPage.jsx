@@ -442,7 +442,7 @@ export function ProjectDashboardPage() {
         refreshStock();
       }
     } catch (err) {
-      notify(err.message || 'Failed to update record', 'error');
+      alertModal(err?.message || 'Failed to update record', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -473,7 +473,7 @@ export function ProjectDashboardPage() {
         refreshStock();
       }
     } catch (err) {
-      notify(err.message || 'Failed to delete record', 'error');
+      alertModal(err?.message || 'Failed to delete record', 'error');
     }
   };
 

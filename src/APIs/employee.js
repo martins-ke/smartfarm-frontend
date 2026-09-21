@@ -33,3 +33,10 @@ export const toggleEmployeeStatus = async (employeeId, status) => {
   return unwrap(res);
 };
 
+export const deleteEmployee = async (employeeId) => {
+  const res = await apiClient(`/employees/${employeeId}`, {
+    method: 'DELETE',
+  });
+  return unwrap(res);
+};
+

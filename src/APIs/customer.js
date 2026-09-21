@@ -25,6 +25,13 @@ export const createCustomer = async (customerData) => {
   return unwrap(res);
 };
 
+export const deleteCustomer = async (customerId) => {
+  const res = await apiClient(`/customers/${customerId}`, {
+    method: 'DELETE',
+  });
+  return unwrap(res);
+};
+
 export const recordCustomerPayment = async (customerId, paymentData) => {
   const payload = typeof paymentData === 'object' 
     ? paymentData 

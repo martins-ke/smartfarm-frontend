@@ -25,6 +25,13 @@ export const createSupplier = async (supplierData) => {
   return unwrap(res);
 };
 
+export const deleteSupplier = async (supplierId) => {
+  const res = await apiClient(`/suppliers/${supplierId}`, {
+    method: 'DELETE',
+  });
+  return unwrap(res);
+};
+
 export const getSupplierPurchases = async (supplierId) => {
   const res = await apiClient(`/suppliers/${supplierId}/purchases`);
   const data = unwrap(res);

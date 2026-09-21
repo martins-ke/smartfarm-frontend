@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './CustomerDetailsPage.module.css';
-import { getCustomerById, recordCustomerPayment, getCustomerSales, getSalePaymentHistory } from '../../APIs/customer';
-import { notify } from '../../utils/notify';
+import { getCustomerById, recordCustomerPayment, getCustomerSales, getSalePaymentHistory, deleteCustomer } from '../../APIs/customer';
+import { notify, confirmModal, alertModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import {
@@ -22,7 +22,8 @@ import {
   FaChevronRight,
   FaCalendarAlt,
   FaMoneyBillWave,
-  FaFileInvoiceDollar
+  FaFileInvoiceDollar,
+  FaTrash
 } from 'react-icons/fa';
 
 function SaleHistoryModal({ sale, customer, onClose, onPaySale }) {
@@ -331,6 +332,25 @@ export function CustomerDetailsPage() {
     }
   };
 
+  const handleDeleteCustomer = async () => {
+    if (!customer) return;
+    const confirmed = await confirmModal({
+      title: 'Delete Customer',
+      message: `Are you sure you want to delete customer "${customer.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      await deleteCustomer(customer.id);
+      notify(`Customer "${customer.name}" deleted successfully ✅`, 'success');
+      navigate('/customers');
+    } catch (err) {
+      alertModal(err?.message || 'Failed to delete customer', 'error');
+    }
+  };
+
   if (loading) {
     return <Spinner fullPage label="Loading customer ledger..." />;
   }
@@ -384,12 +404,33 @@ export function CustomerDetailsPage() {
           </div>
         </div>
 
-        <div className={styles.headerActions}>
+        <div className={styles.headerActions} style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
           {debt > 0 && (
             <button className={styles.actionBtnCollect} onClick={() => handleOpenPaymentModal(null)}>
               <FaHandHoldingUsd /> Collect Payment
             </button>
           )}
+          <button
+            type="button"
+            style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#ef4444',
+              borderRadius: '8px',
+              padding: '0.65rem 1rem',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.15s ease'
+            }}
+            onClick={handleDeleteCustomer}
+            title="Delete Customer Profile"
+          >
+            <FaTrash /> Delete Customer
+          </button>
         </div>
       </div>
 
