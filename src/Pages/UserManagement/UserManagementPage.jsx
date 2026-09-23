@@ -112,7 +112,8 @@ export default function UserManagementPage() {
     });
     if (!confirmed) return;
     try {
-      await deleteEmployee(emp.id);
+      const newStatus = emp.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+      await toggleEmployeeStatus(emp.id, newStatus);
       notify(`Worker "${emp.fullName}" deleted successfully ✅`, 'success');
       loadData();
     } catch (err) {

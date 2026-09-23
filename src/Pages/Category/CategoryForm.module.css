@@ -67,4 +67,11 @@ input, textarea{
   border-radius: 6px;
   cursor: pointer;
   flex: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 300px){
+  .actions{
+    flex-wrap: wrap-reverse;
+  }
 }

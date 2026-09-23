@@ -45,6 +45,7 @@ const initialForm = {
 
 const unwrapResponse = (response) => {
   if (response && response.body !== undefined) return response.body;
+  if (response && response.data !== undefined) return response.data;
   return response;
 };
 
@@ -511,7 +512,15 @@ export function ProjectDashboardPage() {
     }
     setIsSubmitting(true);
     try {
-      const res = await updateProject(projectId, projectEditForm);
+      const payload = {
+        ...projectEditForm,
+        budget: projectEditForm.budget !== '' && projectEditForm.budget !== null && projectEditForm.budget !== undefined
+          ? Number(projectEditForm.budget)
+          : null,
+        startDate: projectEditForm.startDate || null,
+        endDate: projectEditForm.endDate || null,
+      };
+      const res = await updateProject(projectId, payload);
       notify(res?.message || 'Project updated successfully ✅', 'success');
       setEditingProject(false);
       const refreshedProject = await getProjectById(projectId);

@@ -232,7 +232,7 @@ export function Category() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap-reverse' }}>
                 <button
                   type="button"
                   className={styles.modalCancelBtn}
@@ -245,7 +245,7 @@ export function Category() {
                   className={styles.modalSubmitBtn}
                   disabled={isSubmitting}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
                     <FaSave /> {isSubmitting ? 'Saving...' : 'Save Changes'}
                   </span>
                 </button>

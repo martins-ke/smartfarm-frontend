@@ -139,6 +139,7 @@ html, body {
   font-family: var(--font-family-base);
   font-size: var(--font-body);
   letter-spacing: -0.01em;
+  scrollbar-width: none;
   line-height: 1.5;
   color: var(--text, inherit);
   -webkit-font-smoothing: antialiased;
@@ -254,7 +255,7 @@ input::placeholder,
 textarea::placeholder,
 select::placeholder,
 option {
-  color: #2aa1ee;
+  color: #597182;
   font-family: var(--font-family-base);
   font-size: var(--font-input);
 }

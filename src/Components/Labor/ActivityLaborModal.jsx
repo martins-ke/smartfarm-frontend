@@ -43,10 +43,7 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
 
   if (!isOpen || !activity) return null;
 
-  const selectedEmployee = employees.find(e => e.id === form.employeeId);
-  const dailyRate = selectedEmployee ? Number(selectedEmployee.dailyRate || 0) : 0;
   const hours = Number(form.hoursWorked || 8);
-  const calculatedWage = ((dailyRate / 8) * hours).toFixed(2);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,7 +58,7 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
         hoursWorked: hours,
         notes: form.notes
       });
-      notify('Worker allocated to task & wage calculated! ✅', 'success');
+      notify('Worker allocated to task roster! ✅', 'success');
       setForm({ employeeId: '', hoursWorked: 8, notes: '' });
       loadLaborData();
     } catch (err) {
@@ -71,7 +68,6 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
     }
   };
 
-  const totalWages = assignments.reduce((sum, a) => sum + Number(a.wagePayable || 0), 0);
   const totalHours = assignments.reduce((sum, a) => sum + Number(a.hoursWorked || 0), 0);
 
   return (
@@ -103,7 +99,7 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
                     <option value="">-- Choose verified worker --</option>
                     {employees.map((emp) => (
                       <option key={emp.id} value={emp.id}>
-                        {emp.fullName} (ID: {emp.idNumber} | KES {Number(emp.dailyRate || 0).toLocaleString()}/day)
+                        {emp.fullName} (ID: {emp.idNumber || emp.id})
                       </option>
                     ))}
                   </select>
@@ -121,13 +117,6 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
                 </div>
               </div>
 
-              {selectedEmployee && (
-                <div className={styles.wagePreview}>
-                  <span>Base Rate: <strong>KES {dailyRate.toLocaleString()} / day</strong></span>
-                  <span>Calculated Wage Payable: <strong className={styles.wageHighlight}>KES {calculatedWage}</strong></span>
-                </div>
-              )}
-
               <div className={styles.formGroup}>
                 <label>Task Output / Remarks (Optional)</label>
                 <input 
@@ -139,7 +128,7 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
               </div>
 
               <button type="submit" className={styles.submitBtn} disabled={submitting}>
-                {submitting ? 'Assigning...' : 'Assign Worker & Compute Wage'}
+                {submitting ? 'Assigning...' : 'Assign Worker to Task'}
               </button>
             </form>
 
@@ -148,8 +137,7 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
               <div className={styles.rosterHeader}>
                 <h4>Allocated Labor Roster ({assignments.length})</h4>
                 <div className={styles.rosterTotals}>
-                  <span>Total Hours: <strong>{totalHours} hrs</strong></span>
-                  <span>Total Labor Wage: <strong className={styles.wageHighlight}>KES {totalWages.toLocaleString()}</strong></span>
+                  <span>Total Labor Hours: <strong>{totalHours} hrs</strong></span>
                 </div>
               </div>
 
@@ -165,7 +153,7 @@ export function ActivityLaborModal({ isOpen, onClose, activity }) {
                       </div>
                       <div className={styles.workMetrics}>
                         <span><FaClock /> {a.hoursWorked} hrs</span>
-                        <span className={styles.wageBadge}>KES {Number(a.wagePayable || 0).toLocaleString()}</span>
+                        {a.notes && <span style={{ fontSize: '0.75rem', color: 'var(--muted)', fontStyle: 'italic' }}>{a.notes}</span>}
                       </div>
                     </div>
                   ))}

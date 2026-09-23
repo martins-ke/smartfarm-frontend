@@ -71,7 +71,7 @@
 /* ── Financial Metric Cards ── */
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: clamp(0.45rem, 0.7vw, 0.65rem);
 }
 
@@ -155,7 +155,7 @@
   border: 1px solid var(--border, rgba(138, 180, 219, 0.2));
   color: var(--text, #edf6ff);
   padding: 0.48rem 0.8rem 0.48rem 2.1rem;
-  border-radius: 0.55rem;
+  border-radius: 1rem;
   font-size: clamp(0.76rem, 0.82vw, 0.82rem);
   outline: none;
   transition: all 0.15s ease;

@@ -24,7 +24,7 @@ export function ProjectHeader({
             onClick={onOpenEditProject}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
-              <FaEdit /> Edit Project
+              <FaEdit />Edit
             </span>
           </button>
         )}
@@ -37,7 +37,7 @@ export function ProjectHeader({
             title="Delete this empty project"
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
-              <FaTrash /> {isDeleting ? 'Deleting...' : 'Delete Project'}
+              <FaTrash /> {isDeleting ? 'Deleting...' : ''}
             </span>
           </button>
         )}

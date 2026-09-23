@@ -137,13 +137,13 @@ export function ProjectFormPage() {
 
         <div className={styles.actions}>
           <button type="button" className={styles.secondary} onClick={() => navigate(`/categories/${category_id}/${category}`)}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', color: '#238cf5' }}>
               <FaTimes />
               Cancel
             </span>
           </button>
           <button type="submit" className={styles.btn} disabled={isSubmitting}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', whiteSpace: 'nowrap' }}>
               <FaSave />
               {isSubmitting ? 'Saving...' : 'Create project'}
             </span>
