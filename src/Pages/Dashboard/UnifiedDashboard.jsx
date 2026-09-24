@@ -341,7 +341,7 @@ export function UnifiedDashboard() {
 
           {/* Operational Pulse KPI Strip */}
           <section className={styles.opsPulseGrid}>
-            <div className={styles.opsPulseCard} onClick={() => navigate('/projects')} title="View active farm projects">
+            <div className={styles.opsPulseCard} onClick={() => navigate('/categories')} title="View active farm projects">
               <div className={styles.opsPulseInfo}>
                 <p className={styles.opsPulseLabel}>Active Projects</p>
                 <p className={styles.opsPulseValue} style={{ color: '#10b981' }}>{activeProjectsCount}</p>
@@ -377,7 +377,7 @@ export function UnifiedDashboard() {
               </div>
             </div>
 
-            <div className={styles.opsPulseCard} onClick={() => navigate('/sales')} title="Market-ready harvest batches ready for sales">
+            <div className={styles.opsPulseCard} onClick={() => navigate('/inventory?tab=harvest')} title="Market-ready harvest batches in stock">
               <div className={styles.opsPulseInfo}>
                 <p className={styles.opsPulseLabel}>Ready For Market</p>
                 <p className={styles.opsPulseValue} style={{ color: '#28e1f5' }}>

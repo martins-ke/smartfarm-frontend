@@ -48,6 +48,8 @@ export function App() {
               <Route path='/categories/:category_id/:category/new' element={<ProjectFormPage />} />
               <Route path='/categories/:category/projects/:projectId' element={<ProjectDashboardPage />} />
               <Route path='/inventory' element={<InventoryPage />} />
+              <Route path='/sales' element={<Navigate to="/inventory?tab=harvest" replace />} />
+              <Route path='/projects' element={<Navigate to="/categories" replace />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={[ROLE.ADMIN, ROLE.MANAGER]} />}>

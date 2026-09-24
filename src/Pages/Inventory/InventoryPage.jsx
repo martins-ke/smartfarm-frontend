@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import styles from './InventoryPage.module.css';
 import { getInventoryItems, addInventoryItem, updateInventoryItem, deleteInventoryItem } from '../../APIs/inventory';
 import { FaPlus,  FaExclamationTriangle, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
@@ -128,7 +129,17 @@ export function InventoryPage() {
   const [totalElements, setTotalElements] = useState(0);
   const PAGE_SIZE = 20;
 
-  const[activeTab, setActiveTab] = useState('inputs');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam === 'harvest' ? 'harvest' : 'inputs');
+
+  useEffect(() => {
+    if (tabParam === 'harvest') {
+      setActiveTab('harvest');
+    } else if (tabParam === 'inputs') {
+      setActiveTab('inputs');
+    }
+  }, [tabParam]);
 
   const loadItems = async (currentPage = page) => {
     setLoading(true);
@@ -201,8 +212,18 @@ export function InventoryPage() {
       </div>
 
       <div style={{display: 'flex', gap: '1rem'}}>
-        <button className={`${styles.tabBtn} ${activeTab === 'inputs'? styles.btnActive: ''}`} onClick={()=> setActiveTab("inputs")}>Inputs Inventory</button>
-        <button  className={`${styles.tabBtn} ${activeTab === 'harvest'? styles.btnActive: ''}`} onClick={()=> setActiveTab("harvest")}>Harvest Inventory</button>
+        <button 
+          className={`${styles.tabBtn} ${activeTab === 'inputs'? styles.btnActive: ''}`} 
+          onClick={() => { setActiveTab('inputs'); setSearchParams({ tab: 'inputs' }); }}
+        >
+          Inputs Inventory
+        </button>
+        <button  
+          className={`${styles.tabBtn} ${activeTab === 'harvest'? styles.btnActive: ''}`} 
+          onClick={() => { setActiveTab('harvest'); setSearchParams({ tab: 'harvest' }); }}
+        >
+          Harvest Inventory
+        </button>
       </div>
 
       {activeTab === 'inputs' && (
