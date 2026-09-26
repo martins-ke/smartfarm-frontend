@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_AGROSYNC_BACKEND_URL || import.meta.env.SMARTFARMV1_BC_URL || import.meta.env.VITE_SMARTFARMV1_BC_URL || import.meta.env.VITE_SMARTFARM_BACKEND_URL || import.meta.env.VITE_API_URL || "/api";
+const API_BASE_URL = import.meta.env.VITE_AGROSYNC_BACKEND_URL || "/api";
 
 export class ApiError extends Error {
     constructor(message, { status = 0, isNetworkError = false, isServerError = false, isAuthError = false, rawData = null } = {}) {
@@ -18,11 +18,10 @@ export const apiClient = async (endpoint, options = {}) => {
     let authHeaders = {};
     if (typeof window !== 'undefined') {
         try {
-            const raw = window.sessionStorage.getItem('smartfarm-auth-user') || window.localStorage.getItem('smartfarm-auth-user');
-            if (raw) {
-                const user = JSON.parse(raw);
-                if (user?.id) authHeaders['X-User-Id'] = user.id;
-                if (user?.role) authHeaders['X-User-Role'] = user.role.toUpperCase();
+            const token = window.sessionStorage.getItem('smartfarm-jwt')
+                       || window.localStorage.getItem('smartfarm-jwt');
+            if (token) {
+                authHeaders['Authorization'] = `Bearer ${token}`;
             }
         } catch (e) {}
     }

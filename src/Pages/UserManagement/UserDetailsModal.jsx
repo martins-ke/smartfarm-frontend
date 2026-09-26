@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserDetailsModal.module.css';
 import { getUserById, getSupervisorProjects, updateUserStatus, updateUserPrivileges } from '../../APIs/user';
-import { notify, confirmModal } from '../../utils/notify';
+import { notify } from '../../utils/notify';
 import { 
   FaTimes, 
   FaUserShield, 

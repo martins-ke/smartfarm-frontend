@@ -12,7 +12,7 @@ import { notify, alertModal, confirmModal } from '../../utils/notify';
 import { Spinner } from '../../Components/Spinner/Spinner';
 import { ErrorState } from '../../Components/ErrorState/ErrorState';
 import useAuth from '../../useAuth';
-import { toBaseUnit, toCompoundDisplay, getUnit, isCustomUnit, formatHarvestStock } from '../../utils/units';
+import { toBaseUnit, getUnit, isCustomUnit, formatHarvestStock } from '../../utils/units';
 
 // Modular Sub-Components
 import { ProjectHeader } from './components/ProjectHeader';
@@ -770,6 +770,10 @@ export function ProjectDashboardPage() {
           isOpen={Boolean(selectedActivityForLabor)}
           onClose={() => setSelectedActivityForLabor(null)}
           activity={selectedActivityForLabor}
+          onLaborAssigned={async () => {
+            const refreshedProject = await getProjectById(projectId);
+            if (refreshedProject) setProject(unwrapResponse(refreshedProject));
+          }}
         />
       )}
     </div>

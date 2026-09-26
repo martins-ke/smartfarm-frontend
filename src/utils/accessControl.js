@@ -20,8 +20,9 @@ export const normalizeUser = (user = {}) => ({
   ...user,
   role: normalizeRole(user.role),
   employmentType: user.employmentType ? String(user.employmentType).toLowerCase() : 'temporary',
-  permissions: Array.isArray(user.permissions) ? user.permissions : [],
-  privileges: Array.isArray(user.privileges) ? user.privileges : [],
+  // NOTE: backend field is 'privileges' (Set<String> from User.getPrivileges())
+  // 'permissions' was a dead field — backend never sends it
+  privileges: Array.isArray(user.privileges) ? user.privileges : (Array.isArray(user.permissions) ? user.permissions : []),
   assignedCategories: Array.isArray(user.assignedCategories) ? user.assignedCategories : [],
   createdById: user.createdById ?? null,
   isActive: user.isActive ?? true,

@@ -105,15 +105,14 @@ export default function UserManagementPage() {
   const handleDeleteEmployee = async (emp) => {
     const confirmed = await confirmModal({
       title: 'Delete Worker',
-      message: `Are you sure you want to delete worker "${emp.fullName}" (ID: ${emp.idNumber})? This action cannot be undone.`,
-      confirmText: 'Delete',
+      message: `Are you sure you want to delete worker "${emp.fullName}" (ID: ${emp.idNumber})? Their previous tasks, assignments, and expense records will remain safely preserved.`,
+      confirmText: 'Delete Worker',
       cancelText: 'Cancel',
       type: 'danger',
     });
     if (!confirmed) return;
     try {
-      const newStatus = emp.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-      await toggleEmployeeStatus(emp.id, newStatus);
+      await deleteEmployee(emp.id);
       notify(`Worker "${emp.fullName}" deleted successfully ✅`, 'success');
       loadData();
     } catch (err) {

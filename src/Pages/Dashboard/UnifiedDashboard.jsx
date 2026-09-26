@@ -287,7 +287,7 @@ export function UnifiedDashboard() {
             {activeView === 'FINANCIAL' && data?.yearScope?.availableYears && data.yearScope.availableYears.length > 0 && (
               <div className={styles.yearSelectorWrap}>
                 <label htmlFor="dashboard-year-select" className={styles.yearLabel}>
-                  <FaCalendarAlt size={12} /> Scope:
+                  <FaCalendarAlt size={10} /> Scope:
                 </label>
                 <select
                   id="dashboard-year-select"

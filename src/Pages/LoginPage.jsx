@@ -37,8 +37,15 @@ const LoginPage = () => {
         password: form.password,
       });
 
-      const user = response?.body || response?.user || response;
-      login(user);
+      const payload = response?.body || response?.data || response;
+      const user = payload?.user || payload;
+      const token = payload?.token || response?.token;
+
+      if (!user) {
+        throw new Error('Unable to read user credentials from server response.');
+      }
+
+      login({ user, token });
       navigate('/', { replace: true });
     } catch (err) {
       setError(err.message || 'Network error. Please try again.');
