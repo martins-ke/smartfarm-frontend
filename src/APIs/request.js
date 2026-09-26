@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_AGROSYNC_BACKEND_URL || "/api";
+const API_BASE_URL = import.meta.env.VITE_AGROSYNC_BACKEND_URL || import.meta.env.SMARTFARMV1_BC_URL || import.meta.env.VITE_SMARTFARMV1_BC_URL || import.meta.env.VITE_SMARTFARM_BACKEND_URL || import.meta.env.VITE_API_URL || "/api";
 
 export class ApiError extends Error {
     constructor(message, { status = 0, isNetworkError = false, isServerError = false, isAuthError = false, rawData = null } = {}) {
