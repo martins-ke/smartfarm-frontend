@@ -135,6 +135,13 @@ export function SuppliersPage() {
 
   const handleDeleteSupplier = async (sup, e) => {
     if (e) e.stopPropagation();
+
+    const debt = Number(sup.balanceOwed || sup.outstandingDebt || 0);
+    if (debt > 0) {
+      alertModal(`Cannot delete supplier "${sup.name}" because there is an outstanding debt of KES ${debt.toLocaleString()}. Please clear all pending invoice payments before deleting.`, 'warning');
+      return;
+    }
+
     const confirmed = await confirmModal({
       title: 'Delete Supplier',
       message: `Are you sure you want to delete supplier "${sup.name}"? This action cannot be undone.`,
