@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './CustomersPage.module.css';
 import { getCustomers, createCustomer, deleteCustomer } from '../../APIs/customer';
-import useAuth from '../../useAuth';
 import { notify, confirmModal, alertModal } from '../../utils/notify';
 import { 
   FaUsers, 
@@ -16,8 +15,6 @@ import {
   FaCheckCircle, 
   FaExclamationTriangle, 
   FaArrowRight, 
-  FaCoins, 
-  FaFilter,
   FaTrash
 } from 'react-icons/fa';
 import { Spinner } from '../../Components/Spinner/Spinner';
@@ -227,7 +224,7 @@ export function CustomersPage() {
           <span className={styles.metricSub}>Registered buyers</span>
         </div>
       </div>
-
+      <hr style={{ width: '100%'}} />
       {/* Toolbar: Search & Filter Tabs */}
       <section className={styles.toolbar}>
         <div className={styles.searchWrap}>

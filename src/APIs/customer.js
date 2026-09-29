@@ -26,7 +26,7 @@ export const createCustomer = async (customerData) => {
 };
 
 export const deleteCustomer = async (customerId) => {
-  const res = await apiClient(`/customers/${customerId}`, {
+  const res = await apiClient(`/customers/delete/${customerId}`, {
     method: 'DELETE',
   });
   return unwrap(res);

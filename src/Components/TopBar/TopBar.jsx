@@ -186,16 +186,6 @@ export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, set
                            </li>
                        )}
                    </ul>
-
-                    <div className={styles.theme}>
-                        <p>Theme</p>
-                        <div className={styles.themeToggleWrap}>
-                            {darkTheme ? <FaMoon className={styles.themeIcon} title="Dark Mode Active" /> : <FaSun className={styles.themeIcon} title="Light Mode Active" />}
-                            <div className={styles.themeBtn} onClick={()=> setDarkTheme(!darkTheme)} aria-label="Toggle theme">
-                                <div className={`${styles.child} ${darkTheme ? styles.on : ''}`}></div>
-                            </div>
-                        </div>
-                    </div>
                </nav>
 
                {/* overlay covering rest of the app to block interactions when menu is open */}
@@ -207,6 +197,21 @@ export function TopBar({darkTheme, setDarkTheme, hideMenu: externalHideMenu, set
            </div>
 
            <div className={styles.rightControls}>
+               {/* ── Theme Toggle ── */}
+               <div className={styles.themeToggleWrap}>
+                   <button
+                       type="button"
+                       className={styles.themeToggleBtn}
+                       onClick={() => setDarkTheme(!darkTheme)}
+                       aria-label="Toggle theme"
+                   >
+                       {darkTheme ? <FaSun className={styles.themeToggleIcon} /> : <FaMoon className={styles.themeToggleIcon} />}
+                   </button>
+                   <span className={styles.themeTooltip}>
+                       {darkTheme ? 'Dark mode' : 'Light mode'}
+                   </span>
+               </div>
+
                {/* ── Notification Bell Trigger ── */}
                <div style={{ position: 'relative' }}>
                    <button

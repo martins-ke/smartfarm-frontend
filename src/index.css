@@ -82,14 +82,14 @@ html {
 /* Standard Mobile */
 @media (max-width: 768px) {
   html {
-    font-size: 14px;
+    font-size: 15.5px;
   }
 }
 
 /* Compact Mobile */
 @media (max-width: 480px) {
   html {
-    font-size: 13px;
+    font-size: 14.5px;
   }
 }
 

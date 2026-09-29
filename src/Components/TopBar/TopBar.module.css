@@ -864,3 +864,77 @@
     opacity: 0.92;
 }
 
+/* ── Top Bar Theme Toggle Button ── */
+.themeToggleWrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.themeToggleWrap:hover .themeTooltip,
+.themeToggleWrap:focus-within .themeTooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: none;
+}
+
+.themeTooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    background: var(--modal-bg, rgba(15, 27, 40, 0.95));
+    color: var(--text, #edf6ff);
+    border: 1px solid var(--border, rgba(138, 180, 219, 0.25));
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.4rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 9999;
+}
+
+/* small arrow pointing up */
+.themeTooltip::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 5px 5px 5px;
+    border-style: solid;
+    border-color: transparent transparent var(--border, rgba(138, 180, 219, 0.25)) transparent;
+}
+
+.themeToggleBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--text, #edf6ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+}
+
+.themeToggleBtn:hover {
+    color: var(--accent, #2aa1ee);
+    background: rgba(42, 161, 238, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(42, 161, 238, 0.2);
+}
+
+.themeToggleIcon {
+    font-size: 1rem;
+}
