@@ -24,30 +24,30 @@
   --font-family-base: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* ── Standard Typography Scale ── */
-  --text-2xs: 0.7rem;
-  --text-xs: 0.75rem;
-  --text-sm: 0.82rem;
-  --text-base: 0.875rem;
-  --text-md: 0.95rem;
-  --text-lg: 1.1rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.45rem;
-  --text-3xl: 1.75rem;
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8rem;
+  --text-sm: 0.875rem;
+  --text-base: 0.9rem;
+  --text-md: 1rem;
+  --text-lg: 1.15rem;
+  --text-xl: 1.3rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.85rem;
 
   /* ── Semantic Typography Scale Tokens ── */
-  --font-page-title: clamp(1.15rem, 1.4vw, 1.35rem);
-  --font-section-title: 1.05rem;
-  --font-card-title: 0.95rem;
-  --font-subheading: 0.88rem;
-  --font-body: 0.9rem;
-  --font-table-th: 0.78rem;
-  --font-table-td: 0.82rem;
-  --font-label: 0.8rem;
-  --font-input: 0.85rem;
-  --font-btn: 0.85rem;
-  --font-badge: 0.72rem;
-  --font-metric-sm: 1.15rem;
-  --font-metric-lg: 1.45rem;
+  --font-page-title: clamp(1.25rem, 1.5vw, 1.45rem);
+  --font-section-title: 1.1rem;
+  --font-card-title: 1rem;
+  --font-subheading: 0.95rem;
+  --font-body: 0.95rem;
+  --font-table-th: 0.85rem;
+  --font-table-td: 0.875rem;
+  --font-label: 0.875rem;
+  --font-input: 0.9rem;
+  --font-btn: 0.9rem;
+  --font-badge: 0.78rem;
+  --font-metric-sm: 1.2rem;
+  --font-metric-lg: 1.5rem;
 
   /* ── Adaptive Accent & Green Palette Fallbacks ── */
   --green-text: #15803d;
